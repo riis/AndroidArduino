@@ -5,8 +5,16 @@ import com.riis.androidarduino.rs232.R;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 
 public class MainActivity extends Activity {
+	
+	private EditText msgBox;
+	private Button sendMsgButton;
 	
 	UsbCommWrapper usbHost;
 	
@@ -22,8 +30,24 @@ public class MainActivity extends Activity {
     }
     
     private void setUpGUI() {
-    	
+    	setupMsgBox();
+    	setupSendMsgButton();
 	}
+    
+    private void setupMsgBox() {
+    	msgBox = (EditText) findViewById(R.id.messageBox);
+    }
+    
+    private void setupSendMsgButton() {
+    	sendMsgButton = (Button) findViewById(R.id.messageLabel);
+    	sendMsgButton.setOnClickListener(
+    	    		new OnClickListener(){
+    					public void onClick(View v) {
+    						usbHost.sendString(msgBox.getText().toString());
+    					}
+    	    		}
+    	    	);
+    }
     
 	@Override
 	public Object onRetainNonConfigurationInstance() {

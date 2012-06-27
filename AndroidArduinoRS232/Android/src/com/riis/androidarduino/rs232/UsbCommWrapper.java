@@ -182,6 +182,24 @@ public class UsbCommWrapper implements Runnable {
 		}
 	}
 	
+	public void sendString(String str) {
+		byte[] messageBytes = stringToByteArray(str);
+		for(int i = 0; i < messageBytes.length; ++i) {
+			sendByte(messageBytes[i]);
+		}
+		//Send the null terminator to signify the end of the string.
+		sendByte((byte) 0);
+	}
+	
+	private byte[] stringToByteArray(String str) {
+		char[] buffer = str.toCharArray();
+		byte[] b = new byte[buffer.length];
+		for (int i = 0; i < b.length; i++) {
+			b[i] = (byte) buffer[i];
+		}
+		return b;
+	}
+	
 	public void sendByte(byte msg) {
 		log("Sending Byte '" + msg + "' to Usb Accessory");
 		

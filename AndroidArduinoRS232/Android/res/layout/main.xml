@@ -5,8 +5,31 @@
     android:orientation="vertical" >
 
     <TextView
+        android:id="@+id/messageLabel"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="@string/hello" />
+        android:text="Enter a message to send to the Arduino." />
+    <LinearLayout 
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        
+	    <EditText
+	        android:id="@+id/messageBox"
+	        android:layout_width="0dp"
+	        android:layout_height="wrap_content"
+	        android:layout_weight="1.0"
+	        android:hint="Message..." />
+	    
+	    <Button
+	        android:id="@+id/sendButton"
+	        android:layout_width="0dp"
+	        android:layout_height="wrap_content"
+	        android:layout_weight="1.0"
+	        android:hapticFeedbackEnabled="true"
+	        android:layout_marginLeft="10dp"
+	        android:text="Send" />
+        
+    </LinearLayout>
 
 </LinearLayout>
