@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="hello">Hello World, AndroidArduinoRS232Activity!</string>
+    <string name="app_name">AndroidArduinoRS232</string>
+
+</resources>

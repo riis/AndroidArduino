@@ -14,5 +14,5 @@
      limitations under the License.
 -->
 <resources>
-    <usb-accessory manufacturer="RIIS" model="AndroidArduinoUSB" version="1.0" />
+    <usb-accessory manufacturer="RIIS" model="AndroidArduinoRS232" version="1.0" />
 </resources>
