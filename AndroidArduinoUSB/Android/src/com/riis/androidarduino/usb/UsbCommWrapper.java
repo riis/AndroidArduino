@@ -145,7 +145,6 @@ public class UsbCommWrapper implements Runnable {
 		}
 	}
 	
-	@Override
 	public void run() {
 		int ret = 0;
 		byte[] buffer = new byte[16384];
