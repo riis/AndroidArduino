@@ -1,0 +1,14 @@
+For this program to work, the serial shield needs to be connected properly.
+
+It can't be plugged in to the Arduino Mega ADK board as it normally would be, because then it connects to the serial port that's also used for status messaged on the USB connection.
+To solve this, the serial shield needs to we wired in manually.
+
+Wire a red jumper from the +5v pin on the Arduino board to the +5v pin on the serial shield. Do the same for GND.
+Then wire a jumper from the RX1 pin on the Arduino board (pin 19) to the RX pin on the serial shield.
+Lastly, wire a jumper from the TX1 pin on the Arduino borad (pin 18) to the TX pin on the serial shield.
+
+Now plug the RS232 to USB adapter into the serial shield and plug it into the computer.
+If all of the drivers are installed, open PuTTY on that COM port and run the program, then plug in the Android device running the associated app.
+
+Ben Oztalay
+boztalay@riis.com
