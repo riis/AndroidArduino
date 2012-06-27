@@ -218,7 +218,12 @@ public class UsbCommWrapper implements Runnable {
 	}
 	
 	public void unregisterReceiver() {
-		parentActivity.unregisterReceiver(usbBroadcastReceiver);
+		try {
+			parentActivity.unregisterReceiver(usbBroadcastReceiver);
+		} catch(IllegalArgumentException e) {
+			//Do nothing and keep the exception from surfacing, because
+			//the receiver was already unregistered
+		}
 	}
 	
 	public UsbAccessory getAccessory() {

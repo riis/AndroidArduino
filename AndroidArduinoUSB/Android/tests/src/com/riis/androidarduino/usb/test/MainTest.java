@@ -28,6 +28,10 @@ public class MainTest extends ActivityInstrumentationTestCase2 {
 		solo = new Solo(getInstrumentation(), getActivity());
 	}
 	
+	public void testUIElementsExist() {
+		assertTrue(solo.getCurrentButtons().size() == 3);
+	}
+	
 	public void testRedButtonToggles() {
 		solo.clickOnButton("Turn Red On");
 		assertTrue(solo.searchButton("Turn Red Off"));
