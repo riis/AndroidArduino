@@ -39,11 +39,12 @@ public class MainActivity extends Activity {
     }
     
     private void setupSendMsgButton() {
-    	sendMsgButton = (Button) findViewById(R.id.messageLabel);
+    	sendMsgButton = (Button) findViewById(R.id.sendButton);
     	sendMsgButton.setOnClickListener(
     	    		new OnClickListener(){
     					public void onClick(View v) {
     						usbHost.sendString(msgBox.getText().toString());
+    						msgBox.setText("");
     					}
     	    		}
     	    	);

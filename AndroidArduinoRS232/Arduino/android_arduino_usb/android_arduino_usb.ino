@@ -99,8 +99,10 @@ void runStateMachine(char letter)
       else
       {
         state = IDLE;
+        Serial.println("String terminated, reversing and sending...");
         reverseAndSendString();
         resetStringAndState();
+        Serial.println();
       }
       break;
     default:
