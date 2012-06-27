@@ -78,7 +78,7 @@ public class UsbCommWrapper implements Runnable {
 	}
 	
 	private void setupAccessory() {
-		log("In setupAccessory");
+		log("Setting up accessory");
 		manager = UsbManager.getInstance(parentActivity);
 		permissionIntent = PendingIntent.getBroadcast(parentActivity, 0, new Intent(ACTION_USB_PERMISSION), 0);
 		registerReceiver();
@@ -100,15 +100,18 @@ public class UsbCommWrapper implements Runnable {
 		fileDescriptor = manager.openAccessory(accessory);
 		if (fileDescriptor != null) {
 			this.accessory = accessory;
+			
 			FileDescriptor fd = fileDescriptor.getFileDescriptor();
 			inputStream = new FileInputStream(fd);
 			outputStream = new FileOutputStream(fd);
+			
 			Thread thread = new Thread(null, this, "UsbCommWrapperLoop");
 			thread.start();
+			
 			alert("openAccessory: Accessory opened");
-			log("Attached");
+			log("Accessory attached");
 		} else {
-			log("openAccessory: accessory open failed");
+			log("Accessory open failed");
 		}
 	}
 	
@@ -137,8 +140,10 @@ public class UsbCommWrapper implements Runnable {
 			return;
 		}
 		log("Resuming: streams were null");
+		
 		UsbAccessory[] accessories = manager.getAccessoryList();
 		UsbAccessory accessory = (accessories == null ? null : accessories[0]);
+		
 		if (accessory != null) {
 			if (manager.hasPermission(accessory)) {
 				openAccessory(accessory);
@@ -151,7 +156,7 @@ public class UsbCommWrapper implements Runnable {
 				}
 			}
 		} else {
-			log("onResume:mAccessory is null");
+			log("Resuming: accessory is null");
 		}
 	}
 	
@@ -160,7 +165,7 @@ public class UsbCommWrapper implements Runnable {
 		byte[] buffer = new byte[16384];
 		int i;
 
-		while (true) { // keep reading messages forever. There are prob lots of messages in the buffer, each 4 bytes
+		while(true) { //Read messages forever
 			try {
 				ret = inputStream.read(buffer);
 			} catch (IOException e) {
@@ -183,7 +188,7 @@ public class UsbCommWrapper implements Runnable {
 	}
 	
 	public void sendByte(byte msg) {
-		log("Sending Byte '" + msg + "' to Usb Accessory");
+		log("Sending byte '" + msg + "' to Usb Accessory");
 		
 		byte[] buffer = new byte[1];
 		buffer[0] = msg;
