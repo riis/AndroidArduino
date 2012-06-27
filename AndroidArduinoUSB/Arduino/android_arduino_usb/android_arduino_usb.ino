@@ -12,11 +12,11 @@
 #define IDLE             0
 #define RECEIVED_COMMAND 1
 
-AndroidAccessory acc("Simon Monk",
-		     "OpenAccessoryTest",
+AndroidAccessory acc("RIIS",
+		     "AndroidArduinoUSB",
 		     "DemoKit Arduino Board",
 		     "1.0",
-		     "http://www.duinodroid.com",
+		     "http://www.riis.com",
 		     "0000000012345678");
 
 int redLED = 8;
