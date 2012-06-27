@@ -24,8 +24,8 @@ import com.android.future.usb.UsbManager;
 public class UsbCommWrapper implements Runnable {
 	public static final String ACTION_USB_PERMISSION = "com.google.android.DemoKit.action.USB_PERMISSION";
 	
-	private final BroadcastReceiver usbReceiver;
-	private UsbManager usbManager;
+	private BroadcastReceiver usbBroadcastReceiver;
+	private UsbManager manager;
 	private UsbAccessory accessory;
 	private ParcelFileDescriptor fileDescriptor;
 	private FileInputStream inputStream;
@@ -34,19 +34,26 @@ public class UsbCommWrapper implements Runnable {
 	private boolean permissionRequestPending;
 	private Activity parentActivity;
 	
-	Handler mHandler;
+	Handler handler;
 	
 	public UsbCommWrapper(Activity parentActivity) {
 		this.parentActivity = parentActivity;
-		
-		mHandler = new Handler() {
+		setupHandler();
+		setupBroadcastReceiver();
+		setupAccessory();
+	}
+	
+	private void setupHandler() {
+		handler = new Handler() {
 			public void handleMessage(Message msg) {
 				ValueMsg t = (ValueMsg) msg.obj;
 				log("Usb Accessory sent: " + t.getFlag() + " " + t.getReading());
 			}
 		};
-		
-		usbReceiver = new BroadcastReceiver() {
+	}
+	
+	private void setupBroadcastReceiver() {
+		usbBroadcastReceiver = new BroadcastReceiver() {
 			@Override
 			public void onReceive(Context context, Intent intent) {
 				String action = intent.getAction();
@@ -68,30 +75,11 @@ public class UsbCommWrapper implements Runnable {
 				}
 			}
 		};
-		
-		setupAccessory();
-	}
-	
-	private void openAccessory(UsbAccessory accessory) {
-		log("In openAccessory");
-		fileDescriptor = usbManager.openAccessory(accessory);
-		if (fileDescriptor != null) {
-			this.accessory = accessory;
-			FileDescriptor fd = fileDescriptor.getFileDescriptor();
-			inputStream = new FileInputStream(fd);
-			outputStream = new FileOutputStream(fd);
-			Thread thread = new Thread(null, this, "UsbCommWrapper");
-			thread.start();
-			alert("openAccessory: Accessory opened");
-			log("Attached");
-		} else {
-			log("openAccessory: accessory open failed");
-		}
 	}
 	
 	private void setupAccessory() {
 		log("In setupAccessory");
-		usbManager = UsbManager.getInstance(parentActivity);
+		manager = UsbManager.getInstance(parentActivity);
 		permissionIntent = PendingIntent.getBroadcast(parentActivity, 0, new Intent(ACTION_USB_PERMISSION), 0);
 		registerReceiver();
 		
@@ -102,11 +90,33 @@ public class UsbCommWrapper implements Runnable {
 		}
     }
 	
+	private void registerReceiver() {
+		IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
+		filter.addAction(UsbManager.ACTION_USB_ACCESSORY_DETACHED);
+		parentActivity.registerReceiver(usbBroadcastReceiver, filter);
+	}
+	
+	private void openAccessory(UsbAccessory accessory) {
+		fileDescriptor = manager.openAccessory(accessory);
+		if (fileDescriptor != null) {
+			this.accessory = accessory;
+			FileDescriptor fd = fileDescriptor.getFileDescriptor();
+			inputStream = new FileInputStream(fd);
+			outputStream = new FileOutputStream(fd);
+			Thread thread = new Thread(null, this, "UsbCommWrapperLoop");
+			thread.start();
+			alert("openAccessory: Accessory opened");
+			log("Attached");
+		} else {
+			log("openAccessory: accessory open failed");
+		}
+	}
+	
 	private void closeAccessory() {
-		log("In closeAccessory");
 		try {
 			if (fileDescriptor != null) {
 				fileDescriptor.close();
+				log("Dettached");
 			}
 		} catch (IOException e) {
 		} finally {
@@ -123,25 +133,25 @@ public class UsbCommWrapper implements Runnable {
 		registerReceiver();
 		
 		if (inputStream != null && outputStream != null) {
-			Log.v("Arduino App", "Resuming: streams were not null");
+			log("Resuming: streams were not null");
 			return;
 		}
-		Log.v("Arduino App", "Resuming: streams were null");
-		UsbAccessory[] accessories = usbManager.getAccessoryList();
+		log("Resuming: streams were null");
+		UsbAccessory[] accessories = manager.getAccessoryList();
 		UsbAccessory accessory = (accessories == null ? null : accessories[0]);
 		if (accessory != null) {
-			if (usbManager.hasPermission(accessory)) {
+			if (manager.hasPermission(accessory)) {
 				openAccessory(accessory);
 			} else {
-				synchronized (usbReceiver) {
+				synchronized (usbBroadcastReceiver) {
 					if (!permissionRequestPending) {
-						usbManager.requestPermission(accessory, permissionIntent);
+						manager.requestPermission(accessory, permissionIntent);
 						permissionRequestPending = true;
 					}
 				}
 			}
 		} else {
-			Log.v("Arduino App", "onResume:mAccessory is null");
+			log("onResume:mAccessory is null");
 		}
 	}
 	
@@ -161,10 +171,10 @@ public class UsbCommWrapper implements Runnable {
 			while (i < ret) {
 				int len = ret - i;
 				if (len >= 2) {
-					Message m = Message.obtain(mHandler);
+					Message m = Message.obtain(handler);
 					int value = composeInt(buffer[i], buffer[i + 1]);
 					m.obj = new ValueMsg('a', value);
-					mHandler.sendMessage(m);
+					handler.sendMessage(m);
 				}
 				i += 2;
 			}
@@ -189,18 +199,8 @@ public class UsbCommWrapper implements Runnable {
 		}
 	}
 	
-	private void registerReceiver() {
-		IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
-		filter.addAction(UsbManager.ACTION_USB_ACCESSORY_DETACHED);
-		parentActivity.registerReceiver(usbReceiver, filter);
-	}
-	
 	public void unregisterReceiver() {
-		try {
-			parentActivity.unregisterReceiver(usbReceiver);
-		} catch (IllegalArgumentException e) {
-			//Do nothing, since the receiver wasn't registered
-		}
+		parentActivity.unregisterReceiver(usbBroadcastReceiver);
 	}
 	
 	public UsbAccessory getAccessory() {
@@ -227,7 +227,7 @@ public class UsbCommWrapper implements Runnable {
 	}
 	
 	private void log(String string) {
-    	Log.v("UsbCommWrapper", string);
+		Log.v("UsbCommWrapper", string);
 	}
 	
 	public class ValueMsg {
