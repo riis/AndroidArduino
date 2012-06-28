@@ -4,6 +4,8 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -28,8 +30,8 @@ public class UsbCommWrapper implements Runnable {
 	private UsbManager manager;
 	private UsbAccessory accessory;
 	private ParcelFileDescriptor fileDescriptor;
-	private FileInputStream inputStream;
-	private FileOutputStream outputStream;
+	private InputStream inputStream;
+	private OutputStream outputStream;
 	private PendingIntent permissionIntent;
 	private boolean permissionRequestPending;
 	private Activity parentActivity;
