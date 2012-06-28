@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="horizontal" >
+
+    <Button
+        android:id="@+id/redButton"
+        android:layout_weight="1"
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:text="Turn Red On" />
+    
+    <Button
+        android:id="@+id/yellowButton"
+        android:layout_weight="1"
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:text="Turn Yellow On" />
+    
+    <Button
+        android:id="@+id/greenButton"
+        android:layout_weight="1"
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:text="Turn Green On" />
+
+</LinearLayout>

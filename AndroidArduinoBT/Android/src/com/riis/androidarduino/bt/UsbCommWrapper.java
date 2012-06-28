@@ -1,4 +1,4 @@
-package com.riis.androidarduino.usb;
+package com.riis.androidarduino.bt;
 
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
