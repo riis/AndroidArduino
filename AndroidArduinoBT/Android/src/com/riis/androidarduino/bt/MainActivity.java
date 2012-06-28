@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import at.abraxas.amarino.Amarino;
 
 public class MainActivity extends Activity {
 	private final byte LED_OFF = 1;
@@ -24,15 +25,11 @@ public class MainActivity extends Activity {
 	private boolean isYellowLEDOn = false;
 	private boolean isGreenLEDOn = false;
 	
-	UsbCommWrapper usbHost;
-	
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        
-        usbHost = new UsbCommWrapper(this);
         
         setUpButtons();
     }
@@ -49,15 +46,14 @@ public class MainActivity extends Activity {
     		new OnClickListener(){
 				public void onClick(View v) {
 					if(isRedLEDOn) {
-			         	usbHost.sendByte(LED_OFF);
 			         	((Button)v).setText("Turn Red On");
+			         	Amarino.sendDataToArduino(v.getContext(), SetupActivity.DEVICE_ADDRESS, 'r', LED_OFF);
 			         	isRedLEDOn = false;
 					} else {
-						usbHost.sendByte(LED_ON);
 			         	((Button)v).setText("Turn Red Off");
+			         	Amarino.sendDataToArduino(v.getContext(), SetupActivity.DEVICE_ADDRESS, 'r', LED_ON);
 			         	isRedLEDOn = true;
 					}
-					usbHost.sendByte(LED1);
 				}
     		}
     	);
@@ -69,15 +65,14 @@ public class MainActivity extends Activity {
     		new OnClickListener(){
 				public void onClick(View v) {
 					if(isYellowLEDOn) {
-			         	usbHost.sendByte(LED_OFF);
 			         	((Button)v).setText("Turn Yellow On");
+			         	Amarino.sendDataToArduino(v.getContext(), SetupActivity.DEVICE_ADDRESS, 'y', LED_OFF);
 			         	isYellowLEDOn = false;
 					} else {
-						usbHost.sendByte(LED_ON);
 			         	((Button)v).setText("Turn Yellow Off");
+			         	Amarino.sendDataToArduino(v.getContext(), SetupActivity.DEVICE_ADDRESS, 'y', LED_ON);
 			         	isYellowLEDOn = true;
 					}
-					usbHost.sendByte(LED2);
 				}
     		}
     	);
@@ -89,49 +84,22 @@ public class MainActivity extends Activity {
     		new OnClickListener(){
 				public void onClick(View v) {
 					if(isGreenLEDOn) {
-			         	usbHost.sendByte(LED_OFF);
-			         	((Button)v).setText("Turn Green On");
-			         	isGreenLEDOn = false;
+						((Button)v).setText("Turn Green On");
+		                Amarino.sendDataToArduino(v.getContext(), SetupActivity.DEVICE_ADDRESS, 'g', LED_OFF);
+		                isGreenLEDOn = false;
 					} else {
-						usbHost.sendByte(LED_ON);
 			         	((Button)v).setText("Turn Green Off");
+			         	Amarino.sendDataToArduino(v.getContext(), SetupActivity.DEVICE_ADDRESS, 'g', LED_ON);
 			         	isGreenLEDOn = true;
 					}
-					usbHost.sendByte(LED3);
 				}
     		}
     	);
 	}
-    
-	@Override
-	public Object onRetainNonConfigurationInstance() {
-		// In case the app is restarted, try to retain the usb accessory object
-		// so that the connection to the device is not lost.
-		if (usbHost.getAccessory() != null) {
-			return usbHost.getAccessory();
-		} else {
-			return super.onRetainNonConfigurationInstance();
-		}
-	}
 	
 	@Override
-	public void onResume() {
-		Log.v("Arduino App", "Resuming");
-		super.onResume();
-		usbHost.resumeConnection();
-	}
-
-	@Override
-	public void onPause() {
-		Log.v("Arduino App", "Pausing");
-		super.onPause();
-		usbHost.pauseConnection();
-	}
-
-	@Override
-	public void onDestroy() {
-		Log.v("Arduino App", "Destroying");
-		usbHost.unregisterReceiver();
-		super.onDestroy();
+	public void onStop() {
+		super.onStop();
+		Amarino.disconnect(this, SetupActivity.DEVICE_ADDRESS);
 	}
 }

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		android:orientation="vertical" 
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content" 
+		>
+	
+    <TextView 
+        android:id="@+id/description"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:textSize="18dp"
+        android:text="BlueTooth device ID (can be found in bluetooth settings if you dont know it)"/>
+
+    <EditText 
+        android:id="@+id/deviceIDField" 
+        android:layout_width="fill_parent" 
+        android:layout_height="wrap_content"
+        android:text="00:18:E4:0C:68:02"
+        >
+    </EditText> 
+    
+     <Button  
+        android:id="@+id/connectButton"
+        android:layout_width="fill_parent" 
+        android:layout_height="wrap_content" 
+        android:text="Connect!"
+/>
+
+</LinearLayout>
