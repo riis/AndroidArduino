@@ -5,8 +5,8 @@ import android.test.ActivityInstrumentationTestCase2;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class MainTest extends ActivityInstrumentationTestCase2 {
-	private static final String TARGET_PACKAGE_ID="com.riis.androidarduino.rs232";
-	private static final String LAUNCHER_ACTIVITY_FULL_CLASSNAME = "com.riis.androidarduino.rs232.MainActivity";
+	private static final String TARGET_PACKAGE_ID="com.riis.androidarduino.bt";
+	private static final String LAUNCHER_ACTIVITY_FULL_CLASSNAME = "com.riis.androidarduino.bt.MainActivity";
 	private static Class launcherActivityClass;
 	
 	private Solo solo;

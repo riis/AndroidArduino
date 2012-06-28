@@ -53,6 +53,11 @@ public class BlueToothComm implements Runnable {
 		boolean gotDevice = false;
     	
     	adapter = BluetoothAdapter.getDefaultAdapter();
+    	if(adapter == null) {
+    		Toast.makeText(context, "Bluetooth not supported", Toast.LENGTH_SHORT).show();
+    		return;
+    	}
+    	
     	Set<BluetoothDevice> pairedDevices = adapter.getBondedDevices();
 
     	if (pairedDevices.size() > 0) {
@@ -79,7 +84,7 @@ public class BlueToothComm implements Runnable {
 		
 			inputStream = socket.getInputStream();														
 			outputStream = socket.getOutputStream();		
-		} catch (IOException e) {
+		} catch (Exception e) {
 			Toast.makeText(context, "Couldn't connect to device", Toast.LENGTH_SHORT).show();
 			return ;
 		}
@@ -90,7 +95,7 @@ public class BlueToothComm implements Runnable {
 			socket.close();
 			inputStream.close();
 			outputStream.close();
-		} catch (IOException e) { }
+		} catch (Exception e) { }
 		
 		Toast.makeText(context, "Disconnected!", Toast.LENGTH_SHORT).show();
 	}
