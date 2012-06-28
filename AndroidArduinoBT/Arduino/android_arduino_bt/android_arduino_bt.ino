@@ -13,7 +13,7 @@
 #define RECEIVED_COMMAND 1
 
 //RX and TX pin numbers
-#define RX 2
+#define RX 11
 #define TX 3
 
 int redLED = 8;
@@ -35,7 +35,7 @@ void setup()
   
   Serial.println("Powering up the BlueTooth device...");
   setUpBlueToothConnection();
-  
+ 
   Serial.println("BlueTooth device ready, connect to \"AndroidArduinoBT.\"");
   Serial.println();
   Serial.println("Waiting for messages...");
@@ -60,7 +60,8 @@ void resetState()
 
 void setUpBlueToothConnection()
 {
-  blueToothSerial.begin(38400); //Set the baud rate to the BlueTooth's default rate
+  blueToothSerial.begin(38400);
+
   blueToothSerial.print("\r\n+STWMOD=0\r\n"); //Set the BlueTooth to slave mode
   blueToothSerial.print("\r\n+STNA=AndroidArduinoBT\r\n"); //Set the BlueDTooth name to "AndroidArduinoBT"
   blueToothSerial.print("\r\n+STOAUT=1\r\n"); //Permit a paired device to connect
@@ -75,20 +76,20 @@ void setUpBlueToothConnection()
 
 void loop()
 {
-  char msgChar;
+  byte msg;
   
-  if(blueToothSerial.available()) {    
+  if(blueToothSerial.available()) {
     msgChar = blueToothSerial.read();
     
-    printReceivedMessage(msgChar);
-    //runStateMachine((byte) msgChar);
+    printReceivedMessage(msg);
+    runStateMachine(msg);
   }
 }
 
-void printReceivedMessage(char msgChar)
+void printReceivedMessage(byte msg)
 {
   Serial.print("Recieved ");
-  Serial.print(msgChar);
+  Serial.print(msg);
   Serial.println(" from master");
 }
 

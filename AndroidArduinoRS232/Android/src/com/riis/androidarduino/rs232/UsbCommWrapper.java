@@ -157,7 +157,7 @@ public class UsbCommWrapper implements Runnable {
 	
 	public void run() {
 		int ret = 0;
-		byte[] buffer = new byte[16384];
+		byte[] buffer = new byte[256];
 		int i;
 
 		while (true) { // keep reading messages forever. There are prob lots of messages in the buffer, each 4 bytes
@@ -178,7 +178,10 @@ public class UsbCommWrapper implements Runnable {
 				}
 				i += 2;
 			}
-
+			
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {	}
 		}
 	}
 	
