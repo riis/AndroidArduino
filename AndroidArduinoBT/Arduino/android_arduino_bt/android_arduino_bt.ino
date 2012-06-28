@@ -79,7 +79,7 @@ void loop()
   byte msg;
   
   if(blueToothSerial.available()) {
-    msgChar = blueToothSerial.read();
+    msg = blueToothSerial.read();
     
     printReceivedMessage(msg);
     runStateMachine(msg);
