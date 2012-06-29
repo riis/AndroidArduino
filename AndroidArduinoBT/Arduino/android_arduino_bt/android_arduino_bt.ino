@@ -33,7 +33,7 @@ void setup()
   Serial.println("Powering up the BlueTooth device...");
   setUpBlueToothConnection();
  
-  Serial.println("BlueTooth device ready, connect to \"AndroidArduinoBT.\"");
+  Serial.println("BlueTooth device ready, connect to \"AndroidArduinoBT\".");
   Serial.println();
   Serial.println("Waiting for messages...");
   Serial.println();
