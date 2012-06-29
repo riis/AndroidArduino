@@ -34,7 +34,7 @@
 		<link>
 			<name>libs/externaldevice.jar</name>
 			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/libs/bin/externaldevice.jar</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/libs/ExternalDevice/bin/externaldevice.jar</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

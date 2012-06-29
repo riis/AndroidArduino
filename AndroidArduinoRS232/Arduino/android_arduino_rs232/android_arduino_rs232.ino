@@ -5,8 +5,9 @@
 #define STRING_END 0
 #define STRING_LENGTH 256
 
-#define IDLE 0
-#define RECEIVING_STRING 1
+#define RECEIVING_STRING_FLAG 1
+#define RECEIVING_STRING_CHAR 2
+#define RECEIVING_END_CODE    3
 
 AndroidAccessory acc("RIIS",
 		     "AndroidArduinoRS232",
@@ -15,7 +16,7 @@ AndroidAccessory acc("RIIS",
 		     "http://www.riis.com",
 		     "0000000012345678");
 
-int state = IDLE;
+int state;
 
 boolean saidConnected;
 byte msgBuf[1];
@@ -40,7 +41,7 @@ void setup()
 
 void resetStringAndState()
 {
-  state = IDLE;
+  state = RECEIVING_STRING_FLAG;
   
   for(int i = 0; i < STRING_LENGTH; i++) {
     stringBuf[i] = 0; 
@@ -52,13 +53,7 @@ void loop()
 {
   if (acc.isConnected())
   {
-    if(!saidConnected)
-    {
-      Serial.println();
-      Serial.println("Connected!");
-      Serial.println();
-      saidConnected = true;
-    }
+    printConnectedMessage();
     
     if(tryToReadMessageInto(msgBuf))
     {
@@ -68,6 +63,17 @@ void loop()
       runStateMachine((char)msg);
     }
   }
+}
+
+void printConnectedMessage()
+{
+  if(!saidConnected)
+    {
+      Serial.println();
+      Serial.println("Connected!");
+      Serial.println();
+      saidConnected = true;
+    }
 }
 
 boolean tryToReadMessageInto(byte msgBuffer[])
@@ -87,31 +93,60 @@ void runStateMachine(char letter)
 {
   switch(state)
   {
-    case IDLE:
-      appendCharOnString(letter);
-      state = RECEIVING_STRING;
-      break;
-    case RECEIVING_STRING:
-      if(isLetterNotEndCode(letter))
+    case RECEIVING_STRING_FLAG:
+      if(isLetterStringFlag(letter))
       {
-        appendCharOnString(letter);
+        state = RECEIVING_STRING_CHAR;
+      }
+      else if(isLetterEndFlag(letter))
+      {
+        state = RECEIVING_END_CODE;
+      }
+      break;
+    case RECEIVING_STRING_CHAR:
+      if(!isLetterEndCode(letter))
+      {
+        state = RECEIVING_STRING_FLAG;
+        appendLetterOnString(letter);
       }
       else
       {
-        state = IDLE;
-        Serial.println("String terminated, reversing and sending...");
-        reverseAndSendString();
-        resetStringAndState();
-        Serial.println();
+        stopAndSendString();
       }
       break;
+    case RECEIVING_END_CODE:
+      if(isLetterEndCode(letter))
+      {
+        stopAndSendString();
+      }
+      else
+      {
+        state = RECEIVING_STRING_FLAG;
+        Serial.println("WARNING: Received null flag, but did not receive null value. Continuing string read.");
+      }
     default:
-      state = IDLE;
+      state = RECEIVING_STRING_FLAG;
       break;
   }
 }
 
-void appendCharOnString(char letter)
+boolean isLetterStringFlag(char letter)
+{
+  return (letter == 'S');
+}
+
+boolean isLetterEndFlag(char letter)
+{
+  return (letter == 'N');
+}
+
+boolean isLetterEndCode(char letter)
+{
+  byte charNum = (byte) letter;
+  return (charNum == STRING_END); 
+}
+
+void appendLetterOnString(char letter)
 {
   if(curCharIndex < STRING_LENGTH)
   {
@@ -120,10 +155,13 @@ void appendCharOnString(char letter)
   }
 }
 
-boolean isLetterNotEndCode(char letter)
+void stopAndSendString()
 {
-  byte charNum = (byte) letter;
-  return (charNum != STRING_END); 
+  state = RECEIVING_STRING_FLAG;
+  Serial.println("String terminated, reversing and sending...");
+  reverseAndSendString();
+  resetStringAndState();
+  Serial.println();
 }
 
 void reverseAndSendString()

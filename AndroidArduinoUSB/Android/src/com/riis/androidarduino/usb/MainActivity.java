@@ -50,11 +50,11 @@ public class MainActivity extends Activity {
     		new OnClickListener(){
 				public void onClick(View v) {
 					if(isRedLEDOn) {
-			         	usbHost.sendByte(LED1, LED_OFF);
+			         	usbHost.sendByteWithFlag(LED1, LED_OFF);
 			         	((Button)v).setText("Turn Red On");
 			         	isRedLEDOn = false;
 					} else {
-						usbHost.sendByte(LED1, LED_ON);
+						usbHost.sendByteWithFlag(LED1, LED_ON);
 			         	((Button)v).setText("Turn Red Off");
 			         	isRedLEDOn = true;
 					}
@@ -69,11 +69,11 @@ public class MainActivity extends Activity {
     		new OnClickListener(){
 				public void onClick(View v) {
 					if(isYellowLEDOn) {
-			         	usbHost.sendByte(LED2, LED_OFF);
+			         	usbHost.sendByteWithFlag(LED2, LED_OFF);
 			         	((Button)v).setText("Turn Yellow On");
 			         	isYellowLEDOn = false;
 					} else {
-						usbHost.sendByte(LED2, LED_ON);
+						usbHost.sendByteWithFlag(LED2, LED_ON);
 			         	((Button)v).setText("Turn Yellow Off");
 			         	isYellowLEDOn = true;
 					}
@@ -88,11 +88,11 @@ public class MainActivity extends Activity {
     		new OnClickListener(){
 				public void onClick(View v) {
 					if(isGreenLEDOn) {
-			         	usbHost.sendByte(LED3, LED_OFF);
+			         	usbHost.sendByteWithFlag(LED3, LED_OFF);
 			         	((Button)v).setText("Turn Green On");
 			         	isGreenLEDOn = false;
 					} else {
-						usbHost.sendByte(LED3, LED_ON);
+						usbHost.sendByteWithFlag(LED3, LED_ON);
 			         	((Button)v).setText("Turn Green Off");
 			         	isGreenLEDOn = true;
 					}

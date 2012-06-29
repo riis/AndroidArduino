@@ -37,17 +37,23 @@ public abstract class SerialComm implements Communication, Runnable {
 	public void sendString(String str) {
 		byte[] messageBytes = Util.stringToByteArray(str);
 		for(int i = 0; i < messageBytes.length; ++i) {
-			sendByte('S', messageBytes[i]);
+			sendByteWithFlag('S', messageBytes[i]);
 		}
 		//Send the null terminator to signify the end of the string.
-		sendByte('N', (byte) 0);
+		sendByteWithFlag('N', (byte) 0);
 	}
 	
-	public void sendByte(char flag, byte value) {
+	public void sendByteWithFlag(char flag, byte value) {
 		log("Sending Byte '" + value + "' to Usb Accessory");
 		
-		byte[] buffer = new byte[1];
+		sendByte((byte) flag);
+		sendByte(value);
+	}
+	
+	public void sendByte(byte value) {
+		byte buffer[] = new byte[1];
 		buffer[0] = value;
+		
 		if (outputStream != null) {
 			try {
 				outputStream.write(buffer);

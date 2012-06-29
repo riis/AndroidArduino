@@ -2,15 +2,15 @@
 #include <Usb.h>
 #include <AndroidAccessory.h>
 
-#define DO_NOTHING  0
-#define LED_OFF     1
-#define LED_ON      2
-#define LED1        3
-#define LED2        4
-#define LED3        5
+#define LED_OFF 0
+#define LED_ON  1
 
-#define IDLE             0
-#define RECEIVED_COMMAND 1
+#define RED_LED 8
+#define YLW_LED 10
+#define GRN_LED 12
+
+#define RECEIVING_COMMAND_FLAG 0
+#define RECEIVING_COMMAND_DATA 1
 
 AndroidAccessory acc("RIIS",
 		     "AndroidArduinoUSB",
@@ -18,10 +18,6 @@ AndroidAccessory acc("RIIS",
 		     "1.0",
 		     "http://www.riis.com",
 		     "0000000012345678");
-
-int redLED = 8;
-int yellowLED = 10;
-int greenLED = 12;
 
 byte msgBuf[1];
 
@@ -33,9 +29,9 @@ boolean saidConnected = false;
 
 void setup()
 {
-  pinMode(redLED, OUTPUT);
-  pinMode(yellowLED, OUTPUT); 
-  pinMode(greenLED, OUTPUT);
+  pinMode(RED_LED, OUTPUT);
+  pinMode(YLW_LED, OUTPUT); 
+  pinMode(GRN_LED, OUTPUT);
   
   resetState();
   
@@ -49,22 +45,16 @@ void setup()
 
 void resetState()
 {
-  state = IDLE;
-  currentCommand = DO_NOTHING;
-  currentLEDNum = LED1;
+  state = RECEIVING_COMMAND_FLAG;
+  currentCommand = LED_OFF;
+  currentLEDNum = RED_LED;
 }
 
 void loop()
 {
   if (acc.isConnected())
   {
-    if(!saidConnected)
-    {
-      Serial.println();
-      Serial.println("Connected!");
-      Serial.println();
-      saidConnected = true;
-    }
+    printConnectedMessage();
     
     if(tryToReadMessageInto(msgBuf))
     {
@@ -74,6 +64,17 @@ void loop()
       runStateMachine(msg);
     }
   }
+}
+
+void printConnectedMessage()
+{
+  if(!saidConnected)
+    {
+      Serial.println();
+      Serial.println("Connected!");
+      Serial.println();
+      saidConnected = true;
+    }
 }
 
 boolean tryToReadMessageInto(byte msgBuffer[])
@@ -93,75 +94,51 @@ void runStateMachine(byte msg)
 {
   switch(state)
   {
-    case IDLE:
+    case RECEIVING_COMMAND_FLAG:
+      if(isMessageAnLEDFlag(msg))
+      {
+        setCurrentLEDNum(msg);
+        state = RECEIVING_COMMAND_DATA;
+      } else {
+        resetState(); 
+      }
+      break;
+    case RECEIVING_COMMAND_DATA:
       if(isMessageACommand(msg))
       {
         currentCommand = msg;
-        state = RECEIVED_COMMAND;
-      } else {
-        resetState(); 
-      }
-      break;
-    case RECEIVED_COMMAND:
-      if(isMessageAnLEDNum(msg))
-      {
-        currentLEDNum = msg;
         executeCommand();
-        resetState();
-      } else {
-        resetState(); 
       }
+      
+      resetState(); 
       break;
     default:
-      state = IDLE;
+      resetState();
       break;
   }
 }
 
-void executeCommand()
+boolean isMessageAnLEDFlag(byte msg)
 {
-  if(currentCommand == LED_ON)
-  {
-    switch(currentLEDNum)
-    {
-      case LED1:
-        Serial.println("Turning red LED on...");
-        digitalWrite(redLED, HIGH);
-        break;
-      case LED2:
-        Serial.println("Turning yellow LED on...");
-        digitalWrite(yellowLED, HIGH);
-        break; 
-      case LED3:
-        Serial.println("Turning green LED on...");
-        digitalWrite(greenLED, HIGH);
-        break; 
-      default:
-        break;
-    }
-    Serial.println();
-  }
+  char msgChar = (char) msg;
+  return (msgChar == 'r' || msgChar == 'y' || msgChar == 'g');
+}
+
+void setCurrentLEDNum(byte msg)
+{
+  char msgChar = (char) msg;
   
-  if(currentCommand == LED_OFF)
+  if(msgChar == 'r')
   {
-    switch(currentLEDNum)
-    {
-      case LED1:
-        Serial.println("Turning red LED off...");
-        digitalWrite(redLED, LOW);
-        break;
-      case LED2:
-        Serial.println("Turning yellow LED off...");
-        digitalWrite(yellowLED, LOW);
-        break; 
-      case LED3:
-        Serial.println("Turning green LED off...");
-        digitalWrite(greenLED, LOW);
-        break; 
-      default:
-        break;
-    }
-    Serial.println();
+    currentLEDNum = RED_LED;
+  }
+  else if(msgChar == 'y')
+  {
+    currentLEDNum = YLW_LED;
+  }
+  else if(msgChar == 'g')
+  {
+    currentLEDNum = GRN_LED;
   }
 }
 
@@ -170,8 +147,22 @@ boolean isMessageACommand(byte msg)
   return (msg == LED_OFF || msg == LED_ON);
 }
 
-boolean isMessageAnLEDNum(byte msg)
+void executeCommand()
 {
-  return (msg == LED1 || msg == LED2 || msg == LED3);
+  Serial.print("Turning pin ");
+  Serial.print(currentLEDNum);
+  
+  if(currentCommand == LED_ON)
+  {
+    Serial.println(" on...");
+    digitalWrite(currentLEDNum, HIGH);
+  }
+  else if(currentCommand == LED_OFF)
+  {
+    Serial.println(" off...");
+    digitalWrite(currentLEDNum, LOW);
+  }
+  
+  Serial.println();
 }
 

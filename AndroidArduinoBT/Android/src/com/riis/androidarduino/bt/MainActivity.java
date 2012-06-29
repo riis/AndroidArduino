@@ -95,11 +95,11 @@ public class MainActivity extends Activity {
 				public void onClick(View v) {
 					if(isRedLEDOn) {
 			         	((Button)v).setText("Turn Red On");
-			         	btComm.sendByte(LED1, LED_OFF);
+			         	btComm.sendByteWithFlag(LED1, LED_OFF);
 			         	isRedLEDOn = false;
 					} else {
 			         	((Button)v).setText("Turn Red Off");
-			         	btComm.sendByte(LED1, LED_ON);
+			         	btComm.sendByteWithFlag(LED1, LED_ON);
 			         	isRedLEDOn = true;
 					}
 				}
@@ -114,11 +114,11 @@ public class MainActivity extends Activity {
 				public void onClick(View v) {
 					if(isYellowLEDOn) {
 			         	((Button)v).setText("Turn Yellow On");
-			         	btComm.sendByte(LED2, LED_OFF);
+			         	btComm.sendByteWithFlag(LED2, LED_OFF);
 			         	isYellowLEDOn = false;
 					} else {
 			         	((Button)v).setText("Turn Yellow Off");
-			         	btComm.sendByte(LED2, LED_ON);
+			         	btComm.sendByteWithFlag(LED2, LED_ON);
 			         	isYellowLEDOn = true;
 					}
 				}
@@ -133,11 +133,11 @@ public class MainActivity extends Activity {
 				public void onClick(View v) {
 					if(isGreenLEDOn) {
 						((Button)v).setText("Turn Green On");
-						btComm.sendByte(LED3, LED_OFF);
+						btComm.sendByteWithFlag(LED3, LED_OFF);
 		                isGreenLEDOn = false;
 					} else {
 			         	((Button)v).setText("Turn Green Off");
-			         	btComm.sendByte(LED3, LED_ON);
+			         	btComm.sendByteWithFlag(LED3, LED_ON);
 			         	isGreenLEDOn = true;
 					}
 				}
