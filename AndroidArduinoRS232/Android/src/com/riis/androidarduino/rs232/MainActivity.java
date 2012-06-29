@@ -16,7 +16,7 @@ public class MainActivity extends Activity {
 	private EditText msgBox;
 	private Button sendMsgButton;
 	
-	UsbComm usbHost;
+	UsbComm usbComm;
 	
     /** Called when the activity is first created. */
     @Override
@@ -24,7 +24,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
-        usbHost = new UsbComm(this);
+        usbComm = new UsbComm(this);
         
         setUpGUI();
     }
@@ -43,7 +43,7 @@ public class MainActivity extends Activity {
     	sendMsgButton.setOnClickListener(
     	    		new OnClickListener(){
     					public void onClick(View v) {
-    						usbHost.sendString(msgBox.getText().toString());
+    						usbComm.sendString(msgBox.getText().toString());
     						msgBox.setText("");
     					}
     	    		}
@@ -54,8 +54,8 @@ public class MainActivity extends Activity {
 	public Object onRetainNonConfigurationInstance() {
 		// In case the app is restarted, try to retain the usb accessory object
 		// so that the connection to the device is not lost.
-		if (usbHost.getAccessory() != null) {
-			return usbHost.getAccessory();
+		if (usbComm.getAccessory() != null) {
+			return usbComm.getAccessory();
 		} else {
 			return super.onRetainNonConfigurationInstance();
 		}
@@ -65,20 +65,20 @@ public class MainActivity extends Activity {
 	public void onResume() {
 		Log.v("Arduino App", "Resuming");
 		super.onResume();
-		usbHost.resumeConnection();
+		usbComm.resumeConnection();
 	}
 
 	@Override
 	public void onPause() {
 		Log.v("Arduino App", "Pausing");
 		super.onPause();
-		usbHost.pauseConnection();
+		usbComm.pauseConnection();
 	}
 
 	@Override
 	public void onDestroy() {
 		Log.v("Arduino App", "Destroying");
-		usbHost.unregisterReceiver();
+		usbComm.unregisterReceiver();
 		super.onDestroy();
 	}
 }
