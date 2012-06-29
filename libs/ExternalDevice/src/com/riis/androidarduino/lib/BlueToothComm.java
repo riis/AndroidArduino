@@ -27,7 +27,9 @@ public class BlueToothComm extends SerialComm implements Runnable {
 		findDevice(deviceName);
 		connectSocket();
 		
-		Toast.makeText(context, "Connected!", Toast.LENGTH_SHORT).show();
+		if(socket != null) {
+			Toast.makeText(context, "Connected!", Toast.LENGTH_SHORT).show();
+		}
 	}
 	
 	private void findDevice(String deviceName) {
@@ -60,7 +62,7 @@ public class BlueToothComm extends SerialComm implements Runnable {
 		
 			inputStream = socket.getInputStream();														
 			outputStream = socket.getOutputStream();		
-		} catch (IOException e) {
+		} catch (Exception e) {
 			Toast.makeText(context, "Couldn't connect to device", Toast.LENGTH_SHORT).show();
 			return ;
 		}
@@ -71,7 +73,7 @@ public class BlueToothComm extends SerialComm implements Runnable {
 			socket.close();
 			inputStream.close();
 			outputStream.close();
-		} catch (IOException e) { }
+		} catch (Exception e) { }
 		
 		Toast.makeText(context, "Disconnected!", Toast.LENGTH_SHORT).show();
 	}

@@ -2,13 +2,16 @@
 #include <Usb.h>
 #include <AndroidAccessory.h>
 
+//LED command codes
 #define LED_OFF 0
 #define LED_ON  1
 
+//LED pin numbers
 #define RED_LED 8
 #define YLW_LED 10
 #define GRN_LED 12
 
+//State machine states
 #define RECEIVING_COMMAND_FLAG 0
 #define RECEIVING_COMMAND_DATA 1
 
@@ -29,10 +32,7 @@ boolean saidConnected = false;
 
 void setup()
 {
-  pinMode(RED_LED, OUTPUT);
-  pinMode(YLW_LED, OUTPUT); 
-  pinMode(GRN_LED, OUTPUT);
-  
+  setUpIO(); 
   resetState();
   
   Serial.begin(115200);
@@ -41,6 +41,13 @@ void setup()
   acc.powerOn();
   
   Serial.println("Waiting for Android device...");
+}
+
+void setUpIO()
+{
+  pinMode(RED_LED, OUTPUT);
+  pinMode(YLW_LED, OUTPUT); 
+  pinMode(GRN_LED, OUTPUT);
 }
 
 void resetState()
