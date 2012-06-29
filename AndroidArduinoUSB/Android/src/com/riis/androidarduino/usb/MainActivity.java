@@ -1,5 +1,6 @@
 package com.riis.androidarduino.usb;
 
+import com.riis.androidarduino.lib.UsbComm;
 import com.riis.androidarduino.usb.R;
 
 import android.app.Activity;
@@ -10,11 +11,11 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 
 public class MainActivity extends Activity {
-	private final byte LED_OFF = 1;
-	private final byte LED_ON = 2;
-	private final byte LED1 = 3;
-	private final byte LED2 = 4;
-	private final byte LED3 = 5;
+	private final byte LED_OFF = 0;
+	private final byte LED_ON = 1;
+	private final char LED1 = 'r';
+	private final char LED2 = 'y';
+	private final char LED3 = 'g';
 	
 	private Button redButton;
 	private Button yellowButton;
@@ -24,7 +25,7 @@ public class MainActivity extends Activity {
 	private boolean isYellowLEDOn = false;
 	private boolean isGreenLEDOn = false;
 	
-	UsbCommWrapper usbHost;
+	UsbComm usbHost;
 	
     /** Called when the activity is first created. */
     @Override
@@ -32,7 +33,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
-        usbHost = new UsbCommWrapper(this);
+        usbHost = new UsbComm(this);
         
         setUpButtons();
     }
@@ -49,15 +50,14 @@ public class MainActivity extends Activity {
     		new OnClickListener(){
 				public void onClick(View v) {
 					if(isRedLEDOn) {
-			         	usbHost.sendByte(LED_OFF);
+			         	usbHost.sendByte(LED1, LED_OFF);
 			         	((Button)v).setText("Turn Red On");
 			         	isRedLEDOn = false;
 					} else {
-						usbHost.sendByte(LED_ON);
+						usbHost.sendByte(LED1, LED_ON);
 			         	((Button)v).setText("Turn Red Off");
 			         	isRedLEDOn = true;
 					}
-					usbHost.sendByte(LED1);
 				}
     		}
     	);
@@ -69,15 +69,14 @@ public class MainActivity extends Activity {
     		new OnClickListener(){
 				public void onClick(View v) {
 					if(isYellowLEDOn) {
-			         	usbHost.sendByte(LED_OFF);
+			         	usbHost.sendByte(LED2, LED_OFF);
 			         	((Button)v).setText("Turn Yellow On");
 			         	isYellowLEDOn = false;
 					} else {
-						usbHost.sendByte(LED_ON);
+						usbHost.sendByte(LED2, LED_ON);
 			         	((Button)v).setText("Turn Yellow Off");
 			         	isYellowLEDOn = true;
 					}
-					usbHost.sendByte(LED2);
 				}
     		}
     	);
@@ -89,15 +88,14 @@ public class MainActivity extends Activity {
     		new OnClickListener(){
 				public void onClick(View v) {
 					if(isGreenLEDOn) {
-			         	usbHost.sendByte(LED_OFF);
+			         	usbHost.sendByte(LED3, LED_OFF);
 			         	((Button)v).setText("Turn Green On");
 			         	isGreenLEDOn = false;
 					} else {
-						usbHost.sendByte(LED_ON);
+						usbHost.sendByte(LED3, LED_ON);
 			         	((Button)v).setText("Turn Green Off");
 			         	isGreenLEDOn = true;
 					}
-					usbHost.sendByte(LED3);
 				}
     		}
     	);

@@ -1,5 +1,6 @@
 package com.riis.androidarduino.rs232;
 
+import com.riis.androidarduino.lib.UsbComm;
 import com.riis.androidarduino.rs232.R;
 
 import android.app.Activity;
@@ -9,14 +10,13 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 
 public class MainActivity extends Activity {
 	
 	private EditText msgBox;
 	private Button sendMsgButton;
 	
-	UsbCommWrapper usbHost;
+	UsbComm usbHost;
 	
     /** Called when the activity is first created. */
     @Override
@@ -24,7 +24,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
-        usbHost = new UsbCommWrapper(this);
+        usbHost = new UsbComm(this);
         
         setUpGUI();
     }

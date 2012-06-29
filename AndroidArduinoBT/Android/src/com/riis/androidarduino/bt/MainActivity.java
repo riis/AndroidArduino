@@ -1,6 +1,7 @@
 package com.riis.androidarduino.bt;
 
 import com.riis.androidarduino.bt.R;
+import com.riis.androidarduino.lib.BlueToothComm;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -11,11 +12,11 @@ import android.widget.Button;
 public class MainActivity extends Activity {
 	private static String DEVICE_NAME = "AndroidArduinoBT";
 	
-	private final byte LED_OFF = 1;
-	private final byte LED_ON = 2;
-	private final byte LED1 = 3;
-	private final byte LED2 = 4;
-	private final byte LED3 = 5;
+	private final byte LED_OFF = 0;
+	private final byte LED_ON = 1;
+	private final char LED1 = 'r';
+	private final char LED2 = 'y';
+	private final char LED3 = 'g';
 	
 	private Button connectButton;
 	private Button disconnectButton;
@@ -46,14 +47,14 @@ public class MainActivity extends Activity {
 		if(btComm == null) {
 			btComm = new BlueToothComm(this, DEVICE_NAME);
 		} else {
-			btComm.connect(DEVICE_NAME);
+			btComm.resumeConnection();
 		}
 	}
 	
 	@Override
 	public void onPause() {
 		super.onPause();
-		btComm.disconnect();
+		btComm.pauseConnection();
 	}
     
     private void setUpButtons() {
@@ -70,7 +71,7 @@ public class MainActivity extends Activity {
     	connectButton.setOnClickListener(
     		new OnClickListener() {
     			public void onClick(View v) {
-    				btComm.connect(DEVICE_NAME);
+    				btComm.connect();
     			}
     		}
     	);
@@ -94,14 +95,13 @@ public class MainActivity extends Activity {
 				public void onClick(View v) {
 					if(isRedLEDOn) {
 			         	((Button)v).setText("Turn Red On");
-			         	btComm.sendByte(LED_OFF);
+			         	btComm.sendByte(LED1, LED_OFF);
 			         	isRedLEDOn = false;
 					} else {
 			         	((Button)v).setText("Turn Red Off");
-			         	btComm.sendByte(LED_ON);
+			         	btComm.sendByte(LED1, LED_ON);
 			         	isRedLEDOn = true;
 					}
-					btComm.sendByte(LED1);
 				}
     		}
     	);
@@ -114,14 +114,13 @@ public class MainActivity extends Activity {
 				public void onClick(View v) {
 					if(isYellowLEDOn) {
 			         	((Button)v).setText("Turn Yellow On");
-			         	btComm.sendByte(LED_OFF);
+			         	btComm.sendByte(LED2, LED_OFF);
 			         	isYellowLEDOn = false;
 					} else {
 			         	((Button)v).setText("Turn Yellow Off");
-			         	btComm.sendByte(LED_ON);
+			         	btComm.sendByte(LED2, LED_ON);
 			         	isYellowLEDOn = true;
 					}
-					btComm.sendByte(LED2);
 				}
     		}
     	);
@@ -134,14 +133,13 @@ public class MainActivity extends Activity {
 				public void onClick(View v) {
 					if(isGreenLEDOn) {
 						((Button)v).setText("Turn Green On");
-						btComm.sendByte(LED_OFF);
+						btComm.sendByte(LED3, LED_OFF);
 		                isGreenLEDOn = false;
 					} else {
 			         	((Button)v).setText("Turn Green Off");
-			         	btComm.sendByte(LED_ON);
+			         	btComm.sendByte(LED3, LED_ON);
 			         	isGreenLEDOn = true;
 					}
-					btComm.sendByte(LED3);
 				}
     		}
     	);

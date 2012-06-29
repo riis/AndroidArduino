@@ -8,7 +8,6 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.os.Message;
 import android.widget.Toast;
 
 public class BlueToothComm extends SerialComm implements Runnable {
@@ -79,32 +78,14 @@ public class BlueToothComm extends SerialComm implements Runnable {
 
 	@Override
 	public void run() {
-		int msgLen = 0;
 		byte[] buffer = new byte[256];
-		int i;
 
 		while (true) { // keep reading messages forever.
 			try {
-				msgLen = inputStream.read(buffer);
+				checkAndHandleMessages(buffer);
 			} catch (IOException e) {
 				break;
 			}
-
-			i = 0;
-			while (i < msgLen) {
-				int len = msgLen - i;
-				if (len >= 2) {
-					Message m = Message.obtain(handler);
-					int value = Util.composeInt(buffer[i], buffer[i + 1]);
-					m.obj = new ValueMsg('a', value);
-					handler.sendMessage(m);
-				}
-				i += 2;
-			}
-			
-			try {
-				Thread.sleep(10);
-			} catch (InterruptedException e) {	}
 		}
 	}
 
