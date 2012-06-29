@@ -5,6 +5,7 @@
 #define STRING_END 0
 #define STRING_LENGTH 256
 
+//States for the state machine
 #define RECEIVING_STRING_FLAG 1
 #define RECEIVING_STRING_CHAR 2
 #define RECEIVING_END_CODE    3
