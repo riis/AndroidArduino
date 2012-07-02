@@ -35,17 +35,17 @@ byte curCharIndex;
 
 void setup()
 {
-  resetStringAndState();
-  saidConnected = false;
-  
-  Serial.begin(115200);  
-  Serial.println("Powering up...");
-  acc.powerOn();
+    resetStringAndState();
+    saidConnected = false;
+    
+    Serial.begin(115200);
+    Serial.println("Powering up...");
+    acc.powerOn();
 
-  Serial.println("Initializing other serial port...");  
-  Serial1.begin(115200);
-  
-  Serial.println("Waiting for Android device...");
+    Serial.println("Initializing other serial port...");    
+    Serial1.begin(115200);
+    
+    Serial.println("Waiting for Android device...");
 }
 
 void resetStringAndState()
@@ -60,46 +60,45 @@ void resetStringAndState()
 
 void loop()
 {
-  if (acc.isConnected())
-  {
-    printConnectedMessage();
-    
-    if(tryToReadMessageInto(msgBuf))
+    if (acc.isConnected())
     {
-      byte msg = msgBuf[0];
-      printReceivedMessage(msg);
-      if(testing)
+	  printConnectedMessage();
+
+	  if(tryToReadMessageInto(msgBuf))
       {
-        printTestStatusCode();
-      }
+        byte msg = msgBuf[0];
+        printReceivedMessage(msg);
+        if(testing)
+        {
+          printTestStatusCode();
+        }
       
-      runStateMachine((char)msg);
+        runStateMachine((char)msg);
     }
-  }
 }
 
 void printConnectedMessage()
 {
-  if(!saidConnected)
+    if(!saidConnected)
     {
-      Serial.println();
-      Serial.println("Connected!");
-      Serial.println();
-      saidConnected = true;
+        Serial.println();
+        Serial.println("Connected!");
+        Serial.println();
+        saidConnected = true;
     }
 }
 
 boolean tryToReadMessageInto(byte msgBuffer[])
 {
-  int len = acc.read(msgBuffer, sizeof(msgBuffer), 1);
-  return (len >= 1);
+    int len = acc.read(msgBuffer, sizeof(msgBuffer), 1);
+    return (len >= 1);
 }
 
 void printReceivedMessage(byte msg)
 {
-  Serial.print("Recieved ");
-  Serial.print(msg);
-  Serial.println(" from Android device");
+    Serial.print("Recieved ");
+    Serial.print(msg);
+    Serial.println(" from Android device");
 }
 
 void printTestStatusCode()
@@ -174,27 +173,27 @@ void setTestingVal(char letter)
 
 boolean isLetterStringFlag(char letter)
 {
-  return (letter == 'S');
+    return (letter == 'S');
 }
 
 boolean isLetterEndFlag(char letter)
 {
-  return (letter == 'N');
+    return (letter == 'N');
 }
 
 boolean isLetterEndCode(char letter)
 {
-  byte charNum = (byte) letter;
-  return (charNum == STRING_END); 
+    byte charNum = (byte) letter;
+    return (charNum == STRING_END); 
 }
 
 void appendLetterOnString(char letter)
 {
-  if(curCharIndex < STRING_LENGTH)
-  {
-    stringBuf[curCharIndex] = letter;
-    curCharIndex++;
-  }
+    if(curCharIndex < STRING_LENGTH)
+    {
+        stringBuf[curCharIndex] = letter;
+        curCharIndex++;
+    }
 }
 
 void stopAndSendString()
