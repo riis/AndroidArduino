@@ -19,9 +19,14 @@ public abstract class SerialComm implements Communication, Runnable {
 	protected Context context;
 	protected Handler handler;
 	
+	protected boolean isConnected;
+	
 	public SerialComm(Activity parentActivity) {
 		this.context = parentActivity.getApplicationContext();
+		
 		shouldLog = false;
+		isConnected = false;
+		
 		setupHandler();
 	}
 	
@@ -67,8 +72,8 @@ public abstract class SerialComm implements Communication, Runnable {
 	}
 	
 	
-	public void shouldPrintLogMsgs(boolean x) {
-		shouldLog = x;
+	public void shouldPrintLogMsgs(boolean shouldLog) {
+		this.shouldLog = shouldLog;
 	}
 	
 	protected void checkAndHandleMessages(byte[] buffer) throws IOException {
@@ -85,9 +90,14 @@ public abstract class SerialComm implements Communication, Runnable {
 			}
 		}
 	}
+	
+	public boolean isConnected() {
+		return isConnected;
+	}
 
 	protected void log(String string) {
-		if(shouldLog)
+		if(shouldLog) {
 			Log.v("UsbCommWrapper", string);
+		}
 	}
 }

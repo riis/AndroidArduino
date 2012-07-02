@@ -26,7 +26,6 @@ public class UsbComm extends SerialComm {
 	private PendingIntent permissionIntent;
 	private boolean permissionRequestPending;
 	
-	
 	public UsbComm(Activity parentActivity) {
 		super(parentActivity);
 		setupBroadcastReceiver();
@@ -80,14 +79,19 @@ public class UsbComm extends SerialComm {
 		fileDescriptor = manager.openAccessory(accessory);
 		if (fileDescriptor != null) {
 			this.accessory = accessory;
+			
 			FileDescriptor fd = fileDescriptor.getFileDescriptor();
 			inputStream = new FileInputStream(fd);
 			outputStream = new FileOutputStream(fd);
+			
 			Thread thread = new Thread(null, this, "UsbCommWrapperLoop");
 			thread.start();
-			log("Attached");
+			
+			isConnected = true;
+			
+			log("Accessory attached");
 		} else {
-			log("openAccessory: accessory open failed");
+			log("Accessory open failed");
 		}
 	}
 	
@@ -96,7 +100,8 @@ public class UsbComm extends SerialComm {
 		try {
 			if (fileDescriptor != null) {
 				fileDescriptor.close();
-				log("Dettached");
+				isConnected = false;
+				log("Accessory detached");
 			}
 		} catch (IOException e) {
 		} finally {
@@ -107,6 +112,7 @@ public class UsbComm extends SerialComm {
 	
 	public void pauseConnection() {
 		unregisterReceiver();
+		isConnected = false;
 	}
 	
 	public void resumeConnection() {

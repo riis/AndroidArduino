@@ -16,9 +16,8 @@ public class MainActivity extends Activity {
 	private EditText msgBox;
 	private Button sendMsgButton;
 	
-	UsbComm usbComm;
+	private UsbComm usbComm;
 	
-    /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,7 +40,7 @@ public class MainActivity extends Activity {
     private void setupSendMsgButton() {
     	sendMsgButton = (Button) findViewById(R.id.sendButton);
     	sendMsgButton.setOnClickListener(
-    	    		new OnClickListener(){
+    	    		new OnClickListener() {
     					public void onClick(View v) {
     						usbComm.sendString(msgBox.getText().toString());
     						msgBox.setText("");
@@ -80,5 +79,9 @@ public class MainActivity extends Activity {
 		Log.v("Arduino App", "Destroying");
 		usbComm.unregisterReceiver();
 		super.onDestroy();
+	}
+	
+	public UsbComm getUsbComm() {
+		return usbComm;
 	}
 }
