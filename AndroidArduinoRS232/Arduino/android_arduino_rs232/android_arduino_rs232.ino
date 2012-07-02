@@ -6,9 +6,14 @@
 #define STRING_LENGTH 256
 
 //States for the state machine
-#define RECEIVING_STRING_FLAG 1
+#define RECEIVING_FLAG 1
 #define RECEIVING_STRING_CHAR 2
 #define RECEIVING_END_CODE    3
+#define RECEIVING_TESTING_VALUE 4
+
+#define TESTING_CODE_FAILURE -1
+#define TESTING_CODE_SUCCESS 1
+#define TESTING_CODE_WORKING 0
 
 AndroidAccessory acc("RIIS",
 		     "AndroidArduinoRS232",
@@ -18,6 +23,9 @@ AndroidAccessory acc("RIIS",
 		     "0000000012345678");
 
 int state;
+
+boolean testing = false;
+byte testingCode;
 
 boolean saidConnected;
 byte msgBuf[1];
@@ -42,7 +50,7 @@ void setup()
 
 void resetStringAndState()
 {
-  state = RECEIVING_STRING_FLAG;
+  state = RECEIVING_FLAG;
   
   for(int i = 0; i < STRING_LENGTH; i++) {
     stringBuf[i] = 0; 
@@ -60,6 +68,10 @@ void loop()
     {
       byte msg = msgBuf[0];
       printReceivedMessage(msg);
+      if(testing)
+      {
+        printTestStatusCode();
+      }
       
       runStateMachine((char)msg);
     }
@@ -90,11 +102,22 @@ void printReceivedMessage(byte msg)
   Serial.println(" from Android device");
 }
 
+void printTestStatusCode()
+{
+    byte[] msgBuffer = {'T', testingCode};
+    acc.write(msgBuffer, sizeof(msgBuffer), 2);
+}
+
 void runStateMachine(char letter)
 {
+  testingByte = TESTING_CODE_WORKING;
   switch(state)
   {
-    case RECEIVING_STRING_FLAG:
+    case RECEIVING_FLAG:
+      if(isTestingFlag(letter))
+      {
+        state = RECEIVING_TESTING_VALUE;
+      }
       if(isLetterStringFlag(letter))
       {
         state = RECEIVING_STRING_CHAR;
@@ -104,10 +127,14 @@ void runStateMachine(char letter)
         state = RECEIVING_END_CODE;
       }
       break;
+    case RECEIVING_TESTING_VALUE:
+      setTestingVal(letter);
+      state = RECEIVING_FLAG;
+      break;
     case RECEIVING_STRING_CHAR:
       if(!isLetterEndCode(letter))
       {
-        state = RECEIVING_STRING_FLAG;
+        state = RECEIVING_FLAG;
         appendLetterOnString(letter);
       }
       else
@@ -122,13 +149,27 @@ void runStateMachine(char letter)
       }
       else
       {
-        state = RECEIVING_STRING_FLAG;
+        state = RECEIVING_FLAG;
         Serial.println("WARNING: Received null flag, but did not receive null value. Continuing string read.");
+        testingByte = TESTING_CODE_FAILURE;
       }
     default:
-      state = RECEIVING_STRING_FLAG;
+      state = RECEIVING_FLAG;
       break;
   }
+}
+
+boolean isTestingFlag(char letter)
+{
+  return (letter == 'T');
+}
+
+void setTestingVal(char letter)
+{
+  if(letter == 1)
+    testing = true;
+  else
+    testing = false;
 }
 
 boolean isLetterStringFlag(char letter)
@@ -158,7 +199,7 @@ void appendLetterOnString(char letter)
 
 void stopAndSendString()
 {
-  state = RECEIVING_STRING_FLAG;
+  state = RECEIVING_FLAG;
   Serial.println("String terminated, reversing and sending...");
   reverseAndSendString();
   resetStringAndState();
@@ -173,5 +214,6 @@ void reverseAndSendString()
   }
   
   Serial1.println();
+  testingByte = TESTING_CODE_SUCCESS;
 }
 
