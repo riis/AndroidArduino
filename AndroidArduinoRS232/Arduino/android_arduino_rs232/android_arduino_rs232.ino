@@ -50,30 +50,31 @@ void setup()
 
 void resetStringAndState()
 {
-  state = RECEIVING_FLAG;
+    state = RECEIVING_FLAG;
   
-  for(int i = 0; i < STRING_LENGTH; i++) {
-    stringBuf[i] = 0; 
-  }
-  curCharIndex = 0;
+    for(int i = 0; i < STRING_LENGTH; i++) {    
+        stringBuf[i] = 0; 
+    }
+    curCharIndex = 0;
 }
 
 void loop()
 {
     if (acc.isConnected())
     {
-	  printConnectedMessage();
+        printConnectedMessage();
 
-	  if(tryToReadMessageInto(msgBuf))
-      {
-        byte msg = msgBuf[0];
-        printReceivedMessage(msg);
-        if(testing)
+	if(tryToReadMessageInto(msgBuf))
         {
-          printTestStatusCode();
+            byte msg = msgBuf[0];
+            printReceivedMessage(msg);
+            if(testing)
+            {
+                printTestStatusCode();
+            }
+            
+            runStateMachine((char)msg);
         }
-      
-        runStateMachine((char)msg);
     }
 }
 
@@ -109,66 +110,70 @@ void printTestStatusCode()
 
 void runStateMachine(char letter)
 {
-  testingByte = TESTING_CODE_WORKING;
-  switch(state)
-  {
-    case RECEIVING_FLAG:
-      if(isTestingFlag(letter))
-      {
-        state = RECEIVING_TESTING_VALUE;
-      }
-      if(isLetterStringFlag(letter))
-      {
-        state = RECEIVING_STRING_CHAR;
-      }
-      else if(isLetterEndFlag(letter))
-      {
-        state = RECEIVING_END_CODE;
-      }
-      break;
-    case RECEIVING_TESTING_VALUE:
-      setTestingVal(letter);
-      state = RECEIVING_FLAG;
-      break;
-    case RECEIVING_STRING_CHAR:
-      if(!isLetterEndCode(letter))
-      {
-        state = RECEIVING_FLAG;
-        appendLetterOnString(letter);
-      }
-      else
-      {
-        stopAndSendString();
-      }
-      break;
-    case RECEIVING_END_CODE:
-      if(isLetterEndCode(letter))
-      {
-        stopAndSendString();
-      }
-      else
-      {
-        state = RECEIVING_FLAG;
-        Serial.println("WARNING: Received null flag, but did not receive null value. Continuing string read.");
-        testingByte = TESTING_CODE_FAILURE;
-      }
-    default:
-      state = RECEIVING_FLAG;
-      break;
-  }
+    testingByte = TESTING_CODE_WORKING;
+    switch(state)
+    {
+        case RECEIVING_FLAG:
+            if(isTestingFlag(letter))
+            {
+                state = RECEIVING_TESTING_VALUE;
+            }
+            if(isLetterStringFlag(letter))
+            {
+                state = RECEIVING_STRING_CHAR;
+            }
+            else if(isLetterEndFlag(letter))
+            {
+                state = RECEIVING_END_CODE;
+            }
+            break;
+        case RECEIVING_TESTING_VALUE:
+            setTestingVal(letter);
+            state = RECEIVING_FLAG;
+            break;
+        case RECEIVING_STRING_CHAR:
+            if(!isLetterEndCode(letter))
+            {
+                state = RECEIVING_FLAG;
+                appendLetterOnString(letter);
+            }
+            else
+            {
+                stopAndSendString();
+            }
+            break;
+        case RECEIVING_END_CODE:
+            if(isLetterEndCode(letter))
+            {
+                stopAndSendString();
+            }
+            else
+            {
+                state = RECEIVING_FLAG;
+                Serial.println("WARNING: Received null flag, but did not receive null value. Continuing string read.");
+                testingByte = TESTING_CODE_FAILURE;
+            }
+        default:
+          state = RECEIVING_FLAG;
+          break;
+    }
 }
 
 boolean isTestingFlag(char letter)
 {
-  return (letter == 'T');
+    return (letter == 'T');
 }
 
 void setTestingVal(char letter)
 {
-  if(letter == 1)
-    testing = true;
-  else
-    testing = false;
+    if(letter == 1)
+    {
+        testing = true;
+    }
+    else
+    {
+        testing = false;
+    }
 }
 
 boolean isLetterStringFlag(char letter)
@@ -198,21 +203,21 @@ void appendLetterOnString(char letter)
 
 void stopAndSendString()
 {
-  state = RECEIVING_FLAG;
-  Serial.println("String terminated, reversing and sending...");
-  reverseAndSendString();
-  resetStringAndState();
-  Serial.println();
+    state = RECEIVING_FLAG;
+    Serial.println("String terminated, reversing and sending...");
+    reverseAndSendString();
+    resetStringAndState();
+    Serial.println();
 }
 
 void reverseAndSendString()
 {
-  for(int i = curCharIndex - 1; i >= 0; i--)
-  {
-    Serial1.print(stringBuf[i]);
-  }
+    for(int i = curCharIndex - 1; i >= 0; i--)
+    {
+        Serial1.print(stringBuf[i]);
+    }
   
-  Serial1.println();
-  testingByte = TESTING_CODE_SUCCESS;
+    Serial1.println();
+    testingByte = TESTING_CODE_SUCCESS;
 }
 
