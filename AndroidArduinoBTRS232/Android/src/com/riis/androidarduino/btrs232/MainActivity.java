@@ -11,7 +11,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 public class MainActivity extends Activity {
-	private static String DEVICE_NAME = "AndroidArduinoBT";
+	private static String DEVICE_NAME = "AndroidArduinoBTRS232";
 	
 	private Button connectButton;
 	private Button disconnectButton;
@@ -19,8 +19,6 @@ public class MainActivity extends Activity {
 	private EditText msgBox;
 	private Button sendMsgButton;
 
-	
-	
 	private BlueToothComm btComm;
 	
     /** Called when the activity is first created. */
@@ -46,9 +44,10 @@ public class MainActivity extends Activity {
     private void setupSendMsgButton() {
     	sendMsgButton = (Button) findViewById(R.id.sendButton);
     	sendMsgButton.setOnClickListener(
-    	    		new OnClickListener(){
+    	    		new OnClickListener() {
     					public void onClick(View v) {
-    						btComm.sendString(msgBox.getText().toString());
+    						//btComm.sendString(msgBox.getText().toString());
+    						btComm.sendByteWithFlag('T', (byte) 1);
     						msgBox.setText("");
     					}
     	    		}
@@ -64,6 +63,8 @@ public class MainActivity extends Activity {
 		} else {
 			btComm.resumeConnection();
 		}
+		
+		btComm.shouldPrintLogMsgs(true);
 	}
 	
 	@Override
@@ -92,5 +93,9 @@ public class MainActivity extends Activity {
     			}
     		}
     	);
+    }
+    
+    public BlueToothComm getBlueToothComm() {
+    	return btComm;
     }
 }

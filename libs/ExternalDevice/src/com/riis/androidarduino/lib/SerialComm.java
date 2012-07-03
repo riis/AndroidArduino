@@ -3,6 +3,9 @@ package com.riis.androidarduino.lib;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.LinkedList;
+import java.util.NoSuchElementException;
+import java.util.Queue;
 
 import android.app.Activity;
 import android.content.Context;
@@ -12,7 +15,9 @@ import android.util.Log;
 
 public abstract class SerialComm implements Communication, Runnable {
 	protected boolean shouldLog;
-
+	
+	protected Queue<FlagMsg> inputBuffer;
+	
 	protected InputStream inputStream;
 	protected OutputStream outputStream;
 	
@@ -27,14 +32,21 @@ public abstract class SerialComm implements Communication, Runnable {
 		shouldLog = false;
 		isConnected = false;
 		
+		inputBuffer = new LinkedList<FlagMsg>();
+		
 		setupHandler();
+		
+		Thread inputThread = new Thread(this);
+		inputThread.start();
 	}
 	
 	protected void setupHandler() {
 		handler = new Handler() {
 			public void handleMessage(Message msg) {
-				ValueMsg t = (ValueMsg) msg.obj;
-				log("Usb Accessory sent: " + t.getFlag() + " " + t.getReading());
+				FlagMsg message = (FlagMsg) msg.obj;
+				inputBuffer.add(message);
+				
+				log("Message received: " + message.getFlag() + " " + message.getReading());
 			}
 		};
 	}
@@ -49,7 +61,7 @@ public abstract class SerialComm implements Communication, Runnable {
 	}
 	
 	public void sendByteWithFlag(char flag, byte value) {
-		log("Sending Byte '" + value + "' to Usb Accessory");
+		log("Sending byte '" + value + "'  with flag '" + flag + "'.");
 		
 		sendByte((byte) flag);
 		sendByte(value);
@@ -71,24 +83,38 @@ public abstract class SerialComm implements Communication, Runnable {
 		}
 	}
 	
+	public boolean hasNewMessages() {
+		return !inputBuffer.isEmpty();
+	}
 	
-	public void shouldPrintLogMsgs(boolean shouldLog) {
-		this.shouldLog = shouldLog;
+	public FlagMsg readMessage() throws NoSuchElementException {
+		try {
+			return inputBuffer.remove();
+		} catch (NoSuchElementException e) {
+			throw e;
+		}
 	}
 	
 	protected void checkAndHandleMessages(byte[] buffer) throws IOException {
+		if(inputStream == null) {
+			return;
+		}
+		
 		int msgLen = 0;
 		msgLen = inputStream.read(buffer);
 
 		for(int i = 0; i < msgLen; i += 2) {
 			int len = msgLen - i;
 			if (len >= 2) {
-				Message m = Message.obtain(handler);
-				int value = Util.composeInt(buffer[i], buffer[i + 1]);
-				m.obj = new ValueMsg('a', value);
-				handler.sendMessage(m);
+				Message msg = Message.obtain(handler);
+				msg.obj = new FlagMsg((char)buffer[0], buffer[1]);
+				handler.sendMessage(msg);
 			}
 		}
+	}
+	
+	public void shouldPrintLogMsgs(boolean shouldLog) {
+		this.shouldLog = shouldLog;
 	}
 	
 	public boolean isConnected() {
@@ -97,7 +123,7 @@ public abstract class SerialComm implements Communication, Runnable {
 
 	protected void log(String string) {
 		if(shouldLog) {
-			Log.v("UsbCommWrapper", string);
+			Log.v("SerialComm", string);
 		}
 	}
 }

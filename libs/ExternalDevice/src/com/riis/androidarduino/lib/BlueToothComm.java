@@ -8,6 +8,7 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.os.Handler;
 import android.widget.Toast;
 
 public class BlueToothComm extends SerialComm implements Runnable {
@@ -28,6 +29,7 @@ public class BlueToothComm extends SerialComm implements Runnable {
 		connectSocket();
 		
 		if(socket != null) {
+			isConnected = true;
 			Toast.makeText(context, "Connected!", Toast.LENGTH_SHORT).show();
 		}
 	}
@@ -38,7 +40,11 @@ public class BlueToothComm extends SerialComm implements Runnable {
     	adapter = BluetoothAdapter.getDefaultAdapter();
     	Set<BluetoothDevice> pairedDevices = adapter.getBondedDevices();
 
-    	if (pairedDevices.size() > 0) {
+    	if(deviceName.length() > 20) {
+    		deviceName = deviceName.substring(0, 20);
+    	}
+    	
+    	if(pairedDevices.size() > 0) {
 		    for (BluetoothDevice searchDevice : pairedDevices) {
 		    	if(searchDevice.getName().equals(deviceName)) {
 		    		device = searchDevice;
@@ -75,7 +81,12 @@ public class BlueToothComm extends SerialComm implements Runnable {
 			outputStream.close();
 		} catch (Exception e) { }
 		
+		isConnected = false;
 		Toast.makeText(context, "Disconnected!", Toast.LENGTH_SHORT).show();
+	}
+	
+	public Handler getInputHandler() {
+		return handler;
 	}
 
 	@Override
@@ -86,7 +97,7 @@ public class BlueToothComm extends SerialComm implements Runnable {
 			try {
 				checkAndHandleMessages(buffer);
 			} catch (IOException e) {
-				break;
+
 			}
 		}
 	}

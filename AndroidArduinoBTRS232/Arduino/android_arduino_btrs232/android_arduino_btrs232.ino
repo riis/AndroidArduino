@@ -69,14 +69,14 @@ void setUpBlueToothConnection()
     blueToothSerial.begin(38400);
 
     blueToothSerial.print("\r\n+STWMOD=0\r\n"); //Set the BlueTooth to slave mode
-    blueToothSerial.print("\r\n+STNA=AndroidArduinoBTRS232\r\n"); //Set the BlueTooth name to "AndroidArduinoBT"
+    blueToothSerial.print("\r\n+STNA=AndroidArduinoBTRS232\r\n"); //Set the BlueTooth name to "AndroidArduinoBTRS232"
     blueToothSerial.print("\r\n+STOAUT=1\r\n"); //Permit a paired device to connect
     blueToothSerial.print("\r\n+STAUTO=0\r\n"); //No auto conneection
     
-    delay(1000);    
+    delay(2000);    
     blueToothSerial.print("\r\n+INQ=1\r\n"); //Make the BlueTooth device inquirable 
 
-    delay(1000);
+    delay(2000);
     blueToothSerial.flush();
 }
 
@@ -89,17 +89,18 @@ void loop()
 
         printReceivedMessage(msg); 
         runStateMachine(msg);
-        if(testing)
-        {
-                printTestStatusCode();
-        }
+    }
+    
+    if(testing)
+    {
+        printTestStatusCode();
     }
 }
 
 void printReceivedMessage(char msg)
 {
     Serial.print("Recieved ");
-    Serial.print(msg);
+    Serial.print((byte)msg);
     Serial.println(" from Android device");
 }
 
@@ -156,8 +157,10 @@ void runStateMachine(char letter)
 
 void printTestStatusCode()
 {
-        byte msgBuffer[] = {'T', testingCode};
-        blueToothSerial.write(msgBuffer, sizeof(msgBuffer));
+    byte msgBuffer[] = {'T', testingCode};
+    blueToothSerial.write(msgBuffer, sizeof(msgBuffer));
+    Serial.print("Trying to send testing code ");
+    Serial.println(testingCode);
 }
 
 boolean isTestingFlag(char letter)
@@ -167,13 +170,15 @@ boolean isTestingFlag(char letter)
 
 void setTestingVal(char letter)
 {
-    if(letter == 1)
+    testing = ((byte)letter == 1);
+    
+    if(testing)
     {
-        testing = true;
+        Serial.println("Entering testing mode...");
     }
     else
     {
-        testing = false;
+        Serial.println("Exiting testing mode...");   
     }
 }
 
