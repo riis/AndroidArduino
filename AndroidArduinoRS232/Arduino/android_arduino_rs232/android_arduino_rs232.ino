@@ -30,6 +30,9 @@ byte testingCode;
 boolean saidConnected;
 byte msgBuf[1];
 
+int serialMsgLen;
+char serialMsg[STRING_LENGTH];
+
 char stringBuf[STRING_LENGTH];
 byte curCharIndex;
 
@@ -60,7 +63,7 @@ void resetStringAndState()
 
 void loop()
 {
-    if (acc.isConnected())
+    if(acc.isConnected())
     {
         printConnectedMessage();
 
@@ -75,6 +78,13 @@ void loop()
             
             runStateMachine((char)msg);
         }
+    }
+    
+    byte msgLen = Serial.available();
+    
+    if(tryToReadSerialMessage())
+    {
+        printSerialMessageOut();
     }
 }
 
@@ -95,6 +105,26 @@ boolean tryToReadMessageInto(byte msgBuffer[])
     return (len >= 1);
 }
 
+boolean tryToReadSerialMessage()
+{
+    serialMsgLen = Serial.available();
+    
+    for(int i = 0; i < serialMsgLen && i < STRING_LENGTH; i++)
+    {
+        serialMsg[i] = Serial.read();
+    } 
+}
+
+void printSerialMessageOut()
+{
+    for(int i = serialMsgLen - 1; i >= 0; i--)
+    {
+        Serial.print(serialMsg[i]);
+    }
+  
+    Serial.println();
+}
+
 void printReceivedMessage(byte msg)
 {
     Serial.print("Recieved ");
@@ -104,13 +134,13 @@ void printReceivedMessage(byte msg)
 
 void printTestStatusCode()
 {
-    byte[] msgBuffer = {'T', testingCode};
-    acc.write(msgBuffer, sizeof(msgBuffer), 2);
+    byte msgBuffer[] = {'T', testingCode};
+    acc.write(msgBuffer, sizeof(msgBuffer));
 }
 
 void runStateMachine(char letter)
 {
-    testingByte = TESTING_CODE_WORKING;
+    testingCode = TESTING_CODE_WORKING;
     switch(state)
     {
         case RECEIVING_FLAG:
@@ -151,7 +181,7 @@ void runStateMachine(char letter)
             {
                 state = RECEIVING_FLAG;
                 Serial.println("WARNING: Received null flag, but did not receive null value. Continuing string read.");
-                testingByte = TESTING_CODE_FAILURE;
+                testingCode = TESTING_CODE_FAILURE;
             }
         default:
           state = RECEIVING_FLAG;
@@ -218,6 +248,6 @@ void reverseAndSendString()
     }
   
     Serial1.println();
-    testingByte = TESTING_CODE_SUCCESS;
+    testingCode = TESTING_CODE_SUCCESS;
 }
 
