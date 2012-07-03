@@ -3,62 +3,94 @@
 #include <AndroidAccessory.h>
 
 #define STRING_END 0
-#define STRING_LENGTH 256
+#define RETURN_CHAR 13
+#define MSG_LENGTH_MAX 256
 
-//States for the state machine
+//States for the Android state machine
 #define RECEIVING_FLAG 1
 #define RECEIVING_STRING_CHAR 2
 #define RECEIVING_END_CODE    3
-#define RECEIVING_TESTING_VALUE 4
 
-#define TESTING_CODE_FAILURE -1
-#define TESTING_CODE_SUCCESS 1
-#define TESTING_CODE_WORKING 0
+//States for the terminal state machine
+#define RECEIVING_CHARS 1
 
 AndroidAccessory acc("RIIS",
 		     "AndroidArduinoRS232",
-		     "DemoKit Arduino Board",
+		     "MegaADK Arduino Board",
 		     "1.0",
 		     "http://www.riis.com",
 		     "0000000012345678");
 
-int state;
-
-boolean testing = false;
-byte testingCode;
+int androidState;
+int terminalState;
 
 boolean saidConnected;
-byte msgBuf[1];
 
-int serialMsgLen;
-char serialMsg[STRING_LENGTH];
+byte incomingMsgBuf[MSG_LENGTH_MAX];
 
-char stringBuf[STRING_LENGTH];
-byte curCharIndex;
+int terminalMsgLen;
+char terminalMsg[MSG_LENGTH_MAX];
+
+int androidMsgLen;
+char androidMsg[MSG_LENGTH_MAX];
 
 void setup()
 {
-    resetStringAndState();
+    flushBuffersAndResetStates();
     saidConnected = false;
     
     Serial.begin(115200);
-    Serial.println("Powering up...");
+    Serial.println("Powering up Android connection...");
     acc.powerOn();
 
     Serial.println("Initializing other serial port...");    
     Serial1.begin(115200);
+    Serial1.print('\f');
     
     Serial.println("Waiting for Android device...");
 }
 
-void resetStringAndState()
+void flushBuffersAndResetStates()
+{  
+    flushIncomingMsgBuffer();
+    flushAndroidMsgBuffer();
+    flushTerminalMsgBuffer();
+    
+    resetAndroidState();
+    resetTerminalState();
+}
+
+void flushIncomingMsgBuffer()
 {
-    state = RECEIVING_FLAG;
-  
-    for(int i = 0; i < STRING_LENGTH; i++) {    
-        stringBuf[i] = 0; 
+    for(int i = 0; i < MSG_LENGTH_MAX; i++) {    
+        incomingMsgBuf[i] = 0; 
+    } 
+}
+
+void flushAndroidMsgBuffer()
+{
+    for(int i = 0; i < MSG_LENGTH_MAX; i++) {    
+        androidMsg[i] = 0; 
     }
-    curCharIndex = 0;
+    androidMsgLen = 0;
+}
+
+void flushTerminalMsgBuffer()
+{
+    for(int i = 0; i < MSG_LENGTH_MAX; i++) {    
+        terminalMsg[i] = 0; 
+    }
+    terminalMsgLen = 0;
+}
+
+void resetAndroidState()
+{
+    androidState = RECEIVING_FLAG;
+}
+
+void resetTerminalState()
+{
+    terminalState = RECEIVING_CHARS;
 }
 
 void loop()
@@ -67,24 +99,29 @@ void loop()
     {
         printConnectedMessage();
 
-	if(tryToReadMessageInto(msgBuf))
+        flushIncomingMsgBuffer();
+        byte msgLen = tryToReadAndroidMsgInto(incomingMsgBuf);
+	if(msgLen > 0)
         {
-            byte msg = msgBuf[0];
-            printReceivedMessage(msg);
-            if(testing)
+            for(int i = 0; i < msgLen; i++)
             {
-                printTestStatusCode();
+                byte msg = incomingMsgBuf[i];
+                runAndroidStateMachine((char)msg);
             }
-            
-            runStateMachine((char)msg);
         }
-    }
-    
-    byte msgLen = Serial.available();
-    
-    if(tryToReadSerialMessage())
-    {
-        printSerialMessageOut();
+        
+        flushIncomingMsgBuffer();
+        msgLen = tryToReadTerminalMsgInto(incomingMsgBuf);
+        if(msgLen > 0)
+        {
+            echoTerminalMessage(incomingMsgBuf, msgLen);
+            
+            for(int i = 0; i < msgLen; i++)
+            {
+                byte msg = incomingMsgBuf[i];
+                runTerminalStateMachine((char)msg);
+            }
+        }
     }
 }
 
@@ -92,117 +129,84 @@ void printConnectedMessage()
 {
     if(!saidConnected)
     {
-        Serial.println();
-        Serial.println("Connected!");
-        Serial.println();
+        Serial.print("\n\rConnected! Communications ready on the terminal\n\n\r");
+        
+        Serial1.print("Android device connected, monitoring for messages\n\r");
+        Serial1.print("To send messages, type a line, then press enter.\n\n\r");
+        
         saidConnected = true;
     }
 }
 
-boolean tryToReadMessageInto(byte msgBuffer[])
+byte tryToReadAndroidMsgInto(byte msgBuf[])
 {
-    int len = acc.read(msgBuffer, sizeof(msgBuffer), 1);
-    return (len >= 1);
+    int len = acc.read(msgBuf, sizeof(msgBuf), 14000);
+    return len;
 }
 
-boolean tryToReadSerialMessage()
+byte tryToReadTerminalMsgInto(byte msgBuf[])
 {
-    serialMsgLen = Serial.available();
+    byte msgLen = Serial1.available();
     
-    for(int i = 0; i < serialMsgLen && i < STRING_LENGTH; i++)
+    for(int i = 0; i < msgLen && i < MSG_LENGTH_MAX; i++)
     {
-        serialMsg[i] = Serial.read();
-    } 
-}
-
-void printSerialMessageOut()
-{
-    for(int i = serialMsgLen - 1; i >= 0; i--)
-    {
-        Serial.print(serialMsg[i]);
+        msgBuf[i] = Serial1.read();
     }
-  
-    Serial.println();
+   
+    return msgLen; 
 }
 
-void printReceivedMessage(byte msg)
+void echoTerminalMessage(byte msgBuf[], byte msgLen)
 {
-    Serial.print("Recieved ");
-    Serial.print(msg);
-    Serial.println(" from Android device");
+    for(int i = 0; i < msgLen; i++)
+    {
+        if((char)msgBuf[i] == '\r')
+        {
+             Serial1.print('\n');
+        }
+        
+        Serial1.print((char)msgBuf[i]);
+    }
 }
 
-void printTestStatusCode()
+void runAndroidStateMachine(char letter)
 {
-    byte msgBuffer[] = {'T', testingCode};
-    acc.write(msgBuffer, sizeof(msgBuffer));
-}
-
-void runStateMachine(char letter)
-{
-    testingCode = TESTING_CODE_WORKING;
-    switch(state)
+    switch(androidState)
     {
         case RECEIVING_FLAG:
-            if(isTestingFlag(letter))
-            {
-                state = RECEIVING_TESTING_VALUE;
-            }
             if(isLetterStringFlag(letter))
             {
-                state = RECEIVING_STRING_CHAR;
+                androidState = RECEIVING_STRING_CHAR;
             }
             else if(isLetterEndFlag(letter))
             {
-                state = RECEIVING_END_CODE;
+                androidState = RECEIVING_END_CODE;
             }
-            break;
-        case RECEIVING_TESTING_VALUE:
-            setTestingVal(letter);
-            state = RECEIVING_FLAG;
             break;
         case RECEIVING_STRING_CHAR:
             if(!isLetterEndCode(letter))
             {
-                state = RECEIVING_FLAG;
-                appendLetterOnString(letter);
+                resetAndroidState();
+                appendLetterOnAndroidMsg(letter);
             }
             else
             {
-                stopAndSendString();
+                stopAndSendAndroidMsg();
             }
             break;
         case RECEIVING_END_CODE:
             if(isLetterEndCode(letter))
             {
-                stopAndSendString();
+                stopAndSendAndroidMsg();
             }
             else
             {
-                state = RECEIVING_FLAG;
+                resetAndroidState();
                 Serial.println("WARNING: Received null flag, but did not receive null value. Continuing string read.");
-                testingCode = TESTING_CODE_FAILURE;
             }
         default:
-          state = RECEIVING_FLAG;
+          resetAndroidState();
           break;
-    }
-}
-
-boolean isTestingFlag(char letter)
-{
-    return (letter == 'T');
-}
-
-void setTestingVal(char letter)
-{
-    if(letter == 1)
-    {
-        testing = true;
-    }
-    else
-    {
-        testing = false;
     }
 }
 
@@ -222,32 +226,95 @@ boolean isLetterEndCode(char letter)
     return (charNum == STRING_END); 
 }
 
-void appendLetterOnString(char letter)
+void appendLetterOnAndroidMsg(char letter)
 {
-    if(curCharIndex < STRING_LENGTH)
+    if(androidMsgLen < MSG_LENGTH_MAX)
     {
-        stringBuf[curCharIndex] = letter;
-        curCharIndex++;
+        androidMsg[androidMsgLen] = letter;
+        androidMsgLen++;
     }
 }
 
-void stopAndSendString()
+void stopAndSendAndroidMsg()
 {
-    state = RECEIVING_FLAG;
-    Serial.println("String terminated, reversing and sending...");
-    reverseAndSendString();
-    resetStringAndState();
+    Serial.println("Android sent string, printing it to terminal");
+    
+    sendAndroidMsgToTerminal();
+    
+    flushAndroidMsgBuffer();
+    resetAndroidState();
+    
     Serial.println();
 }
 
-void reverseAndSendString()
+void sendAndroidMsgToTerminal()
 {
-    for(int i = curCharIndex - 1; i >= 0; i--)
+    Serial1.println("Android sent:");
+    
+    for(int i = 0; i < androidMsgLen; i++)
     {
-        Serial1.print(stringBuf[i]);
+        Serial1.print(androidMsg[i]);
     }
   
-    Serial1.println();
-    testingCode = TESTING_CODE_SUCCESS;
+    Serial1.print("\n\n\r");
+}
+
+void runTerminalStateMachine(char letter)
+{
+    switch(terminalState)
+    {
+        case RECEIVING_CHARS:
+            if((byte)letter == RETURN_CHAR)
+            {
+                stopAndSendTerminalMsg(); 
+            } else {
+                appendLetterOnTerminalMsg(letter);
+            }
+            break;
+        default:
+            resetTerminalState();
+            break;   
+    }
+}
+
+void appendLetterOnTerminalMsg(char letter)
+{
+    if(terminalMsgLen < MSG_LENGTH_MAX)
+    {
+        terminalMsg[terminalMsgLen] = letter;
+        terminalMsgLen++;
+    }
+}
+
+void stopAndSendTerminalMsg()
+{
+    Serial.println("Received string from terminal, sending it to Android");
+    
+    sendTerminalMsgToAndroid();
+    flushTerminalMsgBuffer();
+    resetTerminalState(); 
+    
+    Serial.println();
+}
+
+void sendTerminalMsgToAndroid()
+{
+    byte flagBuf[] = {'S'};
+    byte msgBuf[1];
+    
+    for(int i = 0; i < terminalMsgLen; i++)
+    {
+        acc.write(flagBuf, 1);
+        
+        msgBuf[0] = (byte)terminalMsg[i];
+        acc.write(msgBuf, 1);       
+    }
+    
+    //Send a null character to terminate the string
+    flagBuf[0] = 'N';
+    acc.write(flagBuf, 1);
+    
+    msgBuf[0] = 0;
+    acc.write(msgBuf, 1);
 }
 
