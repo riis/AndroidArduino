@@ -248,7 +248,7 @@ void stopAndSendAndroidMsg()
 
 void sendAndroidMsgToTerminal()
 {
-    Serial1.print("Android sent:");
+    Serial1.print("Android sent: ");
     
     for(int i = 0; i < androidMsgLen; i++)
     {
@@ -296,22 +296,15 @@ void stopAndSendTerminalMsg()
 
 void sendTerminalMsgToAndroid()
 {
-    byte flagBuf[] = {'S'};
-    byte msgBuf[1];
-    
-    for(int i = 0; i < terminalMsgLen; i++)
-    {
-        acc.write(flagBuf, 1);
-        
-        msgBuf[0] = (byte)terminalMsg[i];
-        acc.write(msgBuf, 1);       
+    int msgSize = terminalMsgLen*2+2;
+    byte msgBuf[msgSize];
+    for(int i = 0; i < msgSize-2; i += 2) {
+        msgBuf[i] = (byte)'S';
+        msgBuf[i+1] = terminalMsg[i/2];
     }
+    msgBuf[msgSize-2] = 'N';    
+    msgBuf[msgSize-1] = 0;
     
-    //Send a null character to terminate the string
-    flagBuf[0] = 'N';
-    acc.write(flagBuf, 1);
-    
-    msgBuf[0] = 0;
-    acc.write(msgBuf, 1);
+    acc.write(msgBuf, msgSize);
 }
 

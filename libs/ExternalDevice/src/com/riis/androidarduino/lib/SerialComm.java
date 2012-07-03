@@ -12,6 +12,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.widget.Toast;
 
 public abstract class SerialComm implements Communication, Runnable {
 	protected boolean shouldLog;
@@ -95,6 +96,10 @@ public abstract class SerialComm implements Communication, Runnable {
 		}
 	}
 	
+	public FlagMsg peekAtMessage() {
+		return inputBuffer.peek();
+	}
+	
 	protected void checkAndHandleMessages(byte[] buffer) throws IOException {
 		if(inputStream == null) {
 			return;
@@ -105,9 +110,9 @@ public abstract class SerialComm implements Communication, Runnable {
 
 		for(int i = 0; i < msgLen; i += 2) {
 			int len = msgLen - i;
-			if (len >= 2) {
+			if(len >= 2) {
 				Message msg = Message.obtain(handler);
-				msg.obj = new FlagMsg((char)buffer[0], buffer[1]);
+				msg.obj = new FlagMsg((char)buffer[i], buffer[i+1]);
 				handler.sendMessage(msg);
 			}
 		}

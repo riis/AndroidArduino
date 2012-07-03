@@ -1,5 +1,7 @@
 package com.riis.androidarduino.rs232;
 
+import java.util.Queue;
+
 import com.riis.androidarduino.lib.FlagMsg;
 import com.riis.androidarduino.lib.UsbComm;
 
@@ -60,14 +62,16 @@ public class MainActivity extends Activity {
 					
 					String newMsg = "UsbHost: ";
 		        	while(usbComm.hasNewMessages()) {
-		        		if(usbComm.readMessage().getReading() != 0) {
-		        			newMsg += Integer.toString(usbComm.readMessage().getReading());
+		        		FlagMsg msg = usbComm.readMessage();
+		        		if(msg.getFlag() != 'N') {
+		        			newMsg += (char)msg.getValue();
 		        		}
 		        		else {
-		        			appendMsgToMsgLog(newMsg);
+				        	appendMsgToMsgLog(newMsg);
 		        			break;
 		        		}
 		        	}
+		        	
 		        } else {
 		        	if(lastStatus) {
 						lastStatus = false;
@@ -90,10 +94,15 @@ public class MainActivity extends Activity {
         setContentView(R.layout.main);
         
         usbComm = new UsbComm(this);
+        usbComm.shouldPrintLogMsgs(true);
+//        usbComm.shouldDisplayToastMsgs(true);
+        
         keepRunning = true;
         displayedStatus = false;
         lastStatus = false;
+        
         setUpGUI();
+        
         msgThread = new Thread(msgUpdateThread);
     }
     
@@ -176,7 +185,11 @@ public class MainActivity extends Activity {
 	public void onResume() {
 		Log.v("Arduino App", "Resuming");
 		keepRunning = true;
-		msgThread.start();
+		
+		if(!msgThread.isAlive()) {
+			msgThread.start();
+		}
+		
 		super.onResume();
 		usbComm.resumeConnection();
 	}
