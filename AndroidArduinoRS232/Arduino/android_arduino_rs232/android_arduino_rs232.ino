@@ -46,6 +46,7 @@ void setup()
     Serial.println("Initializing other serial port...");    
     Serial1.begin(115200);
     Serial1.print('\f');
+    Serial1.print("Waiting for Android device...\n\r");
     
     Serial.println("Waiting for Android device...");
 }
@@ -243,20 +244,18 @@ void stopAndSendAndroidMsg()
     
     flushAndroidMsgBuffer();
     resetAndroidState();
-    
-    Serial.println();
 }
 
 void sendAndroidMsgToTerminal()
 {
-    Serial1.println("Android sent:");
+    Serial1.print("Android sent:");
     
     for(int i = 0; i < androidMsgLen; i++)
     {
         Serial1.print(androidMsg[i]);
     }
   
-    Serial1.print("\n\n\r");
+    Serial1.print("\n\r");
 }
 
 void runTerminalStateMachine(char letter)
@@ -293,8 +292,6 @@ void stopAndSendTerminalMsg()
     sendTerminalMsgToAndroid();
     flushTerminalMsgBuffer();
     resetTerminalState(); 
-    
-    Serial.println();
 }
 
 void sendTerminalMsgToAndroid()
