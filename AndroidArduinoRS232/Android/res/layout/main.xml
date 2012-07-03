@@ -5,11 +5,12 @@
     android:orientation="vertical" >
 
     <TextView
-        android:id="@+id/messageLabel"
+        android:id="@+id/messageLog"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:textSize="20dp"
-        android:text="Enter a message to send to the Arduino." />
+        android:background="#FFFFFF"
+        android:text="" />
     
     <EditText
 	        android:id="@+id/messageBox"
@@ -25,5 +26,8 @@
 	        android:hapticFeedbackEnabled="true"
 	        android:padding="20dp"
 	        android:text="Send" />
+
+        <requestFocus />
+    </EditText>
 
 </LinearLayout>
