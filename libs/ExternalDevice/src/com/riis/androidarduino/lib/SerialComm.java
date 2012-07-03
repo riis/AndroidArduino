@@ -46,7 +46,7 @@ public abstract class SerialComm implements Communication, Runnable {
 				FlagMsg message = (FlagMsg) msg.obj;
 				inputBuffer.add(message);
 				
-				log("Message received: " + message.getFlag() + " " + message.getReading());
+				log("Message received: " + message.getFlag() + " " + message.getValue());
 			}
 		};
 	}

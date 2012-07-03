@@ -4,30 +4,50 @@
     android:layout_height="fill_parent"
     android:orientation="vertical" >
 
-    <TextView
-        android:id="@+id/messageLog"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:textSize="20dp"
-        android:background="#FFFFFF"
-        android:text="" />
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:layout_weight="1" >
+    	<ScrollView 
+    	    android:id="@+id/scrollView"
+	        android:layout_width="fill_parent" 
+	        android:layout_height="fill_parent"
+	        android:layout_alignParentRight="true"
+	        android:layout_alignParentLeft="true">
+    	    <TextView
+		        android:id="@+id/messageLog"
+		        android:layout_width="fill_parent"
+		        android:layout_height="fill_parent"
+		        android:textSize="20dp"
+		        android:background="#FFFFFF"
+		        android:textColor="#000000"
+		        android:scrollbars = "vertical"/>
+    	</ScrollView>
+	    
+    </LinearLayout>
     
-    <EditText
-	        android:id="@+id/messageBox"
-	        android:layout_width="fill_parent"
-	        android:layout_height="wrap_content"
-	        android:layout_margin="5dp"
-	        android:hint="Message..." />
-    
-    <Button
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="horizontal"
+    android:layout_weight="1"  >
+
+        <EditText
+            android:id="@+id/messageBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="Message..." />
+
+	    <Button
 	        android:id="@+id/sendButton"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:hapticFeedbackEnabled="true"
-	        android:padding="20dp"
 	        android:text="Send" />
 
-        <requestFocus />
-    </EditText>
+	</LinearLayout>
+    <requestFocus />
 
 </LinearLayout>
