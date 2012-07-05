@@ -17,7 +17,7 @@ import com.android.future.usb.UsbAccessory;
 import com.android.future.usb.UsbManager;
 
 public class UsbComm extends SerialComm {
-	public static final String ACTION_USB_PERMISSION = "com.google.android.DemoKit.action.USB_PERMISSION";
+	public static final String ACTION_USB_PERMISSION = "com.riis.androidarduino.rs232.action.USB_PERMISSION";
 	
 	private BroadcastReceiver usbBroadcastReceiver;
 	private UsbManager manager;
@@ -31,6 +31,9 @@ public class UsbComm extends SerialComm {
 		setupBroadcastReceiver();
 		accessory = (UsbAccessory) parentActivity.getLastNonConfigurationInstance();
 		connect();
+		
+		Thread inputThread = new Thread(this, "UsbComm");
+		inputThread.start();
 	}
 	
 	private void setupBroadcastReceiver() {
@@ -65,7 +68,7 @@ public class UsbComm extends SerialComm {
 		registerReceiver();
 
 		if (accessory != null) {
-			openAccessory(accessory);
+			isConnected = openAccessory(accessory);
 		}
 	}
 	
@@ -75,7 +78,7 @@ public class UsbComm extends SerialComm {
 		context.registerReceiver(usbBroadcastReceiver, filter);
 	}
 	
-	private void openAccessory(UsbAccessory accessory) {
+	private boolean openAccessory(UsbAccessory accessory) {
 		fileDescriptor = manager.openAccessory(accessory);
 		if (fileDescriptor != null) {
 			this.accessory = accessory;
@@ -84,14 +87,11 @@ public class UsbComm extends SerialComm {
 			inputStream = new FileInputStream(fd);
 			outputStream = new FileOutputStream(fd);
 			
-			Thread thread = new Thread(null, this, "UsbCommWrapperLoop");
-			thread.start();
-			
-			isConnected = true;
-			
 			log("Accessory attached");
+			return true;
 		} else {
 			log("Accessory open failed");
+			return false;
 		}
 	}
 	
@@ -100,11 +100,11 @@ public class UsbComm extends SerialComm {
 		try {
 			if (fileDescriptor != null) {
 				fileDescriptor.close();
-				isConnected = false;
 				log("Accessory detached");
 			}
 		} catch (IOException e) {
 		} finally {
+			isConnected = false;
 			fileDescriptor = null;
 			accessory = null;
 		}
@@ -117,7 +117,6 @@ public class UsbComm extends SerialComm {
 	
 	public void resumeConnection() {
 		registerReceiver();
-		
 		if (inputStream != null && outputStream != null) {
 			log("Resuming: streams were not null");
 			return;
@@ -127,7 +126,7 @@ public class UsbComm extends SerialComm {
 		UsbAccessory accessory = (accessories == null ? null : accessories[0]);
 		if (accessory != null) {
 			if (manager.hasPermission(accessory)) {
-				openAccessory(accessory);
+				isConnected = openAccessory(accessory);
 			} else {
 				synchronized (usbBroadcastReceiver) {
 					if (!permissionRequestPending) {
@@ -147,8 +146,9 @@ public class UsbComm extends SerialComm {
 		while (true) { // keep reading messages forever.
 			try {
 				checkAndHandleMessages(buffer);
-			} catch (IOException e) {
-				break;
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
 		}
 	}

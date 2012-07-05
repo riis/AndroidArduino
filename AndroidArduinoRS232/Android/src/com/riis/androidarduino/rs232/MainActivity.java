@@ -1,7 +1,5 @@
 package com.riis.androidarduino.rs232;
 
-import java.util.Queue;
-
 import com.riis.androidarduino.lib.FlagMsg;
 import com.riis.androidarduino.lib.UsbComm;
 

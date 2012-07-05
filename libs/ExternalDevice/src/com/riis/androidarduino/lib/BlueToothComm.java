@@ -21,6 +21,9 @@ public class BlueToothComm extends SerialComm implements Runnable {
 		super(parentActivity);
 		this.deviceName = deviceName;
 		connect();
+		
+		Thread inputThread = new Thread(this, "BlueToothComm");
+		inputThread.start();
 	}
 	
 	@Override
@@ -84,10 +87,6 @@ public class BlueToothComm extends SerialComm implements Runnable {
 		isConnected = false;
 		Toast.makeText(context, "Disconnected!", Toast.LENGTH_SHORT).show();
 	}
-	
-	public Handler getInputHandler() {
-		return handler;
-	}
 
 	@Override
 	public void run() {
@@ -96,8 +95,10 @@ public class BlueToothComm extends SerialComm implements Runnable {
 		while (true) { // keep reading messages forever.
 			try {
 				checkAndHandleMessages(buffer);
-			} catch (IOException e) {
-
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 	}

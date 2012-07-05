@@ -3,27 +3,21 @@ package com.riis.androidarduino.lib;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.LinkedList;
-import java.util.NoSuchElementException;
-import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import android.app.Activity;
 import android.content.Context;
-import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
-import android.widget.Toast;
 
 public abstract class SerialComm implements Communication, Runnable {
 	protected boolean shouldLog;
 	
-	protected Queue<FlagMsg> inputBuffer;
+	protected LinkedBlockingQueue<FlagMsg> inputBuffer;
 	
 	protected InputStream inputStream;
 	protected OutputStream outputStream;
 	
 	protected Context context;
-	protected Handler handler;
 	
 	protected boolean isConnected;
 	
@@ -33,23 +27,7 @@ public abstract class SerialComm implements Communication, Runnable {
 		shouldLog = false;
 		isConnected = false;
 		
-		inputBuffer = new LinkedList<FlagMsg>();
-		
-		setupHandler();
-		
-		Thread inputThread = new Thread(this);
-		inputThread.start();
-	}
-	
-	protected void setupHandler() {
-		handler = new Handler() {
-			public void handleMessage(Message msg) {
-				FlagMsg message = (FlagMsg) msg.obj;
-				inputBuffer.add(message);
-				
-				log("Message received: " + message.getFlag() + " " + message.getValue());
-			}
-		};
+		inputBuffer = new LinkedBlockingQueue<FlagMsg>();
 	}
 	
 	public void sendString(String str) {
@@ -69,51 +47,55 @@ public abstract class SerialComm implements Communication, Runnable {
 	}
 	
 	public void sendByte(byte value) {
-		byte buffer[] = new byte[1];
-		buffer[0] = value;
-		
 		if (outputStream != null) {
 			try {
-				outputStream.write(buffer);
+				outputStream.write(new byte[] {value});
 			} catch (IOException e) {
+				isConnected = false;
 				log("Send failed: " + e.getMessage());
 			}
 		}
 		else {
+			isConnected = false;
 			log("Send failed: outputStream was null");
 		}
+	}
+	
+	public void clearMessages() {
+		inputBuffer.clear();
 	}
 	
 	public boolean hasNewMessages() {
 		return !inputBuffer.isEmpty();
 	}
 	
-	public FlagMsg readMessage() throws NoSuchElementException {
-		try {
-			return inputBuffer.remove();
-		} catch (NoSuchElementException e) {
-			throw e;
-		}
+	public FlagMsg readMessage() {
+		return inputBuffer.poll();
 	}
 	
 	public FlagMsg peekAtMessage() {
 		return inputBuffer.peek();
 	}
 	
-	protected void checkAndHandleMessages(byte[] buffer) throws IOException {
-		if(inputStream == null) {
+	protected void checkAndHandleMessages(byte[] buffer) {
+		int msgLen = 0;
+		try {
+			msgLen = inputStream.read(buffer);
+		} catch (IOException e) {
+			isConnected = false;
+			log("InputStream error");
 			return;
 		}
-		
-		int msgLen = 0;
-		msgLen = inputStream.read(buffer);
 
 		for(int i = 0; i < msgLen; i += 2) {
 			int len = msgLen - i;
 			if(len >= 2) {
-				Message msg = Message.obtain(handler);
-				msg.obj = new FlagMsg((char)buffer[i], buffer[i+1]);
-				handler.sendMessage(msg);
+				try {
+					inputBuffer.put(new FlagMsg((char)buffer[i], buffer[i+1]));
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 	}
