@@ -1,6 +1,7 @@
 package com.riis.androidarduino.lib;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.Set;
 import java.util.UUID;
 
@@ -31,7 +32,7 @@ public class BlueToothComm extends SerialComm implements Runnable {
 		findDevice(deviceName);
 		connectSocket();
 		
-		if(socket != null && socket.isConnected()) {
+		if(socket != null) {
 			isConnected = true;
 			Toast.makeText(context, "Connected!", Toast.LENGTH_SHORT).show();
 		}
@@ -69,6 +70,9 @@ public class BlueToothComm extends SerialComm implements Runnable {
 	
 	private void connectSocket() {
 		try {
+			Method m = device.getClass().getMethod("createRfcommSocket", new Class[] {int.class});
+			
+			socket = (BluetoothSocket) m.invoke(device, 1);
 			socket = device.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"));			
 			socket.connect();
 		
