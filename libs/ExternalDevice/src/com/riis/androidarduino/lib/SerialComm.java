@@ -85,6 +85,9 @@ public abstract class SerialComm implements Communication, Runnable {
 			isConnected = false;
 			log("InputStream error");
 			return;
+		} catch (NullPointerException e) {
+			isConnected = false;
+			return;
 		}
 
 		for(int i = 0; i < msgLen; i += 2) {

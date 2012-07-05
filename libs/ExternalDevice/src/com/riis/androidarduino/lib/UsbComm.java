@@ -25,15 +25,13 @@ public class UsbComm extends SerialComm {
 	private ParcelFileDescriptor fileDescriptor;
 	private PendingIntent permissionIntent;
 	private boolean permissionRequestPending;
+	private Thread inputThread;
 	
 	public UsbComm(Activity parentActivity) {
 		super(parentActivity);
 		setupBroadcastReceiver();
 		accessory = (UsbAccessory) parentActivity.getLastNonConfigurationInstance();
 		connect();
-		
-		Thread inputThread = new Thread(this, "UsbComm");
-		inputThread.start();
 	}
 	
 	private void setupBroadcastReceiver() {
@@ -41,6 +39,7 @@ public class UsbComm extends SerialComm {
 			@Override
 			public void onReceive(Context context, Intent intent) {
 				String action = intent.getAction();
+				log("ALL UP IN HURRRRR: " + action);
 				if (ACTION_USB_PERMISSION.equals(action)) {
 					synchronized (this) {
 						UsbAccessory accessory = UsbManager.getAccessory(intent);
@@ -70,6 +69,9 @@ public class UsbComm extends SerialComm {
 		if (accessory != null) {
 			isConnected = openAccessory(accessory);
 		}
+		
+		inputThread = new Thread(this, "UsbComm");
+		inputThread.start();
 	}
 	
 	private void registerReceiver() {
@@ -99,15 +101,21 @@ public class UsbComm extends SerialComm {
 	public void disconnect() {
 		try {
 			if (fileDescriptor != null) {
-				fileDescriptor.close();
+				fileDescriptor.close();				
 				log("Accessory detached");
 			}
+			
+			inputStream.close();
+			outputStream.close();
 		} catch (IOException e) {
 		} finally {
 			isConnected = false;
 			fileDescriptor = null;
 			accessory = null;
 		}
+		
+		permissionIntent = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION), 0);
+		registerReceiver();
 	}
 	
 	public void pauseConnection() {

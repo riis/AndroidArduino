@@ -69,7 +69,6 @@ public class MainActivity extends Activity {
 		        			break;
 		        		}
 		        	}
-		        	
 		        } else {
 		        	if(lastStatus) {
 						lastStatus = false;
@@ -93,15 +92,12 @@ public class MainActivity extends Activity {
         
         usbComm = new UsbComm(this);
         usbComm.shouldPrintLogMsgs(true);
-//        usbComm.shouldDisplayToastMsgs(true);
         
         keepRunning = true;
         displayedStatus = false;
         lastStatus = false;
         
         setUpGUI();
-        
-        msgThread = new Thread(msgUpdateThread);
     }
     
     private void setUpGUI() {
@@ -167,28 +163,17 @@ public class MainActivity extends Activity {
     	    		}
     	    	);
     }
-    
-	@Override
-	public Object onRetainNonConfigurationInstance() {
-		// In case the app is restarted, try to retain the usb accessory object
-		// so that the connection to the device is not lost.
-		if (usbComm.getAccessory() != null) {
-			return usbComm.getAccessory();
-		} else {
-			return super.onRetainNonConfigurationInstance();
-		}
-	}
 	
 	@Override
 	public void onResume() {
+		super.onResume();
+		
 		Log.v("Arduino App", "Resuming");
 		keepRunning = true;
+
+		msgThread = new Thread(msgUpdateThread);
+		msgThread.start();
 		
-		if(!msgThread.isAlive()) {
-			msgThread.start();
-		}
-		
-		super.onResume();
 		usbComm.resumeConnection();
 	}
 
