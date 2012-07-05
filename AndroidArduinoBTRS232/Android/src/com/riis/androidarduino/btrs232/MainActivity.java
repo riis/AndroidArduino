@@ -2,13 +2,25 @@ package com.riis.androidarduino.btrs232;
 
 import com.riis.androidarduino.btrs232.R;
 import com.riis.androidarduino.lib.BlueToothComm;
+import com.riis.androidarduino.lib.FlagMsg;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.text.InputType;
+import android.text.method.ScrollingMovementMethod;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ScrollView;
+import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 
 public class MainActivity extends Activity {
 	private static String DEVICE_NAME = "AndroidArduinoBTRS232";
@@ -16,61 +28,86 @@ public class MainActivity extends Activity {
 	private Button connectButton;
 	private Button disconnectButton;
 	
+	private ScrollView scrollContainer;
+	private TextView msgLog;
 	private EditText msgBox;
 	private Button sendMsgButton;
+	
+	private volatile boolean keepRunning;
+	private boolean displayedStatus;
+	private boolean lastStatus;
+	private Thread msgThread;
+	
+	protected Handler handler;
 
 	private BlueToothComm btComm;
+	
+	private Runnable msgUpdateThread = new Runnable() { 
+		public void run() {
+			while(keepRunning) {
+				if(!displayedStatus) {
+					if(btComm.isConnected()) {
+						appendMsgToMsgLog("Usb Connected!");
+					}
+					else {
+						appendMsgToMsgLog("Usb disconnected!");
+						appendMsgToMsgLog("Waiting for USB device...");
+					}
+					displayedStatus = true;
+				}
+				
+				if(btComm.isConnected()) {
+					if(!lastStatus) {
+						lastStatus = true;
+						displayedStatus = false;
+					}
+					
+					String newMsg = "UsbHost: ";
+		        	while(btComm.hasNewMessages()) {
+		        		FlagMsg msg = btComm.readMessage();
+		        		if(msg.getFlag() != 'N') {
+		        			newMsg += (char)msg.getValue();
+		        		}
+		        		else {
+				        	appendMsgToMsgLog(newMsg);
+		        			break;
+		        		}
+		        	}
+		        	
+		        } else {
+		        	if(lastStatus) {
+						lastStatus = false;
+						displayedStatus = false;
+					}
+		        }
+				
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	};
 	
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        
+        keepRunning = true;
+        displayedStatus = false;
+        lastStatus = false;
         setUpGUI();
     }
     
     private void setUpGUI() {
     	setUpConnectButton();
     	setUpDisconnectButton();
+    	setupHandler();
+    	setupMsgLog();
     	setupMsgBox();
     	setupSendMsgButton();
-	}
-    
-    private void setupMsgBox() {
-    	msgBox = (EditText) findViewById(R.id.messageBox);
-    }
-    
-    private void setupSendMsgButton() {
-    	sendMsgButton = (Button) findViewById(R.id.sendButton);
-    	sendMsgButton.setOnClickListener(
-    	    		new OnClickListener() {
-    					public void onClick(View v) {
-    						//btComm.sendString(msgBox.getText().toString());
-    						btComm.sendByteWithFlag('T', (byte) 1);
-    						msgBox.setText("");
-    					}
-    	    		}
-    	    	);
-    }
-    
-    @Override
-	public void onResume() {
-		super.onResume();
-		
-		if(btComm == null) {
-			btComm = new BlueToothComm(this, DEVICE_NAME);
-		} else {
-			btComm.resumeConnection();
-		}
-		
-		btComm.shouldPrintLogMsgs(true);
-	}
-	
-	@Override
-	public void onPause() {
-		super.onPause();
-		btComm.pauseConnection();
 	}
     
     private void setUpConnectButton() {
@@ -94,6 +131,87 @@ public class MainActivity extends Activity {
     		}
     	);
     }
+    
+    private void setupHandler() {
+		handler = new Handler() {
+			public void handleMessage(Message msg) {
+		    	msgLog.append((String) msg.obj + "\n");
+		    	scrollContainer.fullScroll(View.FOCUS_DOWN);
+			}
+		};
+	}
+    
+    private void setupMsgLog() {
+    	scrollContainer = (ScrollView)findViewById(R.id.scrollView);
+    	msgLog = (TextView) findViewById(R.id.messageLog);
+    	msgLog.append("Android Service Init...\n");
+    	msgLog.setMovementMethod(new ScrollingMovementMethod());
+    }
+    
+    private void setupMsgBox() {
+    	msgBox = (EditText) findViewById(R.id.messageBox);
+    	msgBox.setInputType(InputType.TYPE_TEXT_VARIATION_SHORT_MESSAGE);
+    	msgBox.setImeOptions(EditorInfo.IME_ACTION_SEND);
+    	msgBox.setOnEditorActionListener(new OnEditorActionListener() {
+    	    @Override
+    	    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+    	        if (actionId == EditorInfo.IME_ACTION_SEND) {
+    	            sendMessage();
+    	            InputMethodManager inputManager =  (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+    	            inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+    	            return true;
+    	        }
+    	        return false;
+    	    }
+    	});
+    }
+    
+    private void sendMessage() {
+    	appendMsgToMsgLog("Me: " + msgBox.getText().toString());
+		btComm.sendString(msgBox.getText().toString());
+		msgBox.setText("");
+    }
+    
+    private void appendMsgToMsgLog(String str) {
+		Message msg = Message.obtain(handler);
+		msg.obj = str;
+		handler.sendMessage(msg);
+    }
+    
+    private void setupSendMsgButton() {
+    	sendMsgButton = (Button) findViewById(R.id.sendButton);
+    	sendMsgButton.setOnClickListener(
+    	    		new OnClickListener() {
+    					public void onClick(View v) {
+    						sendMessage();
+    					}
+    	    		}
+    	    	);
+    }
+    
+    @Override
+	public void onResume() {
+		super.onResume();
+		
+		if(btComm == null) {
+			btComm = new BlueToothComm(this, DEVICE_NAME);
+		} else {
+			btComm.resumeConnection();
+		}
+		
+		btComm.shouldPrintLogMsgs(true);
+		msgThread = new Thread(msgUpdateThread);
+		msgThread.start();
+	}
+	
+	@Override
+	public void onPause() {
+		super.onPause();
+		keepRunning = false;
+		btComm.pauseConnection();
+	}
+    
+    
     
     public BlueToothComm getBlueToothComm() {
     	return btComm;

@@ -62,6 +62,9 @@ public class BlueToothComm extends SerialComm implements Runnable {
 	    		Toast.makeText(context, "Couldn't find device, is it paired?", Toast.LENGTH_SHORT).show();
 		    }
 		}
+    	else {
+    		Toast.makeText(context, "Couldn't find any Bluetooth devices.", Toast.LENGTH_SHORT).show();
+    	}
 	}
 	
 	private void connectSocket() {
@@ -79,9 +82,12 @@ public class BlueToothComm extends SerialComm implements Runnable {
 	
 	public void disconnect() {
 		try {
-			socket.close();
-			inputStream.close();
-			outputStream.close();
+			if(socket != null)
+				socket.close();
+			if(inputStream != null)
+				inputStream.close();
+			if(outputStream != null)
+				outputStream.close();
 		} catch (Exception e) { }
 		
 		isConnected = false;
@@ -93,20 +99,13 @@ public class BlueToothComm extends SerialComm implements Runnable {
 		byte[] buffer = new byte[256];
 
 		while (true) { // keep reading messages forever.
-			try {
-				checkAndHandleMessages(buffer);
-				Thread.sleep(10);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			checkAndHandleMessages(buffer);
 		}
 	}
 
 	@Override
 	public void pauseConnection() {
 		disconnect();
-		
 	}
 
 	@Override
