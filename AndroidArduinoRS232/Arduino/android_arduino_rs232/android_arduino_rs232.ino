@@ -24,7 +24,7 @@ AndroidAccessory acc("RIIS",
 int androidState;
 int terminalState;
 
-boolean saidConnected;
+boolean lastConnectionState; //True for connected and false for disconnected
 
 byte incomingMsgBuf[MSG_LENGTH_MAX];
 
@@ -37,7 +37,7 @@ char androidMsg[MSG_LENGTH_MAX];
 void setup()
 {
     flushBuffersAndResetStates();
-    saidConnected = false;
+    lastConnectionState = false;
     
     Serial.begin(115200);
     Serial.println("Powering up Android connection...");
@@ -48,7 +48,7 @@ void setup()
     Serial1.print('\f');
     Serial1.print("Waiting for Android device...\n\r");
     
-    Serial.println("Waiting for Android device...");
+    Serial.print("Waiting for Android device...\n\r");
 }
 
 void flushBuffersAndResetStates()
@@ -98,7 +98,11 @@ void loop()
 {
     if(acc.isConnected())
     {
-        printConnectedMessage();
+        if(!lastConnectionState)
+        {
+            printConnectedMessage();
+            lastConnectionState = true;
+        }
 
         flushIncomingMsgBuffer();
         byte msgLen = tryToReadAndroidMsgInto(incomingMsgBuf);
@@ -124,19 +128,36 @@ void loop()
             }
         }
     }
+    else
+    {
+        if(lastConnectionState)
+        {
+            disconnectAndPrintMessage();
+            lastConnectionState = false;
+        }   
+    }
 }
 
 void printConnectedMessage()
 {
-    if(!saidConnected)
-    {
-        Serial.print("\n\rConnected! Communications ready on the terminal\n\n\r");
-        
-        Serial1.print("Android device connected, monitoring for messages\n\r");
-        Serial1.print("To send messages, type a line, then press enter.\n\n\r");
-        
-        saidConnected = true;
-    }
+    Serial.print("\n\rConnected! Communications ready on the terminal\n\n\r");
+    
+    Serial1.print('\f');
+    Serial1.print("Android device connected, monitoring for messages\n\r");
+    Serial1.print("To send messages, type a line, then press enter.\n\n\r");
+}
+
+void disconnectAndPrintMessage()
+{
+    Serial.print("Disconnected! Halting communications...");
+ 
+    Serial1.print('\f');
+    Serial1.print("The Android device was disconnected!");
+    Serial1.print("\n\rWaiting for Android device...");
+    
+    flushBuffersAndResetStates();
+    
+    Serial.print("\n\rWaiting for Android device...\n\r");
 }
 
 byte tryToReadAndroidMsgInto(byte msgBuf[])
