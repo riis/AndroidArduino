@@ -89,12 +89,17 @@ public abstract class SerialComm implements Communication, Runnable {
 			isConnected = false;
 			return;
 		}
+		
+		for(int i = 0; i < msgLen; i++) {
+			log("byte in: " + buffer[i]);
+		}
 
 		for(int i = 0; i < msgLen; i += 2) {
 			int len = msgLen - i;
 			if(len >= 2) {
 				try {
-					inputBuffer.put(new FlagMsg((char)buffer[i], buffer[i+1]));
+					FlagMsg test = new FlagMsg((char)buffer[i], buffer[i+1]);
+					inputBuffer.put(test);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

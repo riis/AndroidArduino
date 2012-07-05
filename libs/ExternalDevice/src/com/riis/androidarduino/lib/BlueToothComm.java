@@ -31,7 +31,7 @@ public class BlueToothComm extends SerialComm implements Runnable {
 		findDevice(deviceName);
 		connectSocket();
 		
-		if(socket != null && socket.isConnected()) {
+		if(socket != null) {
 			isConnected = true;
 			Toast.makeText(context, "Connected!", Toast.LENGTH_SHORT).show();
 		}

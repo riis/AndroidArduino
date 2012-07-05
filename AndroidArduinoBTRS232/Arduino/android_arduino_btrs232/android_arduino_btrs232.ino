@@ -345,18 +345,13 @@ void stopAndSendTerminalMsg()
 
 void sendTerminalMsgToBluetooth()
 {
-    int msgSize = terminalMsgLen*2+2;
-    byte msgBuf[msgSize];
+    bluetoothSerial.write((byte)'q');
     
-    for(int i = 0; i < msgSize-2; i += 2) {
-        msgBuf[i] = (byte)'S';
-        msgBuf[i+1] = terminalMsg[i/2];
+    for(int i = 0; i < terminalMsgLen; i++) {
+        bluetoothSerial.write((byte)'S');
+        bluetoothSerial.write((byte)terminalMsg[i]);
     }
-    msgBuf[msgSize-2] = 'N'; 
-    msgBuf[msgSize-1] = 0;
     
-    for(int i = 0; i < msgSize; i++)
-    {
-        bluetoothSerial.write(msgBuf[i]);
-    }
+    bluetoothSerial.write((byte)'N'); 
+    bluetoothSerial.write((byte)0);
 }
