@@ -1,6 +1,5 @@
 package com.riis.androidarduino.lib;
 
-import java.io.IOException;
 import java.util.Set;
 import java.util.UUID;
 
@@ -8,7 +7,6 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.os.Handler;
 import android.widget.Toast;
 
 public class BlueToothComm extends SerialComm implements Runnable {
