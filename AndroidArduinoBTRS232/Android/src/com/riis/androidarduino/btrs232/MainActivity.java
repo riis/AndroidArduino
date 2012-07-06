@@ -50,23 +50,16 @@ public class MainActivity extends Activity {
 						appendMsgToMsgLog("Bluetooth Connected!");
 					}
 					
-					String newMsg = DEVICE_NAME + ": ";
-		        	while(btComm.hasNewMessages()) {
-		        		FlagMsg msg = btComm.readMessage();
-		        		if(msg.getFlag() != 'N') {
-		        			newMsg += (char)msg.getValue();
-		        		}
-		        		else {
-				        	appendMsgToMsgLog(newMsg);
-		        			break;
-		        		}
-		        	}
+					if(btComm.isMessageReady()) {
+						String newMsg = DEVICE_NAME + ": " + btComm.readMessage();
+						appendMsgToMsgLog(newMsg);
+					}
 		        	
 		        } else {
 		        	if(lastStatus) {
 						lastStatus = false;
 						appendMsgToMsgLog("Bluetooth Disconnected!");
-						appendMsgToMsgLog("Waiting for USB device...");
+						appendMsgToMsgLog("Waiting for Bluetooth connection...");
 					}
 		        }
 				
@@ -145,8 +138,8 @@ public class MainActivity extends Activity {
     	    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
     	        if (actionId == EditorInfo.IME_ACTION_SEND) {
     	            sendMessage();
-    	            InputMethodManager inputManager =  (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-    	            inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+    	            //InputMethodManager inputManager =  (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+    	            //inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
     	            return true;
     	        }
     	        return false;
