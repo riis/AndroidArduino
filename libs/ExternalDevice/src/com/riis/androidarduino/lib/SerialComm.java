@@ -90,9 +90,11 @@ public abstract class SerialComm implements Communication, Runnable {
 			return;
 		}
 		
+		log("Message start");
 		for(int i = 0; i < msgLen; i++) {
-			log("byte in: " + buffer[i]);
+			log("byte in: " + buffer[i] + " " + (char)buffer[i]);
 		}
+		log("Message end");
 
 		for(int i = 0; i < msgLen; i += 2) {
 			int len = msgLen - i;
