@@ -34,7 +34,6 @@ public class MainActivity extends Activity {
 	private Button sendMsgButton;
 	
 	private volatile boolean keepRunning;
-	private boolean displayedStatus;
 	private boolean lastStatus;
 	private Thread msgThread;
 	
@@ -45,24 +44,13 @@ public class MainActivity extends Activity {
 	private Runnable msgUpdateThread = new Runnable() { 
 		public void run() {
 			while(keepRunning) {
-				if(!displayedStatus) {
-					if(btComm.isConnected()) {
-						appendMsgToMsgLog("Usb Connected!");
-					}
-					else {
-						appendMsgToMsgLog("Usb disconnected!");
-						appendMsgToMsgLog("Waiting for USB device...");
-					}
-					displayedStatus = true;
-				}
-				
 				if(btComm.isConnected()) {
 					if(!lastStatus) {
 						lastStatus = true;
-						displayedStatus = false;
+						appendMsgToMsgLog("Bluetooth Connected!");
 					}
 					
-					String newMsg = "UsbHost: ";
+					String newMsg = DEVICE_NAME + ": ";
 		        	while(btComm.hasNewMessages()) {
 		        		FlagMsg msg = btComm.readMessage();
 		        		if(msg.getFlag() != 'N') {
@@ -77,12 +65,13 @@ public class MainActivity extends Activity {
 		        } else {
 		        	if(lastStatus) {
 						lastStatus = false;
-						displayedStatus = false;
+						appendMsgToMsgLog("Bluetooth Disconnected!");
+						appendMsgToMsgLog("Waiting for USB device...");
 					}
 		        }
 				
 				try {
-					Thread.sleep(100);
+					Thread.sleep(10);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -96,7 +85,6 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         keepRunning = true;
-        displayedStatus = false;
         lastStatus = false;
         setUpGUI();
     }
