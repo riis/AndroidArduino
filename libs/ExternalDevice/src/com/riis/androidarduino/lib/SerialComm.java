@@ -39,31 +39,30 @@ public abstract class SerialComm implements iCommunication, Runnable {
 	public void sendString(String str) {
 		byte[] messageBytes = Util.stringToByteArray(str);
 		for(int i = 0; i < messageBytes.length; ++i) {
-			sendByteWithFlag('S', messageBytes[i]);
+			write(new byte[] {'S', messageBytes[i]});
 		}
 		//Send the null terminator to signify the end of the string.
-		sendByteWithFlag('N', (byte) 0);
+		write(new byte[] {'N', (byte) 0});
 	}
 	
 	public void sendByteWithFlag(char flag, byte value) {
 		log("Sending byte '" + value + "'  with flag '" + flag + "'.");
 		
-		sendByte((byte) flag);
-		sendByte(value);
+		write(new byte[] {(byte) flag, value});
 	}
 	
-	public void sendByte(byte value) {
-		if (outputStream != null) {
-			try {
-				outputStream.write(new byte[] {value});
-			} catch (IOException e) {
-				isConnected = false;
-				log("Send failed: " + e.getMessage());
+	@Override
+	public void write(byte[] byteBuffer) {
+		try {
+			for(int i = 0; i < byteBuffer.length; i++) {
+				outputStream.write(byteBuffer[i]);
 			}
-		}
-		else {
+		} catch (IOException e) {
+			log(e.getMessage());
 			isConnected = false;
-			log("Send failed: outputStream was null");
+		} catch (NullPointerException e) {
+			log(e.getMessage());
+			isConnected = false;
 		}
 	}
 	
@@ -107,16 +106,7 @@ public abstract class SerialComm implements iCommunication, Runnable {
 	
 	protected void checkAndHandleMessages(byte[] buffer) {
 		int msgLen = 0;
-		try {
-			msgLen = inputStream.read(buffer);
-		} catch (IOException e) {
-			isConnected = false;
-			log("InputStream error");
-			return;
-		} catch (NullPointerException e) {
-			isConnected = false;
-			return;
-		}
+		msgLen = read(buffer);
 		
 		log("Message start");
 		for(int i = 0; i < msgLen; i++) {
@@ -135,6 +125,21 @@ public abstract class SerialComm implements iCommunication, Runnable {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+		}
+	}
+	
+	@Override
+	public int read(byte[] byteBuffer) {
+		try {
+			return inputStream.read(byteBuffer);
+		} catch (IOException e) {
+			log(e.getMessage());
+			isConnected = false;
+			return -1;
+		} catch (NullPointerException e) {
+			log(e.getMessage());
+			isConnected = false;
+			return -1;
 		}
 	}
 	
