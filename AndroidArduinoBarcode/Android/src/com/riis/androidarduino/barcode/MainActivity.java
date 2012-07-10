@@ -174,7 +174,6 @@ public class MainActivity extends Activity {
 			    	lookupItem.setOnClickListener(
 			    		new OnClickListener() {
 			    			public void onClick(View v) {
-			    				Toast.makeText(getApplicationContext(), "YOU CLICKED ON ITEM " + message + "!!", Toast.LENGTH_SHORT).show();
 			    				openGoogleShopper(message);
 			    			}
 			    		}
