@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 
-import com.riis.androidarduino.lib.BlueToothComm;
 
 import android.app.Activity;
 import android.app.AlertDialog;
