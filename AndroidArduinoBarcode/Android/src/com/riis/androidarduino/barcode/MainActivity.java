@@ -3,10 +3,8 @@ package com.riis.androidarduino.barcode;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Date;
 
 import com.riis.androidarduino.lib.BlueToothComm;
-import com.riis.androidarduino.lib.FlagMsg;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -19,21 +17,14 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.text.InputType;
 import android.text.method.ScrollingMovementMethod;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
-import android.widget.TextView.OnEditorActionListener;
 
 public class MainActivity extends Activity {
 	private static String DEVICE_NAME = "AndroidArduinoBTRS232";
@@ -55,7 +46,7 @@ public class MainActivity extends Activity {
 	private boolean lastStatus;
 	private Thread msgThread;
 	
-	protected Handler handler;
+	private static Handler handler;
 	private Context context;
 
 	private BlueToothComm btComm;
