@@ -160,7 +160,7 @@ public class MainActivity extends Activity {
 			    	TextView scanDate = new TextView(context);
 			    	Button lookupItem = new Button(context);
 			    	
-			    	LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 1);
+			    	LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT, 1);
 			    	
 			    	
 			    	scanCode.setLayoutParams(params);
@@ -175,6 +175,7 @@ public class MainActivity extends Activity {
 			    		new OnClickListener() {
 			    			public void onClick(View v) {
 			    				Toast.makeText(getApplicationContext(), "YOU CLICKED ON ITEM " + message + "!!", Toast.LENGTH_SHORT).show();
+			    				openGoogleShopper(message);
 			    			}
 			    		}
 			    	);
