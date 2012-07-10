@@ -1,5 +1,5 @@
 #include <SoftwareSerial.h>
-#include <Bluetooth.h>
+#include "Bluetooth.h"
 
 #define STRING_END 0
 #define BARCODE_START 63
@@ -19,7 +19,7 @@
 #define RX 11
 #define TX 3
 
-Bluetooth bluetooth(RX, TX, "AndroidArdinoRS232", true);
+Bluetooth bluetooth(RX, TX, "AndroidArduinoBTRS232", true);
 
 int bluetoothState;
 int terminalState;
@@ -38,26 +38,18 @@ void setup()
 {
     Serial.begin(115200);
 
-    setUpIO();
     flushBuffersAndResetStates();
+
+    Serial.print("Initializing barcode scanner serial port...\n\r");    
+    Serial1.begin(9600);
     
     if(!bluetooth.beginBluetooth())
     {
+        Serial.println("\n\n\rHalting program...");
         while(true) { }
     }
     
-    Serial.println("Connect to \"AndroidArduinoBTRS232\".");
-
-    Serial.println("Initializing barcode scanner serial port...");    
-    Serial1.begin(9600);
-    
-    Serial.print("Waiting for Bluetooth connection...\n\r");
-}
-
-void setUpIO()
-{    
-    pinMode(RX, INPUT);
-    pinMode(TX, OUTPUT);
+    Serial.print("\n\rWaiting for Bluetooth connection...\n\r");
 }
 
 void flushBuffersAndResetStates()
@@ -105,9 +97,9 @@ void resetTerminalState()
 
 void loop()
 {    
-    //TODO: FIGURE OUT BT CONNECTION STATE STUFF
+    bluetooth.process();
     
-    if(true) {//ISBTCONNECTED) {
+    if(bluetooth.isConnected()) {
         if(!lastConnectionState)
         {
             printConnectedMessage();
@@ -148,12 +140,12 @@ void loop()
 
 void printConnectedMessage()
 {
-    Serial.print("\n\rConnected! Start scanning!\n\n\r");
+    Serial.print("Connected! Start scanning!\n\n\r");
 }
 
 void printDisconnectedMessage()
 {
-    Serial.print("Disconnected! Halting communications...");
+    Serial.print("\n\rDisconnected! Halting communications...");
     
     flushBuffersAndResetStates();
     
