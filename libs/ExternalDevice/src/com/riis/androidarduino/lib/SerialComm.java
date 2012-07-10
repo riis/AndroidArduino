@@ -97,6 +97,14 @@ public abstract class SerialComm implements Communication, Runnable {
 			return null;
 	}
 	
+	public void run() {
+		byte[] buffer = new byte[256];
+
+		while (true) { // keep reading messages forever.
+			checkAndHandleMessages(buffer);
+		}
+	}
+	
 	protected void checkAndHandleMessages(byte[] buffer) {
 		int msgLen = 0;
 		try {

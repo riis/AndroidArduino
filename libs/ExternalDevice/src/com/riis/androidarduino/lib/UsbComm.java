@@ -148,21 +148,6 @@ public class UsbComm extends SerialComm {
 		}
 	}
 	
-	public void run() {
-		byte[] buffer = new byte[256];
-
-		while (true) { // keep reading messages forever.
-			try {
-				checkAndHandleMessages(buffer);
-				Thread.sleep(10);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-	
-	
-	
 	public void unregisterReceiver() {
 		try {
 			context.unregisterReceiver(usbBroadcastReceiver);

@@ -93,15 +93,6 @@ public class BlueToothComm extends SerialComm implements Runnable {
 	}
 
 	@Override
-	public void run() {
-		byte[] buffer = new byte[256];
-
-		while (true) { // keep reading messages forever.
-			checkAndHandleMessages(buffer);
-		}
-	}
-
-	@Override
 	public void pauseConnection() {
 		disconnect();
 	}
