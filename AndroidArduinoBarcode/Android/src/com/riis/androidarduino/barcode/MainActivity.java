@@ -1,6 +1,9 @@
-package com.riis.androidarduino.btrs232;
+package com.riis.androidarduino.barcode;
 
-import com.riis.androidarduino.btrs232.R;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+
 import com.riis.androidarduino.lib.BlueToothComm;
 import com.riis.androidarduino.lib.FlagMsg;
 
@@ -18,8 +21,10 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.TextView.OnEditorActionListener;
 
 public class MainActivity extends Activity {
@@ -28,10 +33,11 @@ public class MainActivity extends Activity {
 	private Button connectButton;
 	private Button disconnectButton;
 	
-	private ScrollView scrollContainer;
+	private ScrollView logScrollContainer;
 	private TextView msgLog;
-	private EditText msgBox;
-	private Button sendMsgButton;
+	
+	private ScrollView scanScrollContainer;
+	private ArrayList<ScannedObject> scanList;
 	
 	private volatile boolean keepRunning;
 	private boolean lastStatus;
@@ -51,8 +57,9 @@ public class MainActivity extends Activity {
 					}
 					
 					if(btComm.isMessageReady()) {
-						String newMsg = DEVICE_NAME + ": " + btComm.readMessage();
+						String newMsg = "Scanned: " + btComm.readMessage();
 						appendMsgToMsgLog(newMsg);
+						addItemToScanLog(newMsg);
 					}
 		        	
 		        } else {
@@ -87,8 +94,7 @@ public class MainActivity extends Activity {
     	setUpDisconnectButton();
     	setupHandler();
     	setupMsgLog();
-    	setupMsgBox();
-    	setupSendMsgButton();
+    	setupScanLog();
 	}
     
     private void setUpConnectButton() {
@@ -117,40 +123,21 @@ public class MainActivity extends Activity {
 		handler = new Handler() {
 			public void handleMessage(Message msg) {
 		    	msgLog.append((String) msg.obj + "\n");
-		    	scrollContainer.fullScroll(View.FOCUS_DOWN);
+		    	logScrollContainer.fullScroll(View.FOCUS_DOWN);
 			}
 		};
 	}
     
     private void setupMsgLog() {
-    	scrollContainer = (ScrollView)findViewById(R.id.scrollView);
+    	logScrollContainer = (ScrollView)findViewById(R.id.scrollView);
     	msgLog = (TextView) findViewById(R.id.messageLog);
     	msgLog.append("Android Service Init...\n");
     	msgLog.setMovementMethod(new ScrollingMovementMethod());
     }
     
-    private void setupMsgBox() {
-    	msgBox = (EditText) findViewById(R.id.messageBox);
-    	msgBox.setInputType(InputType.TYPE_TEXT_VARIATION_SHORT_MESSAGE);
-    	msgBox.setImeOptions(EditorInfo.IME_ACTION_SEND);
-    	msgBox.setOnEditorActionListener(new OnEditorActionListener() {
-    	    @Override
-    	    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-    	        if (actionId == EditorInfo.IME_ACTION_SEND) {
-    	            sendMessage();
-    	            //InputMethodManager inputManager =  (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-    	            //inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-    	            return true;
-    	        }
-    	        return false;
-    	    }
-    	});
-    }
-    
-    private void sendMessage() {
-    	appendMsgToMsgLog("Me: " + msgBox.getText().toString());
-		btComm.sendString(msgBox.getText().toString());
-		msgBox.setText("");
+    private void setupScanLog() {
+    	scanScrollContainer = (ScrollView)findViewById(R.id.scrollView);
+    	scanList = new ArrayList<ScannedObject>();
     }
     
     private void appendMsgToMsgLog(String str) {
@@ -159,15 +146,30 @@ public class MainActivity extends Activity {
 		handler.sendMessage(msg);
     }
     
-    private void setupSendMsgButton() {
-    	sendMsgButton = (Button) findViewById(R.id.sendButton);
-    	sendMsgButton.setOnClickListener(
-    	    		new OnClickListener() {
-    					public void onClick(View v) {
-    						sendMessage();
-    					}
-    	    		}
-    	    	);
+    private void addItemToScanLog(String itemCode) {
+    	ScannedObject scan = new ScannedObject(itemCode, Calendar.getInstance().getTime());
+    	scanList.add(scan);
+    	LinearLayout newScanView = new LinearLayout(this);
+    	TextView scanCode = new TextView(this);
+    	TextView scanDate = new TextView(this);
+    	Button lookupItem = new Button(this);
+    	
+    	scanCode.setText(itemCode);
+    	scanDate.setText(scan.scanDate.toGMTString());
+    	lookupItem.setText("Lookup Item (Google Shopper)");
+    	lookupItem.setOnClickListener(
+    		new OnClickListener() {
+    			public void onClick(View v) {
+    				Toast.makeText(getApplicationContext(), "YOU CLICKED A THINGY!!!!", Toast.LENGTH_SHORT).show();
+    			}
+    		}
+    	);
+    	
+    	newScanView.addView(scanCode);
+    	newScanView.addView(scanDate);
+    	newScanView.addView(lookupItem);
+    	
+    	scanScrollContainer.addView(newScanView);
     }
     
     @Override
