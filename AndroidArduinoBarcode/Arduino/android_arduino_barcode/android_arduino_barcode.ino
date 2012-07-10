@@ -2,6 +2,7 @@
 #include <Bluetooth.h>
 
 #define STRING_END 0
+#define BARCODE_START 63
 #define RETURN_CHAR 13
 #define MSG_LENGTH_MAX 256
 
@@ -11,13 +12,12 @@
 #define RECEIVING_END_CODE    3
 
 //BluetoothStates for the terminal BluetoothState machine
-#define RECEIVING_CHARS 1
+#define WAITING_FOR_START 1
+#define RECEIVING_CHARS 2
 
 //RX and TX pin numbers
 #define RX 11
 #define TX 3
-
-//SoftwareSerial bluetoothSerial(RX, TX);
 
 Bluetooth bluetooth(RX, TX, "AndroidArdinoRS232", true);
 
@@ -46,7 +46,7 @@ void setup()
         while(true) { }
     }
     
-    Serial.println("Bluetooth device ready, connect to \"AndroidArduinoBTRS232\".");
+    Serial.println("Connect to \"AndroidArduinoBTRS232\".");
 
     Serial.println("Initializing barcode scanner serial port...");    
     Serial1.begin(9600);
@@ -100,7 +100,7 @@ void resetBluetoothState()
 
 void resetTerminalState()
 {
-    terminalState = RECEIVING_CHARS;
+    terminalState = WAITING_FOR_START;
 }
 
 void loop()
@@ -148,7 +148,7 @@ void loop()
 
 void printConnectedMessage()
 {
-    Serial.print("\n\rConnected! Communications ready on the terminal\n\n\r");
+    Serial.print("\n\rConnected! Start scanning!\n\n\r");
 }
 
 void printDisconnectedMessage()
@@ -162,11 +162,11 @@ void printDisconnectedMessage()
 
 byte tryToReadBluetoothMsgInto(byte msgBuf[])
 {
-    byte msgLen = bluetoothSerial.available();
+    byte msgLen = bluetooth.bytesAvailable();
     
     for(int i = 0; i < msgLen && i < MSG_LENGTH_MAX; i++)
     {
-        msgBuf[i] = bluetoothSerial.read();
+        msgBuf[i] = bluetooth.readByte();
     }
    
     return msgLen; 
@@ -252,16 +252,16 @@ void appendLetterOnBluetoothMsg(char letter)
 
 void stopAndSendBluetoothMsg()
 {
-    Serial.println("Received string from Bluetooth connection, printing it to terminal");
-    
-    sendBluetoothMsgToTerminal();
+    Serial.println("Received string from Bluetooth connection, ignoring for the time being");
     
     flushBluetoothMsgBuffer();
     resetBluetoothState();
+    
+//    sendBluetoothMsgToTerminal();
 }
 
-void sendBluetoothMsgToTerminal()
-{
+//void sendBluetoothMsgToTerminal()
+//{
 //    Serial1.print("Connected device: ");
 //    
 //    for(int i = 0; i < bluetoothMsgLen; i++)
@@ -270,12 +270,18 @@ void sendBluetoothMsgToTerminal()
 //    }
 //  
 //    Serial1.print("\n\r");
-}
+//}
 
 void runTerminalStateMachine(char letter)
 {
     switch(terminalState)
     {
+        case WAITING_FOR_START:
+            if((byte)letter == BARCODE_START)
+            {
+                terminalState = RECEIVING_CHARS;   
+            }
+            break;
         case RECEIVING_CHARS:
             if((byte)letter == RETURN_CHAR)
             {
@@ -301,7 +307,11 @@ void appendLetterOnTerminalMsg(char letter)
 
 void stopAndSendTerminalMsg()
 {
-    Serial.println("Received string from terminal, sending it across Bluetooth");
+    Serial.print("Received barcode: ");
+    for(int i = 0; i < terminalMsgLen-1; i++) {
+        Serial.print(terminalMsg[i]);
+    }
+    Serial.print(". Sending it over Bluetooth...\r\n");
     
     sendTerminalMsgToBluetooth();
     flushTerminalMsgBuffer();
@@ -310,16 +320,9 @@ void stopAndSendTerminalMsg()
 
 void sendTerminalMsgToBluetooth()
 {
-    bluetoothSerial.write((byte)'q');
-    
     for(int i = 0; i < terminalMsgLen; i++) {
-        char thingy = terminalMsg[i];
-        if(thingy != 'T') {
-            bluetoothSerial.write((byte)'S');
-            bluetoothSerial.write((byte)thingy);
-        }
+        bluetooth.sendByteWithFlag('S', (byte)terminalMsg[i]);
     }
     
-    bluetoothSerial.write((byte)'N'); 
-    bluetoothSerial.write((byte)0);
+    bluetooth.sendByteWithFlag('N', (byte)0);
 }
