@@ -146,7 +146,7 @@ public class MainActivity extends Activity {
 		handler.sendMessage(msg);
     }
     
-    private void addItemToScanLog(String itemCode) {
+    private void addItemToScanLog(final String itemCode) {
     	ScannedObject scan = new ScannedObject(itemCode, Calendar.getInstance().getTime());
     	scanList.add(scan);
     	LinearLayout newScanView = new LinearLayout(this);
@@ -160,7 +160,7 @@ public class MainActivity extends Activity {
     	lookupItem.setOnClickListener(
     		new OnClickListener() {
     			public void onClick(View v) {
-    				Toast.makeText(getApplicationContext(), "YOU CLICKED A THINGY!!!!", Toast.LENGTH_SHORT).show();
+    				Toast.makeText(getApplicationContext(), "YOU CLICKED ON ITEM " + itemCode + "!!", Toast.LENGTH_SHORT).show();
     			}
     		}
     	);
