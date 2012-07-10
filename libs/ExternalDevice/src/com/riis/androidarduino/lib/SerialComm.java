@@ -9,7 +9,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 
-public abstract class SerialComm implements Communication, Runnable {
+public abstract class SerialComm implements iCommunication, Runnable {
 	protected boolean shouldLog;
 	
 	protected LinkedBlockingQueue<Byte> inputBuffer;

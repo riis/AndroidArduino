@@ -1,6 +1,6 @@
 package com.riis.androidarduino.lib;
 
-public interface Communication {
+public interface iCommunication {
 	public void connect();
 	public void disconnect();
 	public void pauseConnection();

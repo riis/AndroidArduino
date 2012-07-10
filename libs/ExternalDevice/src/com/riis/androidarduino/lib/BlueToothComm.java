@@ -9,13 +9,13 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.widget.Toast;
 
-public class BlueToothComm extends SerialComm implements Runnable {
+public class BluetoothComm extends SerialComm implements Runnable {
 	private BluetoothAdapter adapter;
 	private BluetoothDevice device;
 	private BluetoothSocket socket;
 	private String deviceName;
 	
-	public BlueToothComm(Activity parentActivity, String deviceName) {
+	public BluetoothComm(Activity parentActivity, String deviceName) {
 		super(parentActivity);
 		this.deviceName = deviceName;
 		connect();
