@@ -7,9 +7,10 @@
 class Bluetooth {
 public:
 	Bluetooth();
-	Bluetooth(int RX, int TX, char deviceName[], boolean shouldPrintLog);
+	Bluetooth(int RX, int TX, String deviceName, boolean shouldPrintLog);
 	~Bluetooth();
 	
+	boolean beginBluetooth();
 	boolean setUpBluetooth();
 	boolean sendCommand(char command[]);
 	
@@ -26,12 +27,16 @@ private:
 	boolean waitForCommandOK();
 	boolean isFlag(char flag);
 	
-	void readStatusUpdate();
+	boolean isStateMsgStarting();
+	boolean isStateMsgAStatusUpdate();
 
 	SoftwareSerial bluetoothSerial;
-	int state;
+	int connectionState;
+	String name;
 	boolean printLog;
-	char* name;
+	
+	String stateMsg;
+	boolean readingStateMsg;
 };
 
 #endif

@@ -6,48 +6,48 @@ Bluetooth::Bluetooth()
 
 }
 
-Bluetooth::Bluetooth(int RX, int TX, char* deviceName, boolean shouldPrintLog)
+Bluetooth::Bluetooth(int RX, int TX, String deviceName, boolean shouldPrintLog)
 	: bluetoothSerial(RX, TX, false)
 {
-	Serial.begin(115200);
 	printLog = shouldPrintLog;
 
 	if(printLog) { Serial.println("Setting up Bluetooth I/O..."); }
 	pinMode(RX, INPUT);
 	pinMode(TX, OUTPUT);
 	
-	state = 0;
+	connectionState = 0;
 	name = deviceName;
 	
+	readingStateMsg = false;
+}
+
+Bluetooth::~Bluetooth() { }
+
+boolean Bluetooth::beginBluetooth()
+{
 	if(printLog) { Serial.println("Powering up the Bluetooth device..."); }
     if(!setUpBluetooth())
     {
         if(printLog) { Serial.println("Bluetooth setup failed!"); }
         if(printLog) { Serial.println("Make sure it's connected properly and reset the Arduino board."); }
+		return false;
     } else {
 		if(printLog) { Serial.println("Bluetooth ready!"); }
+		return true;
 	}	
 }
-
-Bluetooth::~Bluetooth() { }
 
 boolean Bluetooth::setUpBluetooth()
 {
     bluetoothSerial.begin(38400);
 
-	Serial.print(0);
     if(!sendCommand("\r\n+STWMOD=0\r\n")) {return false;} //Set the Bluetooth to slave mode
-	Serial.print(1);
-    if(!sendCommand("\r\n+STNA=AndroidArduinoBTRS232\r\n")) {return false;} //Set the Bluetooth name to "AndroidArduinoBTRS232"
-	Serial.print(2);
+    if(!sendCommand("\r\n+AndroidArduinoBTRS232\r\n")) {return false;} //Set the Bluetooth name to "AndroidArduinoBTRS232"
     if(!sendCommand("\r\n+STOAUT=1\r\n")) {return false;} //Permit a paired device to connect
-    Serial.print(3);
 	if(!sendCommand("\r\n+STAUTO=0\r\n")) {return false;} //No auto connection
-    Serial.print(4);
 	
     delay(2000);    
     if(!sendCommand("\r\n+INQ=1\r\n")) {return false;} //Make the Bluetooth device inquirable 
-	Serial.print(5);
 	
     delay(2000);
     bluetoothSerial.flush();
@@ -98,13 +98,13 @@ boolean Bluetooth::waitForCommandOK()
 
 void Bluetooth::sendByte(byte value)
 {
-	bluetoothSerial.print(value);
+	bluetoothSerial.write(value);
 }
 
 void Bluetooth::sendByteWithFlag(char flag, byte value)
 {
-	bluetoothSerial.print(flag);
-	bluetoothSerial.print(value);
+	bluetoothSerial.write(flag);
+	bluetoothSerial.write(value);
 }
 
 int Bluetooth::bytesAvailable()
@@ -139,48 +139,52 @@ byte Bluetooth::readByte()
 
 void Bluetooth::process()
 {
-	if(bluetoothSerial.available())
-	{
-		if(!isFlag(bluetoothSerial.peek()))
-		{
-			readStatusUpdate();
-		}
-	}
+//	int charsAvailable = bluetoothSerial.available();
+//	if(charsAvailable)
+//	{
+//		if(!readingStateMsg && stateMsgLen < 3)
+//		{
+//			while(charsAvailable && stateMsgLen < 14)
+//			{
+//				stateMsgBuf[stateMsgLen] = (char)bluetoothSerial.read();
+//				stateMsgLen += 1
+//				charsAvailable -= 1;
+//			}
+//		}
+//	}
+//	
+//	if(!readingStateMsg && stateMsgLen >= 3)
+//	{
+//		readingStateMsg = isStateMsgStarting();
+//	}
+//	
+//	if(readingStateMsg && stateMsgLen == 14)
+//	{
+//		if(isStateMsgAStatusUpdate())
+//		{
+//			connectionState = 
+//		}
+//	}
 }
 
-void Bluetooth::readStatusUpdate()
+boolean Bluetooth::isStateMsgStarting()
 {
-	if(bluetoothSerial.available())
-	{
-		if(bluetoothSerial.peek() == '\r')
-		{
-			bluetoothSerial.read();
-			
-			if(bluetoothSerial.peek() == '\n')
-			{
-				bluetoothSerial.read();
-			
-				if(bluetoothSerial.peek() == '+')
-				{
-					bluetoothSerial.read();
-			
-					if(bluetoothSerial.read() == 'B' &&
-					   bluetoothSerial.read() == 'S' &&
-					   bluetoothSerial.read() == 'T' &&
-					   bluetoothSerial.read() == 'A' &&
-					   bluetoothSerial.read() == 'T' &&
-					   bluetoothSerial.read() == 'E' &&
-					   bluetoothSerial.read() == ':')
-					{
-						state = bluetoothSerial.read() - 48;
-					}
-				}
-			}
-		}
-	}
+//	return (stateMsgBuf[0] == '\r' && stateMsgBuf[1] == '\n' && stateMsgBuf[2] == '+');
+}
+
+boolean Bluetooth::isStateMsgAStatusUpdate()
+{
+//	return(stateMsgBuf[2] == '+' &&
+//		   stateMsgBuf[3] == 'B' &&
+//		   stateMsgBuf[4] == 'T' &&
+//		   stateMsgBuf[5] == 'S' &&
+//		   stateMsgBuf[6] == 'T' &&
+//		   stateMsgBuf[7] == 'A' &&
+//		   stateMsgBuf[8] == 'T' &&
+//		   stateMsgBuf[9] == 'E');
 }
 
 boolean Bluetooth::isConnected()
 {
-	return (state == 4);
+	return (connectionState == 4);
 }

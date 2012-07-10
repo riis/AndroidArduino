@@ -17,6 +17,7 @@ import android.text.method.ScrollingMovementMethod;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -36,7 +37,8 @@ public class MainActivity extends Activity {
 	private ScrollView logScrollContainer;
 	private TextView msgLog;
 	
-	private ScrollView scanScrollContainer;
+	private LinearLayout scannedContainer;
+	private ScrollView scannedScroll;
 	private ArrayList<ScannedObject> scanList;
 	
 	private volatile boolean keepRunning;
@@ -44,6 +46,7 @@ public class MainActivity extends Activity {
 	private Thread msgThread;
 	
 	protected Handler handler;
+	private Context context;
 
 	private BlueToothComm btComm;
 	
@@ -57,9 +60,9 @@ public class MainActivity extends Activity {
 					}
 					
 					if(btComm.isMessageReady()) {
-						String newMsg = "Scanned: " + btComm.readMessage();
-						appendMsgToMsgLog(newMsg);
-						addItemToScanLog(newMsg);
+						String barcode = btComm.readMessage();
+						appendMsgToMsgLog("Scanned: " + barcode);
+						addItemToScanLog(barcode);
 					}
 		        	
 		        } else {
@@ -86,6 +89,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.main);
         keepRunning = true;
         lastStatus = false;
+        context = this;
         setUpGUI();
     }
     
@@ -122,8 +126,47 @@ public class MainActivity extends Activity {
     private void setupHandler() {
 		handler = new Handler() {
 			public void handleMessage(Message msg) {
-		    	msgLog.append((String) msg.obj + "\n");
-		    	logScrollContainer.fullScroll(View.FOCUS_DOWN);
+				String taggedMessage = (String) msg.obj;
+				String[] tokens = taggedMessage.split("~");
+				
+				final String message = tokens[1];
+				if(tokens[0].equals("LOG")) {
+					msgLog.append(message + "\n");
+			    	logScrollContainer.fullScroll(View.FOCUS_DOWN);
+				} else if(tokens[0].equals("SCAN")) {
+//			    	scannedScroll.fullScroll(View.FOCUS_DOWN);
+			    	
+			    	ScannedObject scan = new ScannedObject(message, Calendar.getInstance().getTime());
+			    	scanList.add(scan);
+			    	LinearLayout newScanView = new LinearLayout(context);
+			    	TextView scanCode = new TextView(context);
+			    	TextView scanDate = new TextView(context);
+			    	Button lookupItem = new Button(context);
+			    	
+			    	LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 1);
+			    	
+			    	scanCode.setLayoutParams(params);
+			    	scanCode.setText(message);
+			    	
+			    	scanDate.setLayoutParams(params);
+			    	scanDate.setText(scan.scanDate.toGMTString());
+			    	
+			    	lookupItem.setLayoutParams(params);
+			    	lookupItem.setText("Lookup Item (Google Shopper)");
+			    	lookupItem.setOnClickListener(
+			    		new OnClickListener() {
+			    			public void onClick(View v) {
+			    				Toast.makeText(getApplicationContext(), "YOU CLICKED ON ITEM " + message + "!!", Toast.LENGTH_SHORT).show();
+			    			}
+			    		}
+			    	);
+			    	
+			    	newScanView.addView(scanCode);
+			    	newScanView.addView(scanDate);
+			    	newScanView.addView(lookupItem);
+			    	
+			    	scannedContainer.addView(newScanView, 0);
+				}
 			}
 		};
 	}
@@ -136,40 +179,21 @@ public class MainActivity extends Activity {
     }
     
     private void setupScanLog() {
-    	scanScrollContainer = (ScrollView)findViewById(R.id.scrollView);
+    	scannedContainer = (LinearLayout)findViewById(R.id.scannedItems);
+    	scannedScroll = (ScrollView)findViewById(R.id.scannedScrollView);
     	scanList = new ArrayList<ScannedObject>();
     }
     
     private void appendMsgToMsgLog(String str) {
 		Message msg = Message.obtain(handler);
-		msg.obj = str;
+		msg.obj = "LOG~" + str;
 		handler.sendMessage(msg);
     }
     
     private void addItemToScanLog(final String itemCode) {
-    	ScannedObject scan = new ScannedObject(itemCode, Calendar.getInstance().getTime());
-    	scanList.add(scan);
-    	LinearLayout newScanView = new LinearLayout(this);
-    	TextView scanCode = new TextView(this);
-    	TextView scanDate = new TextView(this);
-    	Button lookupItem = new Button(this);
-    	
-    	scanCode.setText(itemCode);
-    	scanDate.setText(scan.scanDate.toGMTString());
-    	lookupItem.setText("Lookup Item (Google Shopper)");
-    	lookupItem.setOnClickListener(
-    		new OnClickListener() {
-    			public void onClick(View v) {
-    				Toast.makeText(getApplicationContext(), "YOU CLICKED ON ITEM " + itemCode + "!!", Toast.LENGTH_SHORT).show();
-    			}
-    		}
-    	);
-    	
-    	newScanView.addView(scanCode);
-    	newScanView.addView(scanDate);
-    	newScanView.addView(lookupItem);
-    	
-    	scanScrollContainer.addView(newScanView);
+    	Message msg = Message.obtain(handler);
+		msg.obj = "SCAN~" + itemCode;
+		handler.sendMessage(msg);
     }
     
     @Override
