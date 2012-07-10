@@ -2,13 +2,20 @@ package com.riis.androidarduino.barcode;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 
 import com.riis.androidarduino.lib.BlueToothComm;
 import com.riis.androidarduino.lib.FlagMsg;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.SearchManager;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -30,6 +37,9 @@ import android.widget.TextView.OnEditorActionListener;
 
 public class MainActivity extends Activity {
 	private static String DEVICE_NAME = "AndroidArduinoBTRS232";
+	private static final String GOOGLE_SHOPPER_PACKAGE = "com.google.android.apps.shopper";
+	private static final String GOOGLE_SHOPPER_ACTIVITY = GOOGLE_SHOPPER_PACKAGE + ".results.SearchResultsActivity";
+	private static final String MARKET_URI_PREFIX = "market://details?id=";
 	
 	private Button connectButton;
 	private Button disconnectButton;
@@ -49,6 +59,13 @@ public class MainActivity extends Activity {
 	private Context context;
 
 	private BlueToothComm btComm;
+	
+	private final DialogInterface.OnClickListener shopperMarketListener = new DialogInterface.OnClickListener() {
+		@Override
+		public void onClick(DialogInterface dialogInterface, int which) {
+			startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(MARKET_URI_PREFIX + GOOGLE_SHOPPER_PACKAGE)));
+		}
+	};
 	
 	private Runnable msgUpdateThread = new Runnable() { 
 		public void run() {
@@ -145,6 +162,7 @@ public class MainActivity extends Activity {
 			    	
 			    	LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 1);
 			    	
+			    	
 			    	scanCode.setLayoutParams(params);
 			    	scanCode.setText(message);
 			    	
@@ -194,6 +212,30 @@ public class MainActivity extends Activity {
     	Message msg = Message.obtain(handler);
 		msg.obj = "SCAN~" + itemCode;
 		handler.sendMessage(msg);
+    }
+    
+    private void openGoogleShopper(String query) {
+		// Construct Intent to launch Shopper
+		Intent intent = new Intent(Intent.ACTION_SEARCH);
+		intent.setClassName(GOOGLE_SHOPPER_PACKAGE, GOOGLE_SHOPPER_ACTIVITY);
+		intent.putExtra(SearchManager.QUERY, query);
+
+		// Is it available?
+		PackageManager pm = getPackageManager();
+		Collection<?> availableApps = pm.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+		
+		if (availableApps != null && !availableApps.isEmpty()) {
+			// If something can handle it, start it
+			startActivity(intent);
+		} else {
+			// Otherwise offer to install it from Market.
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setTitle("Google shopper not found!");
+			builder.setMessage("You currently do not have Google Shopper installed, would you like to install it now?");
+			builder.setPositiveButton("Install", shopperMarketListener);
+			builder.setNegativeButton("Not now", null);
+			builder.show();
+		}
     }
     
     @Override
