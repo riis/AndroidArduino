@@ -15,8 +15,8 @@ public abstract class SerialComm implements iCommunication, Runnable {
 	protected LinkedBlockingQueue<Byte> inputBuffer;
 	protected LinkedBlockingQueue<FlagMsg[]> msgBuffer;
 	
-	protected InputStream inputStream;
-	protected OutputStream outputStream;
+	private InputStream inputStream;
+	private OutputStream outputStream;
 	
 	protected boolean foundNullTerminatorFlag;
 	
@@ -192,6 +192,22 @@ public abstract class SerialComm implements iCommunication, Runnable {
 	
 	public boolean isConnected() {
 		return isConnected;
+	}
+	
+	protected InputStream getInputStream() {
+		return inputStream;
+	}
+	
+	protected void setInputStream(InputStream IS) {
+		this.inputStream = IS;
+	}
+	
+	protected OutputStream getOutputStream() {
+		return outputStream;
+	}
+	
+	protected void setOutputStream(OutputStream outputStream) {
+		this.outputStream = outputStream;
 	}
 
 	protected void log(String string) {

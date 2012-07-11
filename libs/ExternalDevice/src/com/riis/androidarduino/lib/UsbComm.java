@@ -86,8 +86,8 @@ public class UsbComm extends SerialComm {
 			this.accessory = accessory;
 			
 			FileDescriptor fd = fileDescriptor.getFileDescriptor();
-			inputStream = new FileInputStream(fd);
-			outputStream = new FileOutputStream(fd);
+			setInputStream(new FileInputStream(fd));
+			setOutputStream(new FileOutputStream(fd));
 			
 			log("Accessory attached");
 			return true;
@@ -105,8 +105,8 @@ public class UsbComm extends SerialComm {
 				log("Accessory detached");
 			}
 			
-			inputStream.close();
-			outputStream.close();
+			getInputStream().close();
+			getOutputStream().close();
 		} catch (IOException e) {
 		} finally {
 			isConnected = false;
@@ -125,7 +125,7 @@ public class UsbComm extends SerialComm {
 	
 	public void resumeConnection() {
 		registerReceiver();
-		if (inputStream != null && outputStream != null) {
+		if (getInputStream() != null && getOutputStream() != null) {
 			log("Resuming: streams were not null");
 			return;
 		}
