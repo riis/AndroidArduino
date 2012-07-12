@@ -58,10 +58,10 @@ public abstract class SerialComm implements iCommunication, Runnable {
 				outputStream.write(byteBuffer[i]);
 			}
 		} catch (IOException e) {
-			log(e.getMessage());
+			log(e.toString());
 			isConnected = false;
 		} catch (NullPointerException e) {
-			log(e.getMessage());
+			log(e.toString());
 			isConnected = false;
 		}
 	}
@@ -133,11 +133,11 @@ public abstract class SerialComm implements iCommunication, Runnable {
 		try {
 			return inputStream.read(byteBuffer);
 		} catch (IOException e) {
-			log(e.getMessage());
+			log(e.toString());
 			isConnected = false;
 			return -1;
 		} catch (NullPointerException e) {
-			log(e.getMessage());
+			log(e.toString());
 			isConnected = false;
 			return -1;
 		}
