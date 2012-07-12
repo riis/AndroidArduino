@@ -97,7 +97,7 @@ public abstract class SerialComm implements iCommunication, Runnable {
 	}
 	
 	public void run() {
-		byte[] buffer = new byte[256];
+		byte[] buffer = new byte[1024];
 
 		while (true) { // keep reading messages forever.
 			checkAndHandleMessages(buffer);
@@ -108,9 +108,14 @@ public abstract class SerialComm implements iCommunication, Runnable {
 		int msgLen = 0;
 		msgLen = read(buffer);
 		
+		//Decode buffer
+		for(int i = 0; i < msgLen; i++) {
+			buffer[i] ^= 55;
+		}
+		
 		log("Message start");
 		for(int i = 0; i < msgLen; i++) {
-			log("byte in: " + buffer[i] + " " + (char)buffer[i]);
+			log("byte in: " + (buffer[i]) + " " + (char)(buffer[i]));
 		}
 		log("Message end");
 
@@ -122,7 +127,6 @@ public abstract class SerialComm implements iCommunication, Runnable {
 				if(foundNullTerminatorFlag && buffer[i] == 0)
 					storeMsg();
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

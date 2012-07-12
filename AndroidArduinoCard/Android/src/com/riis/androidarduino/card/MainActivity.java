@@ -19,6 +19,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends Activity {
 	private static String DEVICE_NAME = "AndroidArduinoBTRS232";
@@ -31,7 +32,7 @@ public class MainActivity extends Activity {
 	
 	private LinearLayout scannedContainer;
 	private ScrollView scannedScroll;
-	private ArrayList<ScannedObject> scanList;
+	private ArrayList<ScannedCreditCard> scanList;
 	
 	private volatile boolean keepRunning;
 	private boolean lastStatus;
@@ -53,7 +54,7 @@ public class MainActivity extends Activity {
 					
 					if(btComm.isMessageReady()) {
 						String barcode = btComm.readMessage();
-						appendMsgToMsgLog("Scanned: " + barcode);
+//						appendMsgToMsgLog("Scanned: " + barcode);
 						addItemToScanLog(barcode);
 					}
 		        	
@@ -126,52 +127,40 @@ public class MainActivity extends Activity {
 					msgLog.append(message + "\n");
 			    	logScrollContainer.fullScroll(View.FOCUS_DOWN);
 				} else if(tokens[0].equals("SCAN")) {
-					message = decodeMessage(message);
-					String[] tracks = message.split("[%?;+]+");
-			    	
-			    	ScannedObject scan = new ScannedObject();
-			    	scan.setScanDate(Calendar.getInstance().getTime());
-			    	if(tracks.length >= 1)
-			    		scan.setTrack1(tracks[0]);
-			    	else
-			    		scan.setTrack1("");
-			    	if(tracks.length >= 2)
-			    		scan.setTrack2(tracks[1]);
-			    	else
-			    		scan.setTrack2("");
-			    	if(tracks.length >= 3)
-			    		scan.setTrack3(tracks[2]);
-			    	else
-			    		scan.setTrack3("");
-			    	scanList.add(scan);
-			    	LinearLayout newScanView = new LinearLayout(context);
-			    	TextView scanTracks = new TextView(context);
-			    	TextView scanDate = new TextView(context);
-			    	
-			    	LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT, 1);
-			    	
-			    	scanTracks.setLayoutParams(params);
-			    	scanTracks.setText(scan.getTrack1() + "\n" + scan.getTrack2() + "\n" + scan.getTrack3());
-			    	
-			    	scanDate.setLayoutParams(params);
-			    	scanDate.setText(scan.getScanDate().toGMTString());
-			    	
-			    	newScanView.addView(scanTracks);
-			    	newScanView.addView(scanDate);
-			    	
-			    	scannedContainer.addView(newScanView, 0);
+			    	ScannedCreditCard scannedCard = new ScannedCreditCard();
+			    	scannedCard.parseData(message, 55);
+					boolean newCard = true;
+					for(ScannedCreditCard card : scanList) {
+						if(scannedCard.matches(card)) {
+							newCard = false;
+							break;
+						}
+					}
+					if(newCard) {
+				    	scanList.add(scannedCard);
+				    	LinearLayout newScanView = new LinearLayout(context);
+				    	TextView scanTracks = new TextView(context);
+				    	TextView scanDate = new TextView(context);
+				    	
+				    	LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT, 1);
+				    	
+				    	scanTracks.setLayoutParams(params);
+				    	scanTracks.setText(scannedCard.generateCardInfoString());
+				    	
+				    	scanDate.setLayoutParams(params);
+				    	scanDate.setText(scannedCard.getScanDate().toGMTString());
+				    	
+				    	newScanView.addView(scanTracks);
+				    	newScanView.addView(scanDate);
+				    	
+				    	scannedContainer.addView(newScanView, 0);
+					}
+					else
+						Toast.makeText(getApplicationContext(), "Card has already been read.", Toast.LENGTH_LONG).show();
 				}
 			}
 		};
 	}
-    
-    private String decodeMessage(String msg) {
-    	String decoded = "";
-    	for(int i = 0; i < msg.length(); i++) {
-    		decoded += (char)(msg.charAt(i) ^ 55);
-    	}
-    	return decoded;
-    }
     
     private void setupMsgLog() {
     	logScrollContainer = (ScrollView)findViewById(R.id.scrollView);
@@ -183,7 +172,7 @@ public class MainActivity extends Activity {
     private void setupScanLog() {
     	scannedContainer = (LinearLayout)findViewById(R.id.scannedItems);
     	scannedScroll = (ScrollView)findViewById(R.id.scannedScrollView);
-    	scanList = new ArrayList<ScannedObject>();
+    	scanList = new ArrayList<ScannedCreditCard>();
     }
     
     private void appendMsgToMsgLog(String str) {
