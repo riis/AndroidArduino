@@ -318,8 +318,8 @@ void sendTerminalMsgToBluetooth()
 {
     for(int i = 0; i < terminalMsgLen; i++) {
         byte encrypted = (byte)terminalMsg[i] ^ XOR_VAL;
-        bluetooth.sendByteWithFlag('S', encrypted);
+        bluetooth.sendByteWithFlag('S' ^ XOR_VAL, encrypted);
     }
     
-    bluetooth.sendByteWithFlag('N', (byte)0);
+    bluetooth.sendByteWithFlag('N' ^ XOR_VAL, (byte)0 ^ XOR_VAL);
 }
