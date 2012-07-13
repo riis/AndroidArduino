@@ -53,9 +53,8 @@ public class MainActivity extends Activity {
 					}
 					
 					if(btComm.isMessageReady()) {
-						String barcode = btComm.readMessage();
-//						appendMsgToMsgLog("Scanned: " + barcode);
-						addItemToScanLog(barcode);
+						String cardInfo = btComm.readMessage();
+						addItemToScanLog(cardInfo);
 					}
 		        	
 		        } else {
