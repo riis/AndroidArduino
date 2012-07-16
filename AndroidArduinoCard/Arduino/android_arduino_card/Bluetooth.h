@@ -6,7 +6,7 @@
 
 class Bluetooth {
 public:
-    Bluetooth(int RX, int TX, String deviceName, boolean shouldPrintLog);
+    Bluetooth(String deviceName, SoftwareSerial &bluetoothSerial, boolean shouldPrintLog);
     ~Bluetooth();
 	
     boolean beginBluetooth();
@@ -36,7 +36,7 @@ private:
 
     void logMsg(String message);
 
-    SoftwareSerial bluetoothSerial;
+    SoftwareSerial* bluetoothSerial;
     char connectionState;
     boolean shouldPrintLog;
     

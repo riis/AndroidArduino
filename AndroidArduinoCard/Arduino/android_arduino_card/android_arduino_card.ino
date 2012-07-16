@@ -23,7 +23,8 @@
 #define RX 11
 #define TX 3
 
-Bluetooth bluetooth(RX, TX, "AndroidArduinoBTRS232", true);
+SoftwareSerial bluetoothSerial(RX, TX);
+Bluetooth bluetooth("AndroidArduinoBTRS232", bluetoothSerial, true);
 
 int bluetoothState;
 int terminalState;
@@ -40,6 +41,7 @@ char terminalMsg[MSG_LENGTH_MAX];
 
 void setup()
 {
+    setUpIO();
     Serial.begin(115200);
 
     flushBuffersAndResetStates();
@@ -54,6 +56,12 @@ void setup()
     }
     
     Serial.print("\n\rWaiting for Bluetooth connection...\n\r");
+}
+
+void setUpIO()
+{
+    pinMode(RX, INPUT);
+    pinMode(TX, OUTPUT);    
 }
 
 void flushBuffersAndResetStates()

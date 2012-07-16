@@ -1,16 +1,13 @@
 #include "Bluetooth.h"
 
-Bluetooth::Bluetooth(int RX, int TX, String deviceName, boolean shouldPrintLog)
-    : bluetoothSerial(RX, TX, false)
+Bluetooth::Bluetooth(String deviceName, SoftwareSerial &bluetoothSerial, boolean shouldPrintLog)
 {
     this->shouldPrintLog = shouldPrintLog;
     this->deviceName = deviceName;
+    this->bluetoothSerial = &bluetoothSerial;
     
     connectionState = '0';
     allowReading = false;
-
-    pinMode(RX, INPUT);
-    pinMode(TX, OUTPUT);
 }
 
 Bluetooth::~Bluetooth() { }
@@ -31,7 +28,7 @@ boolean Bluetooth::beginBluetooth()
 
 boolean Bluetooth::sendSetupCommands()
 {
-    bluetoothSerial.begin(38400);
+    bluetoothSerial->begin(38400);
 
     if(!sendCommand("\r\n+STWMOD=0\r\n")) {return false;}           //Set the Bluetooth to slave mode
     if(!sendCommand("\r\n+STNA=" + deviceName + "\r\n")) {return false;} //Set the Bluetooth device name
@@ -42,14 +39,14 @@ boolean Bluetooth::sendSetupCommands()
     if(!sendCommand("\r\n+INQ=1\r\n")) {return false;}              //Make the Bluetooth device inquirable 
 	
     delay(2000);
-    bluetoothSerial.flush();
+    bluetoothSerial->flush();
 
     return true;
 }
 
 boolean Bluetooth::sendCommand(String command)
 {
-    bluetoothSerial.print(command);
+    bluetoothSerial->print(command);
     return waitForCommandOK();
 }
 
@@ -60,9 +57,9 @@ boolean Bluetooth::waitForCommandOK()
     
     while(msgChar != 'O')
     {
-        if(bluetoothSerial.available())
+        if(bluetoothSerial->available())
         {
-            msgChar = bluetoothSerial.read();
+            msgChar = bluetoothSerial->read();
         }
         
         if(millis() > startTime + 5000)
@@ -73,9 +70,9 @@ boolean Bluetooth::waitForCommandOK()
     
     while(msgChar != 'K')
     {
-        if(bluetoothSerial.available())
+        if(bluetoothSerial->available())
         {
-            msgChar = bluetoothSerial.read();
+            msgChar = bluetoothSerial->read();
         }
         
         if(millis() > startTime + 5000)
@@ -89,7 +86,7 @@ boolean Bluetooth::waitForCommandOK()
 
 void Bluetooth::sendByte(byte value)
 {
-    bluetoothSerial.write(value);
+    bluetoothSerial->write(value);
 }
 
 void Bluetooth::sendStringRaw(String message)
@@ -102,8 +99,8 @@ void Bluetooth::sendStringRaw(String message)
 
 void Bluetooth::sendByteWithFlag(char flag, byte value)
 {
-    bluetoothSerial.write(flag);
-    bluetoothSerial.write(value);
+    bluetoothSerial->write(flag);
+    bluetoothSerial->write(value);
 }
 
 void Bluetooth::sendStringWithFlags(String message)
@@ -144,13 +141,13 @@ byte Bluetooth::readByte()
 
 void Bluetooth::process()
 {
-    int charsAvailable = bluetoothSerial.available();
+    int charsAvailable = bluetoothSerial->available();
     
     if(charsAvailable)
     {
         while(charsAvailable)
         {
-            inputBuffer = inputBuffer + (char)bluetoothSerial.read();
+            inputBuffer = inputBuffer + (char)bluetoothSerial->read();
             charsAvailable -= 1;
         }
     
