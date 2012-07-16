@@ -1,8 +1,7 @@
 package com.riis.androidarduino.btrs232;
 
 import com.riis.androidarduino.btrs232.R;
-import com.riis.androidarduino.lib.BlueToothComm;
-import com.riis.androidarduino.lib.FlagMsg;
+import com.riis.androidarduino.lib.BluetoothComm;
 
 import android.app.Activity;
 import android.content.Context;
@@ -39,7 +38,7 @@ public class MainActivity extends Activity {
 	
 	protected Handler handler;
 
-	private BlueToothComm btComm;
+	private BluetoothComm btComm;
 	
 	private Runnable msgUpdateThread = new Runnable() { 
 		public void run() {
@@ -138,8 +137,6 @@ public class MainActivity extends Activity {
     	    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
     	        if (actionId == EditorInfo.IME_ACTION_SEND) {
     	            sendMessage();
-    	            //InputMethodManager inputManager =  (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-    	            //inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
     	            return true;
     	        }
     	        return false;
@@ -175,7 +172,7 @@ public class MainActivity extends Activity {
 		super.onResume();
 		
 		if(btComm == null) {
-			btComm = new BlueToothComm(this, DEVICE_NAME);
+			btComm = new BluetoothComm(this, DEVICE_NAME);
 		} else {
 			btComm.resumeConnection();
 		}
@@ -194,7 +191,7 @@ public class MainActivity extends Activity {
     
     
     
-    public BlueToothComm getBlueToothComm() {
+    public BluetoothComm getBlueToothComm() {
     	return btComm;
     }
 }
