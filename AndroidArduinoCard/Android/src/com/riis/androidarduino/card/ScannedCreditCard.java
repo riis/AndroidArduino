@@ -20,15 +20,12 @@ public class ScannedCreditCard {
 	private String track2;
 	private String track3;
 	
-	private char formatCode;
 	private String cardNumber;
 	private String cardType;
 	private String firstName;
 	private String lastName;
 	private String expDate;
 	private String serviceCode;
-	private String discretionaryData;
-	
 	
 	private Date scanDate;
 	
@@ -121,7 +118,6 @@ public class ScannedCreditCard {
 		trackSplitREGEX.append(T1_FIELD_SEPERATOR);
 		trackSplitREGEX.append("]+");
 		String[] fields = track1.split(trackSplitREGEX.toString());
-		formatCode = fields[0].charAt(0);
 		cardNumber = fields[0].substring(1);
 		getCardTypeFromNumber();
 		
@@ -129,9 +125,15 @@ public class ScannedCreditCard {
 		lastName = nameInfo[0];
 		firstName = nameInfo[1];
 		
+		if(firstName == null) {
+			firstName = "";
+		}
+		if(lastName == null) {
+			lastName = "";
+		}
+		
 		expDate = fields[2].substring(0, 4);
 		serviceCode = fields[2].substring(4, 7);
-		discretionaryData = fields[2].substring(7);
 	}
 	
 	private void getCardTypeFromNumber() {
@@ -160,7 +162,6 @@ public class ScannedCreditCard {
 		
 		expDate = fields[1].substring(0, 4);
 		serviceCode = fields[1].substring(4, 7);
-		discretionaryData = fields[1].substring(7);
 	}
 	
 	private void parseThirdTrack() {
@@ -171,9 +172,26 @@ public class ScannedCreditCard {
 		StringBuilder cardInfo = new StringBuilder();
 		cardInfo.append("Name: " + firstName + " " + lastName + "\n");
 		cardInfo.append("Card Type: " + cardType + "\n");
-		cardInfo.append("Card Number: " + cardNumber + "\n");
+		cardInfo.append("Card Number: " + generateSecureCardNumberString() + "\n");
 		cardInfo.append("Exp. Date: " + expDate.substring(2) + "/" + expDate.substring(0, 2) + "\n");
 		cardInfo.append("Service Code: " + serviceCode + "\n");
 		return cardInfo.toString();
+	}
+	
+	public String generateSecureCardNumberString() {
+		if(cardNumber == null || cardNumber.length() <= 0) {
+			return "";
+		}
+		
+		int numberLen = cardNumber.length();
+		int starsLen = numberLen - 4;
+		
+		StringBuilder builder = new StringBuilder();
+		
+		for(int i = 0; i < starsLen; i++) {
+			builder.append('*');
+		}
+		
+		return builder.toString() + cardNumber.substring(starsLen);
 	}
 }
