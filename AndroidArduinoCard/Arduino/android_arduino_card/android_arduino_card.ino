@@ -1,5 +1,8 @@
 #include <SoftwareSerial.h>
-#include "Bluetooth.h"
+#include <Bluetooth.h>
+#include <ArduinoUnit.h>
+
+#define TESTING 1
 
 //Encryption defines
 #define XOR_VAL 55
@@ -39,24 +42,32 @@ char bluetoothMsg[MSG_LENGTH_MAX];
 int terminalMsgLen;
 char terminalMsg[MSG_LENGTH_MAX];
 
+HardwareSerial* logSerial;
+HardwareSerial* cardSerial;
+
+#if TESTING == 0
 void setup()
 {
+    logSerial = &Serial;
+    cardSerial = &Serial1;
+    
     setUpIO();
-    Serial.begin(115200);
+    logSerial->begin(115200);
 
     flushBuffersAndResetStates();
 
-    Serial.print("Initializing card reader serial port...\n\r");    
-    Serial1.begin(9600);
+    logSerial->print("Initializing card reader serial port...\n\r");    
+    cardSerial->begin(9600);
     
     if(!bluetooth.beginBluetooth())
     {
-        Serial.println("\n\n\rHalting program...");
+        logSerial->println("\n\n\rHalting program...");
         while(true) { }
     }
     
-    Serial.print("\n\rWaiting for Bluetooth connection...\n\r");
+    logSerial->print("\n\rWaiting for Bluetooth connection...\n\r");
 }
+#endif
 
 void setUpIO()
 {
@@ -107,6 +118,7 @@ void resetTerminalState()
     terminalState = WAITING_FOR_START;
 }
 
+#if TESTING == 0
 void loop()
 {    
     bluetooth.process();
@@ -149,19 +161,20 @@ void loop()
         }   
     }
 }
+#endif
 
 void printConnectedMessage()
 {
-    Serial.print("Connected! Start scanning!\n\n\r");
+    logSerial->print("Connected! Start scanning!\n\n\r");
 }
 
 void printDisconnectedMessage()
 {
-    Serial.print("\n\rDisconnected! Halting communications...");
+    logSerial->print("\n\rDisconnected! Halting communications...");
     
     flushBuffersAndResetStates();
     
-    Serial.print("\n\rWaiting for Bluetooth connection...\n\r");
+    logSerial->print("\n\rWaiting for Bluetooth connection...\n\r");
 }
 
 byte tryToReadBluetoothMsgInto(byte msgBuf[])
@@ -178,11 +191,11 @@ byte tryToReadBluetoothMsgInto(byte msgBuf[])
 
 byte tryToReadTerminalMsgInto(byte msgBuf[])
 {
-    byte msgLen = Serial1.available();
+    byte msgLen = cardSerial->available();
     
     for(int i = 0; i < msgLen && i < MSG_LENGTH_MAX; i++)
     {
-        msgBuf[i] = Serial1.read();
+        msgBuf[i] = cardSerial->read();
     }
    
     return msgLen; 
@@ -221,7 +234,7 @@ void runBluetoothStateMachine(char letter)
             else
             {
                 resetBluetoothState();
-                Serial.println("WARNING: Received null flag, but did not receive null value. Continuing string read.");
+                logSerial->println("WARNING: Received null flag, but did not receive null value. Continuing string read.");
             }
         default:
           resetBluetoothState();
@@ -256,7 +269,7 @@ void appendLetterOnBluetoothMsg(char letter)
 
 void stopAndSendBluetoothMsg()
 {
-    Serial.println("Received string from Bluetooth connection, ignoring for the time being");
+    logSerial->println("Received string from Bluetooth connection, ignoring for the time being");
     
     flushBluetoothMsgBuffer();
     resetBluetoothState();
@@ -266,14 +279,14 @@ void stopAndSendBluetoothMsg()
 
 //void sendBluetoothMsgToTerminal()
 //{
-//    Serial1.print("Connected device: ");
+//    cardSerial->print("Connected device: ");
 //    
 //    for(int i = 0; i < bluetoothMsgLen; i++)
 //    {
-//        Serial1.print(bluetoothMsg[i]);
+//        cardSerial->print(bluetoothMsg[i]);
 //    }
 //  
-//    Serial1.print("\n\r");
+//    cardSerial->print("\n\r");
 //}
 
 void runTerminalStateMachine(char letter)
@@ -311,11 +324,11 @@ void appendLetterOnTerminalMsg(char letter)
 
 void stopAndSendTerminalMsg()
 {
-    Serial.print("Received card data: ");
+    logSerial->print("Received card data: ");
     for(int i = 0; i < terminalMsgLen-1; i++) {
-        Serial.print(terminalMsg[i]);
+        logSerial->print(terminalMsg[i]);
     }
-    Serial.print(". Sending it over Bluetooth...\r\n");
+    logSerial->print(". Sending it over Bluetooth...\r\n");
     
     sendTerminalMsgToBluetooth();
     flushTerminalMsgBuffer();
@@ -331,3 +344,102 @@ void sendTerminalMsgToBluetooth()
     
     bluetooth.sendByteWithFlag('N' ^ XOR_VAL, (byte)0 ^ XOR_VAL);
 }
+
+#if TESTING == 1
+
+#include "MockSerial.h"
+
+#define LIGHT_SUCCESS 8
+#define LIGHT_RUNNING 9
+#define LIGHT_FAILED  10
+
+MockSerial mockSerial = MockSerial();
+
+TestSuite suite;
+
+void setup() {
+    logSerial = &mockSerial;
+    setUpStatusLightsIO();
+}
+
+void setUpStatusLightsIO() {
+    pinMode(LIGHT_SUCCESS, OUTPUT);
+    pinMode(LIGHT_RUNNING, OUTPUT);
+    pinMode(LIGHT_FAILED, OUTPUT); 
+}
+
+test(inputMsgBufferIsFlushed) {
+    flushIncomingMsgBuffer();
+    
+    for(int i = 0; i < MSG_LENGTH_MAX; i++)
+    {
+        assertEquals(incomingMsgBuf[i], 0);
+    }
+}
+
+test(bluetoothMsgBufferIsFlushed) {
+    flushBluetoothMsgBuffer();
+    
+    for(int i = 0; i < MSG_LENGTH_MAX; i++)
+    {
+        assertEquals(bluetoothMsg[i], 0);
+    }
+}
+
+test(terminalMsgBufferIsFlushed) {
+    flushTerminalMsgBuffer();
+    
+    for(int i = 0; i < MSG_LENGTH_MAX; i++)
+    {
+        assertEquals(terminalMsg[i], 0);
+    }
+}
+
+test(bluetoothStateIsReset) {
+    resetBluetoothState();
+    
+    assertEquals(bluetoothState, RECEIVING_FLAG);
+}
+
+test(terminalStateIsReset) {
+    resetTerminalState();
+    
+    assertEquals(terminalState, WAITING_FOR_START);
+}
+
+void loop()
+{
+    if(!suite.hasCompleted()) {
+        setStatusLightsToRunning();
+    }
+    
+    suite.run();
+    
+    if(suite.hasCompleted()) {
+        if(suite.getFailureCount() > 0) {
+            setStatusLightsToFailed();
+        } else {
+            setStatusLightsToSuccess();
+        }
+    }
+}
+
+void setStatusLightsToRunning() {
+    digitalWrite(LIGHT_SUCCESS, LOW);
+    digitalWrite(LIGHT_RUNNING, HIGH);
+    digitalWrite(LIGHT_FAILED, LOW);
+}
+
+void setStatusLightsToSuccess() {
+    digitalWrite(LIGHT_SUCCESS, HIGH);
+    digitalWrite(LIGHT_RUNNING, LOW);
+    digitalWrite(LIGHT_FAILED, LOW);
+}
+
+void setStatusLightsToFailed() {
+    digitalWrite(LIGHT_SUCCESS, LOW);
+    digitalWrite(LIGHT_RUNNING, LOW);
+    digitalWrite(LIGHT_FAILED, HIGH);
+}
+
+#endif
