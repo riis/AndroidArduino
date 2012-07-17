@@ -8,7 +8,7 @@ void MockSerial::end() {
 
 }
 
-void MockSerial::begin(uint32_t baud) {
+void MockSerial::begin(int baud) {
     _baud = baud;
 }
 
@@ -24,19 +24,19 @@ int MockSerial::read() {
     }
 }
 
-size_t MockSerial::write(uint8_t value) {
+size_t MockSerial::write(byte value) {
     _out_buf[_out_ptr] = value;
     _out_ptr++;
 }
 
-void MockSerial::write(uint8_t * array_ptr, uint32_t length) {
+void MockSerial::write(byte * array_ptr, int length) {
     for (uint32_t i = 0; i < length; i++) {
         _out_buf[_out_ptr + i] = *(array_ptr + i);
     }
     _out_ptr += length;
 }
 
-void MockSerial::set_input_buffer(uint8_t * new_buf, uint16_t size) {
+void MockSerial::set_input_buffer(byte * new_buf, word size) {
     _in_buf = new_buf;
     _in_ptr = 0;
     _size = size;

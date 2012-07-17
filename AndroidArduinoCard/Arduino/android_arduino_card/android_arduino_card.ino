@@ -2,7 +2,7 @@
 #include <Bluetooth.h>
 #include <ArduinoUnit.h>
 
-#define TESTING 1
+#define TESTING 0
 
 //Encryption defines
 #define XOR_VAL 55
@@ -131,18 +131,7 @@ void loop()
         }
         
         flushIncomingMsgBuffer();
-        byte msgLen = tryToReadBluetoothMsgInto(incomingMsgBuf);
-	if(msgLen > 0)
-        {
-            for(int i = 0; i < msgLen; i++)
-            {
-                byte msg = incomingMsgBuf[i];
-                runBluetoothStateMachine((char)msg);
-            }
-        }
-        
-        flushIncomingMsgBuffer();
-        msgLen = tryToReadTerminalMsgInto(incomingMsgBuf);
+        int msgLen = tryToReadTerminalMsgInto(incomingMsgBuf);
         if(msgLen > 0)
         {
             for(int i = 0; i < msgLen; i++)
@@ -177,18 +166,6 @@ void printDisconnectedMessage()
     logSerial->print("\n\rWaiting for Bluetooth connection...\n\r");
 }
 
-byte tryToReadBluetoothMsgInto(byte msgBuf[])
-{
-    byte msgLen = bluetooth.bytesAvailable();
-    
-    for(int i = 0; i < msgLen && i < MSG_LENGTH_MAX; i++)
-    {
-        msgBuf[i] = bluetooth.readByte();
-    }
-   
-    return msgLen; 
-}
-
 byte tryToReadTerminalMsgInto(byte msgBuf[])
 {
     byte msgLen = cardSerial->available();
@@ -200,94 +177,6 @@ byte tryToReadTerminalMsgInto(byte msgBuf[])
    
     return msgLen; 
 }
-
-void runBluetoothStateMachine(char letter)
-{
-    switch(bluetoothState)
-    {
-        case RECEIVING_FLAG:
-            if(isLetterStringFlag(letter))
-            {
-                bluetoothState = RECEIVING_STRING_CHAR;
-            }
-            else if(isLetterEndFlag(letter))
-            {
-                bluetoothState = RECEIVING_END_CODE;
-            }
-            break;
-        case RECEIVING_STRING_CHAR:
-            if(!isLetterEndCode(letter))
-            {
-                resetBluetoothState();
-                appendLetterOnBluetoothMsg(letter);
-            }
-            else
-            {
-                stopAndSendBluetoothMsg();
-            }
-            break;
-        case RECEIVING_END_CODE:
-            if(isLetterEndCode(letter))
-            {
-                stopAndSendBluetoothMsg();
-            }
-            else
-            {
-                resetBluetoothState();
-                logSerial->println("WARNING: Received null flag, but did not receive null value. Continuing string read.");
-            }
-        default:
-          resetBluetoothState();
-          break;
-    }
-}
-
-boolean isLetterStringFlag(char letter)
-{
-    return (letter == 'S');
-}
-
-boolean isLetterEndFlag(char letter)
-{
-    return (letter == 'N');
-}
-
-boolean isLetterEndCode(char letter)
-{
-    byte charNum = (byte) letter;
-    return (charNum == STRING_END); 
-}
-
-void appendLetterOnBluetoothMsg(char letter)
-{
-    if(bluetoothMsgLen < MSG_LENGTH_MAX)
-    {
-        bluetoothMsg[bluetoothMsgLen] = letter;
-        bluetoothMsgLen++;
-    }
-}
-
-void stopAndSendBluetoothMsg()
-{
-    logSerial->println("Received string from Bluetooth connection, ignoring for the time being");
-    
-    flushBluetoothMsgBuffer();
-    resetBluetoothState();
-    
-//    sendBluetoothMsgToTerminal();
-}
-
-//void sendBluetoothMsgToTerminal()
-//{
-//    cardSerial->print("Connected device: ");
-//    
-//    for(int i = 0; i < bluetoothMsgLen; i++)
-//    {
-//        cardSerial->print(bluetoothMsg[i]);
-//    }
-//  
-//    cardSerial->print("\n\r");
-//}
 
 void runTerminalStateMachine(char letter)
 {
@@ -345,6 +234,10 @@ void sendTerminalMsgToBluetooth()
     bluetooth.sendByteWithFlag('N' ^ XOR_VAL, (byte)0 ^ XOR_VAL);
 }
 
+//////////////////
+// UNIT TESTING //
+//////////////////
+
 #if TESTING == 1
 
 #include "MockSerial.h"
@@ -368,44 +261,84 @@ void setUpStatusLightsIO() {
     pinMode(LIGHT_FAILED, OUTPUT); 
 }
 
-test(inputMsgBufferIsFlushed) {
-    flushIncomingMsgBuffer();
+//The tests
+
+test(doesFlushAndResetWork) {
+    fillBuffer(incomingMsgBuf);
+    fillBuffer((byte*)terminalMsg);
+    fillBuffer((byte*)bluetoothMsg);
+    terminalState = 17;
+    bluetoothState = 17;
     
-    for(int i = 0; i < MSG_LENGTH_MAX; i++)
-    {
-        assertEquals(incomingMsgBuf[i], 0);
+    flushBuffersAndResetStates();
+    
+    assertTrue(isBufferEmpty(incomingMsgBuf));
+    assertTrue(isBufferEmpty((byte*)terminalMsg));
+    assertTrue(isBufferEmpty((byte*)bluetoothMsg));
+    
+    assertEquals(bluetoothState, RECEIVING_FLAG);
+    assertEquals(terminalState, WAITING_FOR_START);
+}
+
+void fillBuffer(byte buffer[]) {
+    for(int i = 0; i < MSG_LENGTH_MAX; i++) {
+        buffer[i] = i;   
     }
 }
 
-test(bluetoothMsgBufferIsFlushed) {
-    flushBluetoothMsgBuffer();
+boolean isBufferEmpty(byte buffer[]) {
+    boolean isEmpty = true;
     
     for(int i = 0; i < MSG_LENGTH_MAX; i++)
     {
-        assertEquals(bluetoothMsg[i], 0);
+        if(buffer[i] != 0) {
+            isEmpty = false;
+        }
     }
+    
+    return isEmpty;
 }
 
-test(terminalMsgBufferIsFlushed) {
-    flushTerminalMsgBuffer();
+test(printConnectedMessageIsCorrect) {
+    printConnectedMessage();
     
-    for(int i = 0; i < MSG_LENGTH_MAX; i++)
-    {
-        assertEquals(terminalMsg[i], 0);
-    }
+    String correctMsg = "Connected! Start scanning!\n\n\r";
+    String sentMsg = (char*)mockSerial._out_buf;
+
+    assertTrue(correctMsg == sentMsg); 
+ 
+    mockSerial.reset();   
 }
 
-test(bluetoothStateIsReset) {
-    resetBluetoothState();
+test(printDisconnectedMessageIsCorrect) {
+    printDisconnectedMessage();
     
+    String correctMsg = "\n\rDisconnected! Halting communications...\n\rWaiting for Bluetooth connection...\n\r";
+    String sentMsg = (char*)mockSerial._out_buf;
+
+    assertTrue(correctMsg == sentMsg); 
+ 
+    mockSerial.reset();
+}
+
+test(printDisconnectedMessageFlushesAndResets) {
+    fillBuffer(incomingMsgBuf);
+    fillBuffer((byte*)terminalMsg);
+    fillBuffer((byte*)bluetoothMsg);
+    terminalState = 17;
+    bluetoothState = 17;
+    
+    printDisconnectedMessage();
+    
+    assertTrue(isBufferEmpty(incomingMsgBuf));
+    assertTrue(isBufferEmpty((byte*)terminalMsg));
+    assertTrue(isBufferEmpty((byte*)bluetoothMsg));
+    
+    assertEquals(terminalState, WAITING_FOR_START);
     assertEquals(bluetoothState, RECEIVING_FLAG);
 }
 
-test(terminalStateIsReset) {
-    resetTerminalState();
-    
-    assertEquals(terminalState, WAITING_FOR_START);
-}
+//Running the tests and updating the status lights
 
 void loop()
 {
