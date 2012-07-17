@@ -2,7 +2,7 @@
 #include <Bluetooth.h>
 #include <ArduinoUnit.h>
 
-#define TESTING 1
+#define TESTING 0
 
 //Encryption defines
 #if TESTING == 0
