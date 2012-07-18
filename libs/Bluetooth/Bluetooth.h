@@ -21,6 +21,8 @@ public:
 	
     int bytesAvailable();
     byte readByte();
+	byte forceReadByte();
+	byte peekByte();
 	
     void process();
     boolean isConnected();

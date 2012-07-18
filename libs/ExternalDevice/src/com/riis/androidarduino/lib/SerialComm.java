@@ -10,6 +10,8 @@ import android.content.Context;
 import android.util.Log;
 
 public abstract class SerialComm implements iCommunication, Runnable {
+	private static final byte STRING_END_CODE= (byte) 255;
+	
 	protected boolean shouldLog;
 	
 	protected LinkedBlockingQueue<Byte> inputBuffer;
@@ -42,12 +44,10 @@ public abstract class SerialComm implements iCommunication, Runnable {
 			write(new byte[] {'S', messageBytes[i]});
 		}
 		//Send the null terminator to signify the end of the string.
-		write(new byte[] {'N', (byte) 0});
+		write(new byte[] {'N', STRING_END_CODE});
 	}
 	
-	public void sendByteWithFlag(char flag, byte value) {
-		log("Sending byte '" + value + "'  with flag '" + flag + "'.");
-		
+	public void sendByteWithFlag(char flag, byte value) {		
 		write(new byte[] {(byte) flag, value});
 	}
 	
@@ -55,6 +55,7 @@ public abstract class SerialComm implements iCommunication, Runnable {
 	public void write(byte[] byteBuffer) {
 		try {
 			for(int i = 0; i < byteBuffer.length; i++) {
+				log("Sending byte '" + byteBuffer[i] + " " + (char)byteBuffer[i]);
 				outputStream.write(byteBuffer[i]);
 			}
 		} catch (IOException e) {
@@ -107,12 +108,7 @@ public abstract class SerialComm implements iCommunication, Runnable {
 	protected void checkAndHandleMessages(byte[] buffer) {
 		int msgLen = 0;
 		msgLen = read(buffer);
-		
-		//Decode buffer
-		for(int i = 0; i < msgLen; i++) {
-			buffer[i] ^= 55;
-		}
-		
+
 		log("Message start");
 		for(int i = 0; i < msgLen; i++) {
 			log("byte in: " + (buffer[i]) + " " + (char)(buffer[i]));
@@ -124,7 +120,7 @@ public abstract class SerialComm implements iCommunication, Runnable {
 				inputBuffer.put(buffer[i]);
 				if((char)buffer[i] == 'N')
 					foundNullTerminatorFlag = true;
-				if(foundNullTerminatorFlag && buffer[i] == 0)
+				if(foundNullTerminatorFlag && buffer[i] == STRING_END_CODE)
 					storeMsg();
 			} catch (InterruptedException e) {
 				e.printStackTrace();

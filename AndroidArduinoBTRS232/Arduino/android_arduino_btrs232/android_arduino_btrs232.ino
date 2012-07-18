@@ -1,16 +1,23 @@
 #include <SoftwareSerial.h>
-//#include <Bluetooth.h>
+#include <Bluetooth.h>
 
-#define STRING_END 0
+#define TESTING 0
+
+#if TESTING == 1
+    #include <ArduinoUnit.h>
+    #include <Mocks.h>
+#endif
+
+#define STRING_END 255
 #define RETURN_CHAR 13
 #define MSG_LENGTH_MAX 256
 
-//BluetoothStates for the Bluetooth BluetoothState machine
+//BluetoothStates for the Bluetooth state machine
 #define RECEIVING_FLAG        1
 #define RECEIVING_STRING_CHAR 2
 #define RECEIVING_END_CODE    3
 
-//BluetoothStates for the terminal BluetoothState machine
+//BluetoothStates for the terminal state machine
 #define RECEIVING_CHARS 1
 
 //RX and TX pin numbers
@@ -18,8 +25,7 @@
 #define TX 3
 
 SoftwareSerial bluetoothSerial(RX, TX);
-
-//Bluetooth bluetooth(RX, TX, "AndroidArdinoRS232", true);
+Bluetooth bluetooth("AndroidArduinoBTRS232", bluetoothSerial, true);
 
 int bluetoothState;
 int terminalState;
@@ -34,102 +40,39 @@ char bluetoothMsg[MSG_LENGTH_MAX];
 int terminalMsgLen;
 char terminalMsg[MSG_LENGTH_MAX];
 
+HardwareSerial* logSerial;
+HardwareSerial* terminalSerial;
+
+#if TESTING == 0
 void setup()
 {
-//    Serial.begin(115200);
-//    bluetooth.beginBluetooth();
-
+    logSerial = &Serial;
+    terminalSerial = &Serial1;
+    
     setUpIO();
-    flushBuffersAndResetStates();
+    logSerial->begin(115200); 
     
-    pinMode(10, OUTPUT);
-    digitalWrite(10, HIGH);
+    flushBuffersAndResetStates();   
     
-    Serial.begin(115200);    
-    
-    Serial.println("Powering up the Bluetooth device...");
-    if(!setUpBluetoothConnection())
+    logSerial->println("Initializing terminal serial port...");    
+    terminalSerial->begin(9600);
+    terminalSerial->print('\f');
+
+    if(!bluetooth.beginBluetooth())
     {
-        Serial.println("Bluetooth setup failed!");
-        Serial.println("Make sure it's connected properly and reset the Arduino board.");
-//        while(true) { }
+        logSerial->println("\n\n\rHalting program...");
+        while(true) { }
     }
     
-    Serial.println("Bluetooth device ready, connect to \"AndroidArduinoBTRS232\".");
-
-    Serial.println("Initializing other serial port...");    
-    Serial1.begin(9600);
-//    Serial1.print('\f');
-//    Serial1.print("Waiting for Bluetooth connection...\n\r");
-    
-    Serial.print("Waiting for Bluetooth connection...\n\r");
+    logSerial->print("Waiting for Bluetooth connection...\n\r");
+    terminalSerial->print("Waiting for Bluetooth connection...\n\r");
 }
+#endif
 
 void setUpIO()
 {    
     pinMode(RX, INPUT);
     pinMode(TX, OUTPUT);
-}
-
-boolean setUpBluetoothConnection()
-{
-    bluetoothSerial.begin(38400);
-
-    if(!sendCommandToBluetooth("\r\n+STWMOD=0\r\n")) {return false;} //Set the Bluetooth to slave mode
-    
-    if(!sendCommandToBluetooth("\r\n+STNA=AndroidArduinoBTRS232\r\n")) {return false;} //Set the Bluetooth name to "AndroidArduinoBTRS232"
-    if(!sendCommandToBluetooth("\r\n+STOAUT=1\r\n")) {return false;} //Permit a paired device to connect
-    if(!sendCommandToBluetooth("\r\n+STAUTO=0\r\n")) {return false;} //No auto connection
-    
-    delay(2000);    
-    if(!sendCommandToBluetooth("\r\n+INQ=1\r\n")) {return false;} //Make the Bluetooth device inquirable 
-
-    delay(2000);
-    bluetoothSerial.flush();
-    
-    return true;
-}
-
-boolean sendCommandToBluetooth(char command[])
-{
-    bluetoothSerial.print(command);
-    return waitForCommandOk();
-}
-
-boolean waitForCommandOk()
-{
-    unsigned long startTime = millis();
-    char msgChar = '\0';
-    
-    //Wait for O
-    while(msgChar != 'O')
-    {
-        if(bluetoothSerial.available())
-        {
-            msgChar = bluetoothSerial.read();
-        }
-        
-        if(millis() > startTime + 5000)
-        {
-            return false; //Timed out, return that the command failed
-        }
-    }
-    
-    //Wait for K
-    while(msgChar != 'K')
-    {
-        if(bluetoothSerial.available())
-        {
-            msgChar = bluetoothSerial.read();
-        }
-        
-        if(millis() > startTime + 5000)
-        {
-            return false; //Timed out, return that the command failed
-        }
-    }
- 
-    return true;
 }
 
 void flushBuffersAndResetStates()
@@ -175,23 +118,12 @@ void resetTerminalState()
     terminalState = RECEIVING_CHARS;
 }
 
+#if TESTING == 0
 void loop()
 {    
-    //TODO: FIGURE OUT BT CONNECTION STATE STUFF
+    bluetooth.process();
     
-//    while(1)
-//    {
-//        if(bluetooth.bytesAvailable())
-//        {
-//            Serial.print((char)bluetooth.readByte());
-//        }   
-//    }
-
-    if(Serial1.available()) {
-        Serial.print(Serial1.read());   
-    }
-    
-    if(true) {//ISBTCONNECTED) {
+    if(bluetooth.isConnected()) {
         if(!lastConnectionState)
         {
             printConnectedMessage();
@@ -231,36 +163,37 @@ void loop()
         }   
     }
 }
+#endif
 
 void printConnectedMessage()
 {
-    Serial.print("\n\rConnected! Communications ready on the terminal\n\n\r");
+    logSerial->print("\n\rConnected! Communications ready on the terminal\n\n\r");
     
-//    Serial1.print('\f');
-//    Serial1.print("Bluetooth connected!, monitoring for messages\n\r");
-//    Serial1.print("To send messages, type a line, then press enter.\n\n\r");
+    terminalSerial->print('\f');
+    terminalSerial->print("Bluetooth connected!, monitoring for messages\n\r");
+    terminalSerial->print("To send messages, type a line, then press enter.\n\n\r");
 }
 
 void printDisconnectedMessage()
 {
-    Serial.print("Disconnected! Halting communications...");
+    logSerial->print("Disconnected! Halting communications...");
  
-//    Serial1.print('\f');
-//    Serial1.print("The Bluetooth connection was lost!");
-//    Serial1.print("\n\rWaiting for Bluetooth connection...");
+    terminalSerial->print('\f');
+    terminalSerial->print("The Bluetooth connection was lost!");
+    terminalSerial->print("\n\rWaiting for Bluetooth connection...");
     
     flushBuffersAndResetStates();
     
-    Serial.print("\n\rWaiting for Bluetooth connection...\n\r");
+    logSerial->print("\n\rWaiting for Bluetooth connection...\n\r");
 }
 
 byte tryToReadBluetoothMsgInto(byte msgBuf[])
 {
-    byte msgLen = bluetoothSerial.available();
+    byte msgLen = bluetooth.bytesAvailable();
     
     for(int i = 0; i < msgLen && i < MSG_LENGTH_MAX; i++)
     {
-        msgBuf[i] = bluetoothSerial.read();
+        msgBuf[i] = bluetooth.readByte();
     }
    
     return msgLen; 
@@ -268,11 +201,11 @@ byte tryToReadBluetoothMsgInto(byte msgBuf[])
 
 byte tryToReadTerminalMsgInto(byte msgBuf[])
 {
-    byte msgLen = Serial1.available();
+    byte msgLen = terminalSerial->available();
     
     for(int i = 0; i < msgLen && i < MSG_LENGTH_MAX; i++)
     {
-        msgBuf[i] = Serial1.read();
+        msgBuf[i] = terminalSerial->read();
     }
    
     return msgLen; 
@@ -284,10 +217,10 @@ void echoTerminalMessage(byte msgBuf[], byte msgLen)
     {
         if((char)msgBuf[i] == '\r')
         {
-             Serial.print('\n');
+             terminalSerial->print('\n');
         }
         
-        Serial.print((char)msgBuf[i]);
+        terminalSerial->print((char)msgBuf[i]);
     }
 }
 
@@ -324,7 +257,7 @@ void runBluetoothStateMachine(char letter)
             else
             {
                 resetBluetoothState();
-                Serial.println("WARNING: Received null flag, but did not receive null value. Continuing string read.");
+                logSerial->println("WARNING: Received null flag, but did not receive null value. Continuing string read.");
             }
         default:
           resetBluetoothState();
@@ -359,7 +292,7 @@ void appendLetterOnBluetoothMsg(char letter)
 
 void stopAndSendBluetoothMsg()
 {
-    Serial.println("Received string from Bluetooth connection, printing it to terminal");
+    logSerial->println("Received string from Bluetooth connection, printing it to terminal");
     
     sendBluetoothMsgToTerminal();
     
@@ -369,14 +302,14 @@ void stopAndSendBluetoothMsg()
 
 void sendBluetoothMsgToTerminal()
 {
-//    Serial1.print("Connected device: ");
-//    
-//    for(int i = 0; i < bluetoothMsgLen; i++)
-//    {
-//        Serial1.print(bluetoothMsg[i]);
-//    }
-//  
-//    Serial1.print("\n\r");
+    terminalSerial->print("Connected device: ");
+    
+    for(int i = 0; i < bluetoothMsgLen; i++)
+    {
+        terminalSerial->print(bluetoothMsg[i]);
+    }
+  
+    terminalSerial->print("\n\r");
 }
 
 void runTerminalStateMachine(char letter)
@@ -408,7 +341,7 @@ void appendLetterOnTerminalMsg(char letter)
 
 void stopAndSendTerminalMsg()
 {
-    Serial.println("Received string from terminal, sending it across Bluetooth");
+    logSerial->println("Received string from terminal, sending it across Bluetooth");
     
     sendTerminalMsgToBluetooth();
     flushTerminalMsgBuffer();
@@ -417,16 +350,9 @@ void stopAndSendTerminalMsg()
 
 void sendTerminalMsgToBluetooth()
 {
-    bluetoothSerial.write((byte)'q');
-    
     for(int i = 0; i < terminalMsgLen; i++) {
-        char thingy = terminalMsg[i];
-        if(thingy != 'T') {
-            bluetoothSerial.write((byte)'S');
-            bluetoothSerial.write((byte)thingy);
-        }
+        bluetooth.sendByteWithFlag('S', (byte)terminalMsg[i]);
     }
     
-    bluetoothSerial.write((byte)'N'); 
-    bluetoothSerial.write((byte)0);
+    bluetooth.sendByteWithFlag('N', 255);
 }

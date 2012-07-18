@@ -110,7 +110,7 @@ void Bluetooth::sendStringWithFlags(String message)
         sendByteWithFlag('S', message[i]);
     }
     
-    sendByteWithFlag('N', 0);
+    sendByteWithFlag('N', 255);
 }
 
 int Bluetooth::bytesAvailable()
@@ -139,19 +139,36 @@ byte Bluetooth::readByte()
     }
 }
 
+byte Bluetooth::forceReadByte()
+{
+	byte toRead = (byte)inputBuffer[0];
+	inputBuffer = inputBuffer.substring(1);
+	return toRead;
+}
+
+byte Bluetooth::peekByte()
+{
+	return (byte)inputBuffer[0];
+}
+
 void Bluetooth::process()
 {
     int charsAvailable = bluetoothSerial->available();
     
-    if(charsAvailable)
+    if(charsAvailable > 1)
     {
-        while(charsAvailable)
+        while(charsAvailable > 1)
         {
-            inputBuffer = inputBuffer + (char)bluetoothSerial->read();
-            charsAvailable -= 1;
+			char charRead = (char)bluetoothSerial->read();
+            inputBuffer.concat(String(charRead));
+			
+			charRead = (char)bluetoothSerial->read();
+            inputBuffer.concat(String(charRead));
+			
+            charsAvailable -= 2;
         }
     
-        if((isStringWithinBuffer("\r\n+") >= 0) || (isStringWithinBuffer("CON") >= 0))
+        if((isStringWithinBuffer("\r\n") >= 0) || (isStringWithinBuffer("CO") >= 0))
         {
             allowReading = false;
             
@@ -168,7 +185,7 @@ void Bluetooth::process()
                 inputBuffer = inputBuffer.substring(0, conMsgStart) + inputBuffer.substring(conMsgStart + 10);
             }
         }
-        else if(allowReading && inputBuffer.length() < 3)
+        else if(allowReading && inputBuffer.length() < 2)
         {
             allowReading = false;   
         }
