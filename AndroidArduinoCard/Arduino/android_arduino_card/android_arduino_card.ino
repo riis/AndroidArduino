@@ -1,8 +1,12 @@
 #include <SoftwareSerial.h>
 #include <Bluetooth.h>
-#include <ArduinoUnit.h>
 
 #define TESTING 0
+
+#if TESTING == 1
+    #include <Mocks.h>
+    #include <ArduinoUnit.h>
+#endif
 
 //Encryption defines
 #if TESTING == 0
@@ -325,7 +329,7 @@ test(canFlushAndResetReset) {
     flushBuffersAndResetStates();
     
     assertEquals(bluetoothState, RECEIVING_FLAG);
-    assertEquals(terminalState, WAITING_FOR_START)
+    assertEquals(terminalState, WAITING_FOR_START);
 }
 
 test(canFlushAndResetResetMsgLens) {
