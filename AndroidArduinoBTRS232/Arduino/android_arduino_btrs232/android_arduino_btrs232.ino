@@ -1,7 +1,7 @@
 #include <SoftwareSerial.h>
 #include <Bluetooth.h>
 
-#define TESTING 2
+#define TESTING 0
 
 #define STRING_END 255
 #define RETURN_CHAR 13
