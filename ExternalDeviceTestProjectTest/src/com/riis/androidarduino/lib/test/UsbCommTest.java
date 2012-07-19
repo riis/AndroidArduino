@@ -42,11 +42,6 @@ public class UsbCommTest {
 	}
 
 	@Test
-	public void testSerialComm() {
-		fail("Not yet implemented");
-	}
-
-	@Test
 	public void testSendString() {
 		fail("Not yet implemented");
 	}
@@ -82,16 +77,6 @@ public class UsbCommTest {
 	}
 
 	@Test
-	public void testRun() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testCheckAndHandleMessages() {
-		fail("Not yet implemented");
-	}
-
-	@Test
 	public void testRead() {
 		fail("Not yet implemented");
 	}
@@ -103,31 +88,6 @@ public class UsbCommTest {
 
 	@Test
 	public void testIsConnected() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testGetInputStream() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testSetInputStream() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testGetOutputStream() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testSetOutputStream() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testLog() {
 		fail("Not yet implemented");
 	}
 

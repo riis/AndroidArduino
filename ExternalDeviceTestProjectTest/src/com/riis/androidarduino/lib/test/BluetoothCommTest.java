@@ -32,92 +32,62 @@ public class BluetoothCommTest {
 	}
 
 	@Test
-	public void testSerialComm() {
-		fail("Not yet implemented");
-	}
-
-	@Test
 	public void testSendString() {
+		//test that the attached output stream has correct data in it.
 		fail("Not yet implemented");
 	}
 
 	@Test
 	public void testSendByteWithFlag() {
+		//test that the attached output stream has correct data in it.
 		fail("Not yet implemented");
 	}
 
 	@Test
 	public void testWrite() {
+		//test that the attached output stream has correct data in it.
 		fail("Not yet implemented");
 	}
 
 	@Test
 	public void testClearMessages() {
+		//Mock a message into the message buffer, try to clear it, make sure message buffer is empty
 		fail("Not yet implemented");
 	}
 
 	@Test
 	public void testIsMessageReady() {
+		//Mock a message, make sure message is ready returns true.
 		fail("Not yet implemented");
 	}
 
 	@Test
 	public void testReadMessageWithFlags() {
+		//Mock a message, make sure message is ready returns true, test that message reads correctly
 		fail("Not yet implemented");
 	}
 
 	@Test
 	public void testReadMessage() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testRun() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testCheckAndHandleMessages() {
+		//Mock a message, make sure message is ready returns true, test that message reads correctly
 		fail("Not yet implemented");
 	}
 
 	@Test
 	public void testRead() {
+		//Mock a message, make sure message is ready returns true, test that message reads correctly
 		fail("Not yet implemented");
 	}
 
 	@Test
 	public void testShouldPrintLogMsgs() {
+		// not sure about this one...
 		fail("Not yet implemented");
 	}
 
 	@Test
 	public void testIsConnected() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testGetInputStream() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testSetInputStream() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testGetOutputStream() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testSetOutputStream() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testLog() {
+		//Not sure about this one...
 		fail("Not yet implemented");
 	}
 
