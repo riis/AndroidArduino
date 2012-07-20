@@ -20,6 +20,7 @@ import android.widget.TextView;
 
 public class MainActivity extends Activity {
 	private static String DEVICE_NAME = "AndroidArduinoBTRS232";
+	private static final int MAX_ARRAY_SIZE = 1000;
 	
 	private Button connectButton;
 	private Button disconnectButton;
@@ -79,7 +80,7 @@ public class MainActivity extends Activity {
         lastStatus = false;
         
         context = this;
-        readings = new ArrayList<Float>();
+        readings = new ArrayList<Float>(MAX_ARRAY_SIZE);
         
         setUpGUI();
     }
@@ -126,6 +127,8 @@ public class MainActivity extends Activity {
 			    	logScrollContainer.fullScroll(View.FOCUS_DOWN);
 				} else if(tokens[0].equals("DATA")) {
 					float reading = Float.parseFloat(message);
+					if(readings.size() == MAX_ARRAY_SIZE)
+						readings.remove(0);
 					readings.add(reading);
 					
 					if(readings.size() % 10 == 0) {
@@ -145,9 +148,9 @@ public class MainActivity extends Activity {
     }
     
     private void setUpGraph() {
-		String[] verlabels = new String[] { "Dead.", "Hammered", "Drunk", "Tipsy", "Buzzed", "Sober" };
-		String[] horlabels = new String[] { "                 Time ------------------->" };
-		GraphView graphView = new GraphView(this, readings, "Breathalyzer Readings", horlabels, verlabels, GraphView.LINE);
+		String[] verlabels = new String[] { "Dead", "Wasted", "Drunk", "Tipsy", "Sober" };
+		String[] horlabels = new String[] { "             Time ------------------->" };
+		BreathalyzerView graphView = new BreathalyzerView(this, readings, "Breathalyzer Readings", horlabels, verlabels, BreathalyzerView.LINE);
 		
 		LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
 		graphView.setLayoutParams(params);
