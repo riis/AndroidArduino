@@ -60,7 +60,7 @@ public class UsbComm extends SerialComm {
 		};
 	}
 	
-	@Override
+//	@Override
 	public void connect() {
 		manager = UsbManager.getInstance(context);
 		permissionIntent = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION), 0);
@@ -97,7 +97,7 @@ public class UsbComm extends SerialComm {
 		}
 	}
 	
-	@Override
+//	@Override
 	public void disconnect() {
 		try {
 			if (fileDescriptor != null) {

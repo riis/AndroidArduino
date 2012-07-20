@@ -51,7 +51,7 @@ public abstract class SerialComm implements iCommunication, Runnable {
 		write(new byte[] {(byte) flag, value});
 	}
 	
-	@Override
+//	@Override
 	public void write(byte[] byteBuffer) {
 		try {
 			for(int i = 0; i < byteBuffer.length; i++) {
@@ -128,7 +128,7 @@ public abstract class SerialComm implements iCommunication, Runnable {
 		}
 	}
 	
-	@Override
+//	@Override
 	public int read(byte[] byteBuffer) {
 		try {
 			return inputStream.read(byteBuffer);

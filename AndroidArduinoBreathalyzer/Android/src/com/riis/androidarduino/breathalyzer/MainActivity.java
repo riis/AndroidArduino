@@ -1,10 +1,8 @@
-package com.riis.androidarduino.card;
+package com.riis.androidarduino.breathalyzer;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 
 import com.riis.androidarduino.lib.BluetoothComm;
-
 
 import android.app.Activity;
 import android.content.Context;
@@ -14,12 +12,11 @@ import android.os.Message;
 import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class MainActivity extends Activity {
 	private static String DEVICE_NAME = "AndroidArduinoBTRS232";
@@ -30,9 +27,6 @@ public class MainActivity extends Activity {
 	private ScrollView logScrollContainer;
 	private TextView msgLog;
 	
-	private LinearLayout scannedContainer;
-	private ArrayList<ScannedCreditCard> scanList;
-	
 	private volatile boolean keepRunning;
 	private boolean lastStatus;
 	private Thread msgThread;
@@ -41,6 +35,7 @@ public class MainActivity extends Activity {
 	private Context context;
 
 	private BluetoothComm btComm;
+	private ArrayList<Float> readings;
 	
 	private Runnable msgUpdateThread = new Runnable() { 
 		public void run() {
@@ -52,8 +47,9 @@ public class MainActivity extends Activity {
 					}
 					
 					if(btComm.isMessageReady()) {
-						String cardInfo = btComm.readMessage();
-						addItemToScanLog(cardInfo);
+						String data = btComm.readMessage();
+						appendMsgToMsgLog("Sensor reading: " + data);
+						addDataToGraph(data);
 					}
 		        	
 		        } else {
@@ -78,9 +74,13 @@ public class MainActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        
         keepRunning = true;
         lastStatus = false;
+        
         context = this;
+        readings = new ArrayList<Float>();
+        
         setUpGUI();
     }
     
@@ -89,7 +89,7 @@ public class MainActivity extends Activity {
     	setUpDisconnectButton();
     	setupHandler();
     	setupMsgLog();
-    	setupScanLog();
+    	setUpGraph();
 	}
     
     private void setUpConnectButton() {
@@ -124,37 +124,14 @@ public class MainActivity extends Activity {
 				if(tokens[0].equals("LOG")) {
 					msgLog.append(message + "\n");
 			    	logScrollContainer.fullScroll(View.FOCUS_DOWN);
-				} else if(tokens[0].equals("SCAN")) {
-			    	ScannedCreditCard scannedCard = new ScannedCreditCard();
-			    	scannedCard.parseData(message, 55);
-					boolean newCard = true;
-					for(ScannedCreditCard card : scanList) {
-						if(scannedCard.matches(card)) {
-							newCard = false;
-							break;
-						}
+				} else if(tokens[0].equals("DATA")) {
+					float reading = Float.parseFloat(message);
+					readings.add(reading);
+					
+					if(readings.size() % 10 == 0) {
+						((LinearLayout)findViewById(R.id.graphContainer)).removeAllViews();
+						setUpGraph();
 					}
-					if(newCard) {
-				    	scanList.add(scannedCard);
-				    	LinearLayout newScanView = new LinearLayout(context);
-				    	TextView scanTracks = new TextView(context);
-				    	TextView scanDate = new TextView(context);
-				    	
-				    	LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT, 1);
-				    	
-				    	scanTracks.setLayoutParams(params);
-				    	scanTracks.setText(scannedCard.generateCardInfoString());
-				    	
-				    	scanDate.setLayoutParams(params);
-				    	scanDate.setText(scannedCard.getScanDate().toGMTString());
-				    	
-				    	newScanView.addView(scanTracks);
-				    	newScanView.addView(scanDate);
-				    	
-				    	scannedContainer.addView(newScanView, 0);
-					}
-					else
-						Toast.makeText(getApplicationContext(), "Card has already been read.", Toast.LENGTH_LONG).show();
 				}
 			}
 		};
@@ -167,9 +144,15 @@ public class MainActivity extends Activity {
     	msgLog.setMovementMethod(new ScrollingMovementMethod());
     }
     
-    private void setupScanLog() {
-    	scannedContainer = (LinearLayout)findViewById(R.id.scannedItems);
-    	scanList = new ArrayList<ScannedCreditCard>();
+    private void setUpGraph() {
+		String[] verlabels = new String[] { "Dead.", "Hammered", "Drunk", "Tipsy", "Buzzed", "Sober" };
+		String[] horlabels = new String[] { "                 Time ------------------->" };
+		GraphView graphView = new GraphView(this, readings, "Breathalyzer Readings", horlabels, verlabels, GraphView.LINE);
+		
+		LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+		graphView.setLayoutParams(params);
+		
+		((LinearLayout)findViewById(R.id.graphContainer)).addView(graphView);
     }
     
     private void appendMsgToMsgLog(String str) {
@@ -178,9 +161,9 @@ public class MainActivity extends Activity {
 		handler.sendMessage(msg);
     }
     
-    private void addItemToScanLog(final String itemCode) {
+    private void addDataToGraph(String data) {
     	Message msg = Message.obtain(handler);
-		msg.obj = "SCAN~" + itemCode;
+		msg.obj = "DATA~" + data;
 		handler.sendMessage(msg);
     }
     

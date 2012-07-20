@@ -24,9 +24,9 @@ public class BluetoothComm extends SerialComm implements Runnable {
 		inputThread.start();
 	}
 	
-	@Override
+//	@Override
 	public void connect() {
-		findDevice(deviceName);
+		device = findDevice(deviceName);
 		connectSocket();
 		
 		if(socket != null) {
@@ -35,9 +35,7 @@ public class BluetoothComm extends SerialComm implements Runnable {
 		}
 	}
 	
-	private void findDevice(String deviceName) {
-		boolean gotDevice = false;
-    	
+	private BluetoothDevice findDevice(String deviceName) {
     	adapter = BluetoothAdapter.getDefaultAdapter();
     	Set<BluetoothDevice> pairedDevices = adapter.getBondedDevices();
 
@@ -48,21 +46,13 @@ public class BluetoothComm extends SerialComm implements Runnable {
     	if(pairedDevices.size() > 0) {
 		    for (BluetoothDevice searchDevice : pairedDevices) {
 		    	if(searchDevice.getName().equals(deviceName)) {
-		    		device = searchDevice;
-		    		gotDevice = true;
-		    		break;
+		    		Toast.makeText(context, "Found device " + deviceName, Toast.LENGTH_SHORT).show();
+			    	return searchDevice;
 		    	}
 		    }
-		    
-		    if(gotDevice) {
-		    	Toast.makeText(context, "Found device " + deviceName, Toast.LENGTH_SHORT).show();
-		    } else {
-	    		Toast.makeText(context, "Couldn't find device, is it paired?", Toast.LENGTH_SHORT).show();
-		    }
 		}
-    	else {
-    		Toast.makeText(context, "Couldn't find any Bluetooth devices.", Toast.LENGTH_SHORT).show();
-    	}
+		Toast.makeText(context, "Couldn't find any Bluetooth devices.", Toast.LENGTH_SHORT).show();
+		return null;
 	}
 	
 	private void connectSocket() {
@@ -92,12 +82,12 @@ public class BluetoothComm extends SerialComm implements Runnable {
 		Toast.makeText(context, "Disconnected!", Toast.LENGTH_SHORT).show();
 	}
 
-	@Override
+//	@Override
 	public void pauseConnection() {
 		disconnect();
 	}
 
-	@Override
+//	@Override
 	public void resumeConnection() {
 		connect();
 	}
