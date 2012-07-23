@@ -5,18 +5,12 @@ import static org.junit.Assert.fail;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.core.classloader.annotations.PrepareOnlyThisForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import com.riis.androidarduino.lib.BluetoothComm;
-import com.riis.androidarduino.lib.SerialComm;
-
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ BluetoothComm.class, SerialComm.class })
+@PrepareForTest({ BluetoothDevice.class })
 public class BluetoothCommTest {
 
 	@Test
