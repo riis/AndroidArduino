@@ -19,6 +19,10 @@ void setup() {
  
 
 void loop() {
+    Serial.println("In loop");
+    Canbus.ecu_req(ENGINE_RPM,buffer);
+    Serial.print("ENGINE BUFFER: ");
+    Serial.println(buffer);
     if(Canbus.ecu_req(ENGINE_RPM,buffer) == 1)
     {
         Serial.print("Engine RPM: ");
@@ -41,5 +45,6 @@ void loop() {
     {
         Serial.print("Throttle: ");
         Serial.print(buffer);
-    }  
+    }
+    delay(1000);
 }
