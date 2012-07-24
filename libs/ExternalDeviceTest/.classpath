@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/ExternalDevice"/>
+	<classpathentry kind="lib" path="libs/android.jar"/>
+	<classpathentry kind="lib" path="libs/cglib-nodep-2.1_3.jar"/>
+	<classpathentry kind="lib" path="libs/easymock-2.4.jar"/>
+	<classpathentry kind="lib" path="libs/easymockclassextension-2.4.jar"/>
+	<classpathentry kind="lib" path="libs/javassist-3.9.0.GA.jar"/>
+	<classpathentry kind="lib" path="libs/junit-4.4.jar"/>
+	<classpathentry kind="lib" path="libs/mockito-all-1.7.jar"/>
+	<classpathentry kind="lib" path="libs/objenesis-1.1.jar"/>
+	<classpathentry kind="lib" path="libs/powermock-api-easymock-1.2.5.jar"/>
+	<classpathentry kind="lib" path="libs/powermock-api-mockito-1.2.5.jar"/>
+	<classpathentry kind="lib" path="libs/powermock-core-1.2.5.jar"/>
+	<classpathentry kind="lib" path="libs/powermock-module-junit3-1.2.5.jar"/>
+	<classpathentry kind="lib" path="libs/powermock-module-junit4-1.2.5.jar"/>
+	<classpathentry kind="lib" path="libs/powermock-module-junit4-common-1.2.5.jar"/>
+	<classpathentry kind="lib" path="libs/powermock-module-junit4-legacy-1.2.5.jar"/>
+	<classpathentry kind="lib" path="libs/powermock-reflect-1.2.5.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
