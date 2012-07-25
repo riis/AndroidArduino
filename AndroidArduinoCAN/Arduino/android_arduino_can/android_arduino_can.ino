@@ -269,9 +269,9 @@ void setup(void)
                 if(message.id >= PID_REPLY) {
                     Serial.println("HOLY SHIT");
                 }
-                printMessageId(message.id);
+                //printMessageId(message.id);
                 //printFormatedTime(timestamp);
-//                sendECURequest(VEHICLE_SPEED);
+                //sendECURequest(VEHICLE_SPEED);
 //                Serial.print("Message ID: ");
 //                Serial.print(message.id,HEX);
 //                Serial.print(", \tMessage Payload: ");
@@ -316,8 +316,8 @@ void setup(void)
                 message.header.rtr = 0;
                 message.header.length = 8;
                 message.data[0] = 0x02;
-                message.data[1] = 0x01;
-                message.data[2] = 0x33;
+                message.data[1] = 0x09;
+                message.data[2] = 0x02;
                 message.data[3] = 0x00;
                 message.data[4] = 0x00;
                 message.data[5] = 0x00;
