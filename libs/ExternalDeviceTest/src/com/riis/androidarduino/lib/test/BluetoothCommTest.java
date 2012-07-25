@@ -46,7 +46,7 @@ public class BluetoothCommTest {
 		BluetoothAdapter mockAdapter = createMock(BluetoothAdapter.class);
 		Set<BluetoothDevice> btDeviceSet = new LinkedHashSet<BluetoothDevice>();
 		expect(mockAdapter.getBondedDevices()).andReturn(btDeviceSet);
-		
+
 		//Mock the BluetoothAdapter's static method to return our mock adapter
 		mockStatic(BluetoothAdapter.class);
 		expect(BluetoothAdapter.getDefaultAdapter()).andReturn(mockAdapter);

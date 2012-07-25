@@ -259,30 +259,30 @@ void setup(void)
         /*CAN Structure*/
         tCAN message;
 
-        CAN.bit_modify(CANCTRL, (1<<REQOP2)|(1<<REQOP1)|(1<<REQOP0), 0);
+//        CAN.bit_modify(CANCTRL, (1<<REQOP2)|(1<<REQOP1)|(1<<REQOP0), 0);
 
-        if (CAN.check_message())
-        {
-            if (CAN.get_message(&message, &timestamp))
-            {
-                digitalWrite(CANCS, HIGH);
-                if(message.id >= PID_REPLY) {
-                    Serial.println("HOLY SHIT");
-                }
-                //printMessageId(message.id);
-                //printFormatedTime(timestamp);
-                //sendECURequest(VEHICLE_SPEED);
-//                Serial.print("Message ID: ");
-//                Serial.print(message.id,HEX);
-//                Serial.print(", \tMessage Payload: ");
-//                for(int i = 0; i < 8; i++)
-//                {
-//                    Serial.print(message.data[i],HEX);
-//                    Serial.print(' ');
+//        if (CAN.check_message())
+//        {
+//            if (CAN.get_message(&message, &timestamp))
+//            {
+//                digitalWrite(CANCS, HIGH);
+//                if(message.id >= PID_REPLY) {
+//                    Serial.println("HOLY SHIT");
 //                }
-//                Serial.println();
-            } 
-        }
+//                //printMessageId(message.id);
+//                //printFormatedTime(timestamp);
+//                //sendECURequest(VEHICLE_SPEED);
+////                Serial.print("Message ID: ");
+////                Serial.print(message.id,HEX);
+////                Serial.print(", \tMessage Payload: ");
+////                for(int i = 0; i < 8; i++)
+////                {
+////                    Serial.print(message.data[i],HEX);
+////                    Serial.print(' ');
+////                }
+////                Serial.println();
+//            } 
+//        }
 
         digitalWrite(CANCS, LOW);
         if(Serial.available() >= 1)
