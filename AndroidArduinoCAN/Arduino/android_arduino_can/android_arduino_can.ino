@@ -149,48 +149,45 @@ void sendECURequest(unsigned char pid) {
     message.header.length = 8;
     message.data[0] = 0x02;
     message.data[1] = 0x01;
-    message.data[2] = 0x66;
+    message.data[2] = pid;
     message.data[3] = 0x00;
     message.data[4] = 0x00;
     message.data[5] = 0x00;
     message.data[6] = 0x00;
     message.data[7] = 0x00;
     
-    Serial.println(CAN.send_message(&message));
+    CAN.send_message(&message);
 
-    while(timeout < 10000)
+    while(timeout < 4000)
     {
         timeout++;
         if (CAN.check_message()) 
         {
             if (CAN.get_message(&message, &timestamp)) 
             {
-                if(message.id == PID_REPLY) {
-                    Serial.println("HOLY SHIT");
-                }
-                
-                if((message.id == PID_REPLY) && (message.data[2] == pid))	// Check message is the reply and its the right PID
+                if((message.id >= PID_REPLY) && (message.data[2] == pid))	// Check message is the reply and its the right PID
                 {
-                    Serial.println("I GOT A REPLY MESSAGE");
                     switch(message.data[2])
                     {   /* Details from http://en.wikipedia.org/wiki/OBD-II_PIDs */
                     case ENGINE_RPM:  			//   ((A*256)+B)/4    [RPM]
                         engine_data =  ((message.data[3]*256) + message.data[4])/4;
                         Serial.print("Engine RPM: ");
                         Serial.println(engine_data, DEC);
+                        timeout = 4000;
                         break;
 
                     case ENGINE_COOLANT_TEMP: 	// 	A-40			  [degree C]
                         engine_data =  message.data[3] - 40;
                         Serial.print("Engine Temp (C): ");
                         Serial.println(engine_data, DEC);
-
+                        timeout = 4000;
                         break;
 
                     case VEHICLE_SPEED: 		// A				  [km]
                         engine_data =  message.data[3];
                         Serial.print("Vehicle KMH: ");
                         Serial.println(engine_data, DEC);
+                        timeout = 4000;
 
                         break;
 
@@ -198,23 +195,26 @@ void sendECURequest(unsigned char pid) {
                         engine_data =  ((message.data[3]*256) + message.data[4])/100;
                         Serial.print("MAF Sensor (g/s): ");
                         Serial.println(engine_data, DEC);
+                        timeout = 4000;
                         break;
 
                     case O2_VOLTAGE:    		// A * 0.005   (B-128) * 100/128 (if B==0xFF, sensor is not used in trim calc)
                         engine_data = message.data[3]*0.005;
                         Serial.print("O2 Voltage (v): ");
                         Serial.println(engine_data, DEC);
+                        timeout = 4000;
+                        break;
 
                     case THROTTLE:				// Throttle Position
                         engine_data = (message.data[3]*100)/255;
                         Serial.print("Throttle Position (%): ");
                         Serial.println(engine_data, DEC);
+                        timeout = 4000;
                         break;
 
                     }
                     message_ok = 1;
                 }
-
             }
         }
     }
@@ -254,47 +254,46 @@ void setup(void)
     char message_ok = 0;
     char buffer[32];
     unsigned long timestamp = 0;
+    /*CAN Structure*/
+    tCAN message;
     while(1)
     {
-        /*CAN Structure*/
-        tCAN message;
-
-//        CAN.bit_modify(CANCTRL, (1<<REQOP2)|(1<<REQOP1)|(1<<REQOP0), 0);
-
+        CAN.bit_modify(CANCTRL, (1<<REQOP2)|(1<<REQOP1)|(1<<REQOP0), 0);
+        sendECURequest(ENGINE_RPM);
+        sendECURequest(ENGINE_COOLANT_TEMP);
+        sendECURequest(VEHICLE_SPEED);
+        sendECURequest(MAF_SENSOR);
+        sendECURequest(O2_VOLTAGE);
+        sendECURequest(THROTTLE);
+        
 //        if (CAN.check_message())
 //        {
 //            if (CAN.get_message(&message, &timestamp))
-//            {
-//                digitalWrite(CANCS, HIGH);
-//                if(message.id >= PID_REPLY) {
-//                    Serial.println("HOLY SHIT");
+//            {digitalWrite(CANCS, HIGH);
+//                printMessageId(message.id);
+//                printFormatedTime(timestamp);
+//
+//                Serial.print(", \tMessage Payload: ");
+//                for(int i = 0; i < 8; i++)
+//                {
+//                    Serial.print(message.data[i],HEX);
+//                    Serial.print(' ');
 //                }
-//                //printMessageId(message.id);
-//                //printFormatedTime(timestamp);
-//                //sendECURequest(VEHICLE_SPEED);
-////                Serial.print("Message ID: ");
-////                Serial.print(message.id,HEX);
-////                Serial.print(", \tMessage Payload: ");
-////                for(int i = 0; i < 8; i++)
-////                {
-////                    Serial.print(message.data[i],HEX);
-////                    Serial.print(' ');
-////                }
-////                Serial.println();
+//                Serial.println();
 //            } 
 //        }
 
         digitalWrite(CANCS, LOW);
-        if(Serial.available() >= 1)
-        {
-            if(Serial.read() == 'W')
-            {
-                /*Serial write format looks like this:
-                 "W 0x000 0x0 0x0000000000000000"
-                 do that (With the spaces) and you are good, otherwise we have a problem, no quotes.
-                 There is no format error detection so be careful.
-                 Note that its "W ID Data Length Payload" In HEX NOT Decimal....this is also key, no "15" enter F
-                 Its case sensitive, so no 'f' either, don't complain, fix it if you like code is above, scroll up.*/
+//        if(Serial.available() >= 1)
+//        {
+//            if(Serial.read() == 'W')
+//            {
+//                /*Serial write format looks like this:
+//                 "W 0x000 0x0 0x0000000000000000"
+//                 do that (With the spaces) and you are good, otherwise we have a problem, no quotes.
+//                 There is no format error detection so be careful.
+//                 Note that its "W ID Data Length Payload" In HEX NOT Decimal....this is also key, no "15" enter F
+//                 Its case sensitive, so no 'f' either, don't complain, fix it if you like code is above, scroll up.*/
 //                for(uint8_t i = 0;i < 30; i++)
 //                {
 //                    inputchar[i] = Serial.read();
@@ -311,25 +310,25 @@ void setup(void)
 //                     to go into message.data to be sent over the friendly CAN bus....*/
 //                    message.data[i] = (uint8_t)((char2num(inputchar[29-(i*2+1)])<<4)+(char2num(inputchar[29-(i*2)])));
 //                }
-
-                message.id = PID_REQUEST;
-                message.header.rtr = 0;
-                message.header.length = 8;
-                message.data[0] = 0x02;
-                message.data[1] = 0x09;
-                message.data[2] = 0x02;
-                message.data[3] = 0x00;
-                message.data[4] = 0x00;
-                message.data[5] = 0x00;
-                message.data[6] = 0x00;
-                message.data[7] = 0x00;
-
-                Serial.println("======================");
-                Serial.println("Sending message to CAN");
-                Serial.println(CAN.send_message(&message));
-                Serial.println("======================");
-            } 
-        }
+//
+//                message.id = PID_REQUEST;
+//                message.header.rtr = 0;
+//                message.header.length = 8;
+//                message.data[0] = 0x02;
+//                message.data[1] = 0x09;
+//                message.data[2] = 0x0C;
+//                message.data[3] = 0x00;
+//                message.data[4] = 0x00;
+//                message.data[5] = 0x00;
+//                message.data[6] = 0x00;
+//                message.data[7] = 0x00;
+//
+//                Serial.println("======================");
+//                Serial.println("Sending message to CAN");
+//                Serial.println(CAN.send_message(&message));
+//                Serial.println("======================");
+//            } 
+//        }
 
         delay(10);
         if(!digitalRead(DOWN))
