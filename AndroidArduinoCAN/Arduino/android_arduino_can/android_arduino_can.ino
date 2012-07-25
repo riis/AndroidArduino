@@ -4,16 +4,17 @@
 #include <mcp2515_defs.h>
 #include <CANInterface.h>
 
-/*LCD Screen Init*/
-SoftwareSerial LCD = SoftwareSerial(5,6); /* Serial LCD is connected to digital pin 6 */
+#include <SoftwareSerial.h>
+#include <Bluetooth.h>
 
-#define COMMAND 0xFE
-#define CLEAR   0x01
-#define LINE0   0x80
-#define LINE1   0xC0
-#define SCREEN  32
+//Bluetooth
+#define RX 62
+#define TX 7
 
-/*"Joystick" Init*/
+SoftwareSerial bluetoothSerial(RX, TX);
+Bluetooth bluetooth("AndroidArduinoCANBT", bluetoothSerial, true);
+
+//Joystick
 #define UP    A1/*Analog Pin 1*/
 #define DOWN  A3/*Analog Pin 3*/
 #define LEFT  A5/*Analog Pin 5*/
@@ -22,18 +23,48 @@ SoftwareSerial LCD = SoftwareSerial(5,6); /* Serial LCD is connected to digital 
 #define JSP   0/*Joystick Pressed*/
 #define JSNP  1/*Joystick Not Pressed*/
 
-/*Status LED's*/
-#ifndef LED_2
-int LED_2 = 8;
-#endif
-#ifndef LED_3
-int LED_3 = 7;
-#endif
-
-int SDCS = 9; /* SPI Enable for SD Card */
 int CANCS = 53;/* SPI Enable for CAN */
 
 int inputchar [32];
+
+float engine_data;
+int timeout = 0;
+char message_ok = 0;
+char buffer[32];
+unsigned long timestamp = 0;
+
+tCAN message;
+
+void setup(void)
+{
+    init_SPI_CS();
+    init_JoyStick();
+
+    Serial.begin(9600);/* Setup Serial communication to Computer*/
+    
+    if(!bluetooth.beginBluetooth())
+    {
+        Serial.println("\n\rHalting program...");
+        while(true) { }
+    }
+    
+    Serial.println("Press Up to Begin");
+
+    while (digitalRead(UP));
+
+    SPI.begin();
+    /*Set CANSPEED to have baud rate for 95 kbps GMLAN medium speed baudrate.*/
+    if(CAN.Init(CANSPEED_500))/*SPI must be configured firstnew 95 kbps...*/
+    {
+        Serial.println("CAN Running");
+    }
+    else
+    {
+        Serial.println("CAN Failure");
+    }
+    
+    digitalWrite(CANCS, LOW);
+}
 
 void init_SPI_CS(void)
 {
@@ -49,11 +80,131 @@ void init_SPI_CS(void)
     digitalWrite(13, LOW);
 }
 
-void init_Status_LED(void)
+void init_JoyStick(void)
 {
-    pinMode(LED_2, OUTPUT); /*Status LED*/
-    pinMode(LED_3, OUTPUT); /*communication LED*/
-    digitalWrite(LED_2,HIGH);
+    pinMode(UP,INPUT);
+    pinMode(DOWN,INPUT);
+    pinMode(LEFT,INPUT);
+    pinMode(RIGHT,INPUT);
+    pinMode(CLICK,INPUT);
+    digitalWrite(UP, HIGH);/*enabled input pull-up resistor*/
+    digitalWrite(DOWN, HIGH);/*enabled input pull-up resistor*/
+    digitalWrite(LEFT, HIGH);/*enabled input pull-up resistor*/
+    digitalWrite(RIGHT, HIGH);/*enabled input pull-up resistor*/
+    digitalWrite(CLICK, HIGH);/*enabled input pull-up resistor*/
+}
+
+void loop(void) {
+    bluetooth.process();
+    
+    CAN.bit_modify(CANCTRL, (1<<REQOP2)|(1<<REQOP1)|(1<<REQOP0), 0);
+    
+    if(bluetooth.isConnected()) {
+        sendECURequest(ENGINE_RPM);
+        sendECURequest(ENGINE_COOLANT_TEMP);
+        sendECURequest(VEHICLE_SPEED);
+        sendECURequest(MAF_SENSOR);
+        sendECURequest(O2_VOLTAGE);
+        sendECURequest(THROTTLE);
+    } else {
+        Serial.println("Bluetooth disconnected...");
+    }
+    
+    delay(10);
+    if(!digitalRead(DOWN))
+    {
+        Serial.println("Program Done");
+        while(1){}
+    }
+}
+
+void sendECURequest(unsigned char pid) {
+    tCAN message;
+    float engine_data;
+    int timeout = 0;
+    unsigned long timestamp = 0;
+    char message_ok = 0;
+    // Prepare message
+    message.id = PID_REQUEST;
+    message.header.rtr = 0;
+    message.header.length = 8;
+    message.data[0] = 0x02;
+    message.data[1] = 0x01;
+    message.data[2] = pid;
+    message.data[3] = 0x00;
+    message.data[4] = 0x00;
+    message.data[5] = 0x00;
+    message.data[6] = 0x00;
+    message.data[7] = 0x00;
+    
+    CAN.send_message(&message);
+
+    while(timeout < 4000)
+    {
+        timeout++;
+        if (CAN.check_message()) 
+        {
+            if (CAN.get_message(&message, &timestamp)) 
+            {
+                if((message.id >= PID_REPLY) && (message.data[2] == pid))	// Check message is the reply and its the right PID
+                {
+                    switch(message.data[2])
+                    {   /* Details from http://en.wikipedia.org/wiki/OBD-II_PIDs */
+                    case ENGINE_RPM:  			//   ((A*256)+B)/4    [RPM]
+                        engine_data =  ((message.data[3]*256) + message.data[4])/4;
+                        Serial.print("Engine RPM: ");
+                        Serial.println(engine_data, DEC);
+                        bluetooth.sendStringWithFlags(String("Engine RPM: ") + String((int)engine_data));
+                        timeout = 4000;
+                        break;
+
+                    case ENGINE_COOLANT_TEMP: 	// 	A-40			  [degree C]
+                        engine_data =  message.data[3] - 40;
+                        Serial.print("Engine Temp (C): ");
+                        Serial.println(engine_data, DEC);
+                        bluetooth.sendStringWithFlags(String("Engine Temp (C): ") + String((int)engine_data));
+                        timeout = 4000;
+                        break;
+
+                    case VEHICLE_SPEED: 		// A				  [km]
+                        engine_data =  message.data[3];
+                        Serial.print("Vehicle KMH: ");
+                        Serial.println(engine_data, DEC);
+                        bluetooth.sendStringWithFlags(String("Vehicle KMH: ") + String((int)engine_data));
+                        timeout = 4000;
+
+                        break;
+
+                    case MAF_SENSOR:   			// ((256*A)+B) / 100  [g/s]
+                        engine_data =  ((message.data[3]*256) + message.data[4])/100;
+                        Serial.print("MAF Sensor (g/s): ");
+                        Serial.println(engine_data, DEC);
+                        bluetooth.sendStringWithFlags(String("MAF Sensor (g/s): ") + String((int)engine_data));
+                        timeout = 4000;
+                        break;
+
+                    case O2_VOLTAGE:    		// A * 0.005   (B-128) * 100/128 (if B==0xFF, sensor is not used in trim calc)
+                        engine_data = message.data[3]*0.005;
+                        Serial.print("O2 Voltage (v): ");
+                        Serial.println(engine_data, DEC);
+                        bluetooth.sendStringWithFlags(String("O2 Voltage (v): ") + String((int)engine_data));
+                        timeout = 4000;
+                        break;
+
+                    case THROTTLE:				// Throttle Position
+                        engine_data = (message.data[3]*100)/255;
+                        Serial.print("Throttle Position (%): ");
+                        Serial.println(engine_data, DEC);
+                        bluetooth.sendStringWithFlags(String("Throttle Position (%): ") + String((int)engine_data));
+                        timeout = 4000;
+                        break;
+
+                    }
+                    message_ok = 1;
+                }
+            }
+        }
+    }
 }
 
 /*converts char to decimal number*/
@@ -114,158 +265,24 @@ int char2num(int chr)
     }
 }
 
-void init_JoyStick(void)
-{
-    pinMode(UP,INPUT);
-    pinMode(DOWN,INPUT);
-    pinMode(LEFT,INPUT);
-    pinMode(RIGHT,INPUT);
-    pinMode(CLICK,INPUT);
-    digitalWrite(UP, HIGH);/*enabled input pull-up resistor*/
-    digitalWrite(DOWN, HIGH);/*enabled input pull-up resistor*/
-    digitalWrite(LEFT, HIGH);/*enabled input pull-up resistor*/
-    digitalWrite(RIGHT, HIGH);/*enabled input pull-up resistor*/
-    digitalWrite(CLICK, HIGH);/*enabled input pull-up resistor*/
-}
-
-void printFormatedTime(unsigned long timestamp) {
-    Serial.print("Time: ");
-    Serial.print(timestamp/3600000, DEC);
-    Serial.print(":");
-    Serial.print(timestamp/60000, DEC);
-    Serial.print(":");
-    Serial.print(timestamp/1000, DEC);
-}
-
-void sendECURequest(unsigned char pid) {
-    tCAN message;
-    float engine_data;
-    int timeout = 0;
-    unsigned long timestamp = 0;
-    char message_ok = 0;
-    // Prepare message
-    message.id = PID_REQUEST;
-    message.header.rtr = 0;
-    message.header.length = 8;
-    message.data[0] = 0x02;
-    message.data[1] = 0x01;
-    message.data[2] = pid;
-    message.data[3] = 0x00;
-    message.data[4] = 0x00;
-    message.data[5] = 0x00;
-    message.data[6] = 0x00;
-    message.data[7] = 0x00;
-    
-    CAN.send_message(&message);
-
-    while(timeout < 4000)
-    {
-        timeout++;
-        if (CAN.check_message()) 
-        {
-            if (CAN.get_message(&message, &timestamp)) 
-            {
-                if((message.id >= PID_REPLY) && (message.data[2] == pid))	// Check message is the reply and its the right PID
-                {
-                    switch(message.data[2])
-                    {   /* Details from http://en.wikipedia.org/wiki/OBD-II_PIDs */
-                    case ENGINE_RPM:  			//   ((A*256)+B)/4    [RPM]
-                        engine_data =  ((message.data[3]*256) + message.data[4])/4;
-                        Serial.print("Engine RPM: ");
-                        Serial.println(engine_data, DEC);
-                        timeout = 4000;
-                        break;
-
-                    case ENGINE_COOLANT_TEMP: 	// 	A-40			  [degree C]
-                        engine_data =  message.data[3] - 40;
-                        Serial.print("Engine Temp (C): ");
-                        Serial.println(engine_data, DEC);
-                        timeout = 4000;
-                        break;
-
-                    case VEHICLE_SPEED: 		// A				  [km]
-                        engine_data =  message.data[3];
-                        Serial.print("Vehicle KMH: ");
-                        Serial.println(engine_data, DEC);
-                        timeout = 4000;
-
-                        break;
-
-                    case MAF_SENSOR:   			// ((256*A)+B) / 100  [g/s]
-                        engine_data =  ((message.data[3]*256) + message.data[4])/100;
-                        Serial.print("MAF Sensor (g/s): ");
-                        Serial.println(engine_data, DEC);
-                        timeout = 4000;
-                        break;
-
-                    case O2_VOLTAGE:    		// A * 0.005   (B-128) * 100/128 (if B==0xFF, sensor is not used in trim calc)
-                        engine_data = message.data[3]*0.005;
-                        Serial.print("O2 Voltage (v): ");
-                        Serial.println(engine_data, DEC);
-                        timeout = 4000;
-                        break;
-
-                    case THROTTLE:				// Throttle Position
-                        engine_data = (message.data[3]*100)/255;
-                        Serial.print("Throttle Position (%): ");
-                        Serial.println(engine_data, DEC);
-                        timeout = 4000;
-                        break;
-
-                    }
-                    message_ok = 1;
-                }
-            }
-        }
-    }
-}
-
-void printMessageId(uint16_t messageId) {
-    Serial.print("Message Id - Mode: ");
-    Serial.print((messageId & 0x0F00) >> 8, HEX);
-    Serial.print(" Value: ");
-    Serial.println(messageId & 0x00FF, HEX);
-}
-
-void setup(void)
-{
-    init_SPI_CS();
-    init_JoyStick();
-
-    Serial.begin(9600);/* Setup Serial communication to Computer*/
-    Serial.println("Press Up to Begin");
-
-    while (digitalRead(UP));
-
-    SPI.begin();
-    /*Set CANSPEED to have baud rate for 95 kbps GMLAN medium speed baudrate.*/
-    if(CAN.Init(CANSPEED_500))/*SPI must be configured firstnew 95 kbps...*/
-    {
-        Serial.println("CAN Running");
-    }
-    else
-    {
-        Serial.println("CAN Failure");
-    }
-
-    /*CAN Data setup*/
-    float engine_data;
-    int timeout = 0;
-    char message_ok = 0;
-    char buffer[32];
-    unsigned long timestamp = 0;
-    /*CAN Structure*/
-    tCAN message;
-    while(1)
-    {
-        CAN.bit_modify(CANCTRL, (1<<REQOP2)|(1<<REQOP1)|(1<<REQOP0), 0);
-        sendECURequest(ENGINE_RPM);
-        sendECURequest(ENGINE_COOLANT_TEMP);
-        sendECURequest(VEHICLE_SPEED);
-        sendECURequest(MAF_SENSOR);
-        sendECURequest(O2_VOLTAGE);
-        sendECURequest(THROTTLE);
-        
+//    /*CAN Data setup*/
+//    float engine_data;
+//    int timeout = 0;
+//    char message_ok = 0;
+//    char buffer[32];
+//    unsigned long timestamp = 0;
+//    /*CAN Structure*/
+//    tCAN message;
+//    while(1)
+//    {
+//        CAN.bit_modify(CANCTRL, (1<<REQOP2)|(1<<REQOP1)|(1<<REQOP0), 0);
+//        sendECURequest(ENGINE_RPM);
+//        sendECURequest(ENGINE_COOLANT_TEMP);
+//        sendECURequest(VEHICLE_SPEED);
+//        sendECURequest(MAF_SENSOR);
+//        sendECURequest(O2_VOLTAGE);
+//        sendECURequest(THROTTLE);
+//        
 //        if (CAN.check_message())
 //        {
 //            if (CAN.get_message(&message, &timestamp))
@@ -282,8 +299,8 @@ void setup(void)
 //                Serial.println();
 //            } 
 //        }
-
-        digitalWrite(CANCS, LOW);
+//
+//        digitalWrite(CANCS, LOW);
 //        if(Serial.available() >= 1)
 //        {
 //            if(Serial.read() == 'W')
@@ -329,17 +346,13 @@ void setup(void)
 //                Serial.println("======================");
 //            } 
 //        }
-
-        delay(10);
-        if(!digitalRead(DOWN))
-        {
-            break;
-        }
-    }
-    delay(5000);
-    Serial.println("Program Done");
-}
-
-void loop(void) { 
-}
+//
+//        delay(10);
+//        if(!digitalRead(DOWN))
+//        {
+//            break;
+//        }
+//    }
+//    delay(5000);
+//    Serial.println("Program Done");
 

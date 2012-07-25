@@ -13,7 +13,6 @@ import java.util.Set;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -22,7 +21,6 @@ import org.powermock.reflect.Whitebox;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.content.Context;
 import android.widget.Toast;
 
 import com.riis.androidarduino.lib.BluetoothComm;
