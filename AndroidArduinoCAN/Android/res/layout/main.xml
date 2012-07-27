@@ -22,8 +22,8 @@
 	            android:layout_height="match_parent"
 	            android:layout_weight="0.5"
 	            android:gravity="center"
-	            android:textColor="@android:color/white"
-	            android:text="Engine Run Time:" />
+	            android:text="@string/engineRunTimePreface"
+	            android:textColor="@android:color/white" />
         
 	    </LinearLayout>
 		
@@ -37,21 +37,33 @@
 		        android:id="@+id/connectButton"
 		        android:layout_width="fill_parent"
 		        android:layout_height="fill_parent"
-		        android:layout_weight="0.5"
 		        android:text="Connect" />
 		    
-		    <Button
-		        android:id="@+id/disconnectButton"
-		        android:layout_width="fill_parent"
-		        android:layout_height="fill_parent"
-		        android:layout_weight="0.5"
-		        android:text="Disconnect" />
 	    </LinearLayout>
 	    
 	    <LinearLayout
 	        android:layout_width="fill_parent"
 	        android:layout_height="match_parent"
 	        android:layout_weight="0.35" >
+		    
+	        <Button
+		        android:id="@+id/startTrackButton"
+		        android:layout_width="fill_parent"
+		        android:layout_height="fill_parent"
+		        android:layout_weight="0.33"
+		        android:text="Start Track" />
+	        <Button
+		        android:id="@+id/pauseTrackButton"
+		        android:layout_width="fill_parent"
+		        android:layout_height="fill_parent"
+		        android:layout_weight="0.33"
+		        android:text="Pause Track" />
+	        <Button
+		        android:id="@+id/stopTrackButton"
+		        android:layout_width="fill_parent"
+		        android:layout_height="fill_parent"
+		        android:layout_weight="0.33"
+		        android:text="Stop Track" />
 	        
 	    </LinearLayout>
 	    
@@ -82,13 +94,14 @@
 			        android:layout_weight="0.5"
 			        android:orientation="vertical" >
 			        
-		            <TextView 
-			            android:layout_width="match_parent"
-			            android:layout_height="match_parent"
-			            android:layout_weight="0.5"
-			            android:gravity="center"
-			            android:textColor="@android:color/white"
-			            android:text="Oil Temp" />
+		            <TextView
+		                android:id="@+id/oilTempTxt"
+		                android:layout_width="match_parent"
+		                android:layout_height="match_parent"
+		                android:layout_weight="0.5"
+		                android:gravity="center"
+		                android:text="@string/engineOilTempPreface"
+		                android:textColor="@android:color/white" />
 			        
 			        <ProgressBar
 			            android:id="@+id/oilTempBar"
@@ -106,13 +119,14 @@
 			        android:layout_weight="0.5"
 			        android:orientation="vertical" >
 			        
-			        <TextView 
+			        <TextView
+			            android:id="@+id/coolantTempTxt"
 			            android:layout_width="match_parent"
 			            android:layout_height="match_parent"
 			            android:layout_weight="0.5"
 			            android:gravity="center"
-			            android:textColor="@android:color/white"
-			            android:text="Coolant Temp" />
+			            android:text="@string/engineCoolantTempPreface"
+			            android:textColor="@android:color/white" />
 			        
 			        <ProgressBar
 			            android:id="@+id/coolantTempBar"
@@ -172,16 +186,17 @@
 					        android:layout_weight="0.33"
 					        android:orientation="vertical" >
 					        
-				            <TextView 
-					            android:layout_width="match_parent"
-					            android:layout_height="match_parent"
-					            android:layout_weight="0.5"
-					            android:gravity="center"
-					            android:textColor="@android:color/white"
-					            android:text="Throttle Pos." />
+				            <TextView
+				                android:id="@+id/throttlePosTxt"
+				                android:layout_width="match_parent"
+				                android:layout_height="match_parent"
+				                android:layout_weight="0.5"
+				                android:gravity="center"
+				                android:text="@string/throttlePosPreface"
+				                android:textColor="@android:color/white" />
 					        
 					        <ProgressBar
-					            android:id="@+id/throttlePos"
+					            android:id="@+id/throttlePosBar"
 					            style="?android:attr/progressBarStyleHorizontal"
 					            android:layout_width="fill_parent"
 					            android:layout_height="fill_parent"
@@ -196,16 +211,17 @@
 					        android:layout_weight="0.33"
 					        android:orientation="vertical" >
 					        
-					        <TextView 
+					        <TextView
+					            android:id="@+id/absoluteThrottleBTxt"
 					            android:layout_width="match_parent"
 					            android:layout_height="match_parent"
 					            android:layout_weight="0.5"
 					            android:gravity="center"
-					            android:textColor="@android:color/white"
-					            android:text="Absolute Throttle B" />
+					            android:text="@string/absThrottleBPreface"
+					            android:textColor="@android:color/white" />
 					        
 					        <ProgressBar
-					            android:id="@+id/absoluteThrottleB"
+					            android:id="@+id/absoluteThrottleBBar"
 					            style="?android:attr/progressBarStyleHorizontal"
 					            android:layout_width="fill_parent"
 					            android:layout_height="fill_parent"
@@ -220,16 +236,17 @@
 					        android:layout_weight="0.33"
 					        android:orientation="vertical" >
 					        
-				            <TextView 
-					            android:layout_width="match_parent"
-					            android:layout_height="match_parent"
-					            android:layout_weight="0.5"
-					            android:gravity="center"
-					            android:textColor="@android:color/white"
-					            android:text="Absolute Throttle C" />
+				            <TextView
+				                android:id="@+id/absoluteThrottleCTxt"
+				                android:layout_width="match_parent"
+				                android:layout_height="match_parent"
+				                android:layout_weight="0.5"
+				                android:gravity="center"
+				                android:text="@string/absThrottleCPreface"
+				                android:textColor="@android:color/white" />
 					        
 					        <ProgressBar
-					            android:id="@+id/absoluteThrottleC"
+					            android:id="@+id/absoluteThrottleCBar"
 					            style="?android:attr/progressBarStyleHorizontal"
 					            android:layout_width="fill_parent"
 					            android:layout_height="fill_parent"
@@ -253,16 +270,17 @@
 					        android:layout_weight="0.33"
 					        android:orientation="vertical" >
 					        
-				            <TextView 
-					            android:layout_width="match_parent"
-					            android:layout_height="match_parent"
-					            android:layout_weight="0.5"
-					            android:gravity="center"
-					            android:textColor="@android:color/white"
-					            android:text="Abs. Acc. Pos. D" />
+				            <TextView
+				                android:id="@+id/absAccPosDTxt"
+				                android:layout_width="match_parent"
+				                android:layout_height="match_parent"
+				                android:layout_weight="0.5"
+				                android:gravity="center"
+				                android:text="@string/accPedalPosDPreface"
+				                android:textColor="@android:color/white" />
 					        
 					        <ProgressBar
-					            android:id="@+id/absAccPosD"
+					            android:id="@+id/absAccPosDBar"
 					            style="?android:attr/progressBarStyleHorizontal"
 					            android:layout_width="fill_parent"
 					            android:layout_height="fill_parent"
@@ -277,16 +295,17 @@
 					        android:layout_weight="0.33"
 					        android:orientation="vertical" >
 					        
-					        <TextView 
+					        <TextView
+					            android:id="@+id/absAccPosETxt"
 					            android:layout_width="match_parent"
 					            android:layout_height="match_parent"
 					            android:layout_weight="0.5"
 					            android:gravity="center"
-					            android:textColor="@android:color/white"
-					            android:text="Abs. Acc. Pos. E" />
+					            android:text="@string/accPedalPosEPreface"
+					            android:textColor="@android:color/white" />
 					        
 					        <ProgressBar
-					            android:id="@+id/absAccPosE"
+					            android:id="@+id/absAccPosEBar"
 					            style="?android:attr/progressBarStyleHorizontal"
 					            android:layout_width="fill_parent"
 					            android:layout_height="fill_parent"
@@ -301,16 +320,17 @@
 					        android:layout_weight="0.33"
 					        android:orientation="vertical" >
 					        
-				            <TextView 
-					            android:layout_width="match_parent"
-					            android:layout_height="match_parent"
-					            android:layout_weight="0.5"
-					            android:gravity="center"
-					            android:textColor="@android:color/white"
-					            android:text="Abs. Acc. Pos. F" />
+				            <TextView
+				                android:id="@+id/absAccPosFTxt"
+				                android:layout_width="match_parent"
+				                android:layout_height="match_parent"
+				                android:layout_weight="0.5"
+				                android:gravity="center"
+				                android:text="@string/accPedalPosFPreface"
+				                android:textColor="@android:color/white" />
 					        
 					        <ProgressBar
-					            android:id="@+id/absAccPosF"
+					            android:id="@+id/absAccPosFBar"
 					            style="?android:attr/progressBarStyleHorizontal"
 					            android:layout_width="fill_parent"
 					            android:layout_height="fill_parent"
@@ -329,14 +349,14 @@
 		        android:layout_weight="0.4"
 		        android:orientation="horizontal" >
 	
-		        <TextView 
+		        <TextView
 		            android:id="@+id/airTemp"
 		            android:layout_width="match_parent"
 		            android:layout_height="match_parent"
 		            android:layout_weight="0.5"
 		            android:gravity="center"
-		            android:textColor="@android:color/white"
-		            android:text="Ambient Air Temp:" />
+		            android:text="@string/airTempPreface"
+		            android:textColor="@android:color/white" />
 		        
 		    </LinearLayout>
 		    
@@ -345,14 +365,14 @@
 		        android:layout_height="match_parent"
 		        android:layout_weight="0.4" >
 		        
-		        <TextView 
+		        <TextView
 		            android:id="@+id/hybridBatteryPack"
 		            android:layout_width="match_parent"
 		            android:layout_height="match_parent"
 		            android:layout_weight="0.5"
 		            android:gravity="center"
-		            android:textColor="@android:color/white"
-		            android:text="Hybrid Battery Pack - Remaining Life (if supported):" />
+		            android:text="@string/hybridBatteryPackPreface"
+		            android:textColor="@android:color/white" />
 		        
 		    </LinearLayout>
 		        
@@ -366,13 +386,13 @@
         android:layout_weight="0.45"
         android:orientation="vertical" >
 	    
-        <TextView 
+        <TextView
             android:id="@+id/VIN"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:textColor="@android:color/white"
-            android:text="VIN:" />
+            android:text="@string/VINPreface"
+            android:textColor="@android:color/white" />
         
     </LinearLayout>
 
