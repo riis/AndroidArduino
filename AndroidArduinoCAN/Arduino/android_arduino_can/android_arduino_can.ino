@@ -16,7 +16,7 @@
 #define DOWN  A3
 
 //Misc
-#define NUM_PARAMETERS 6
+#define NUM_PARAMETERS 15
 #define CANCS 53 //SPI Enable for CAN
 
 SoftwareSerial bluetoothSerial(RX, TX);
@@ -99,26 +99,33 @@ void loop(void) {
 }
 
 void gatherEngineData(float engineData[NUM_PARAMETERS], int* requestStatus) {
-    engineData[0] = sendECURequest(ENGINE_RPM, requestStatus);
-    engineData[1] = sendECURequest(ENGINE_COOLANT_TEMP, requestStatus);
-    engineData[2] = sendECURequest(VEHICLE_SPEED, requestStatus);
-    engineData[3] = sendECURequest(MAF_SENSOR, requestStatus);
-    engineData[4] = sendECURequest(O2_VOLTAGE, requestStatus);
-    engineData[5] = sendECURequest(THROTTLE, requestStatus);
+    engineData[0]  = sendECURequest(ENGINE_LOAD_VAL, requestStatus);
+    engineData[1]  = sendECURequest(ENGINE_COOLANT_TEMP, requestStatus);
+    engineData[2]  = sendECURequest(ENGINE_RPM, requestStatus);
+    engineData[3]  = sendECURequest(VEHICLE_SPEED, requestStatus);
+    engineData[4]  = sendECURequest(THROTTLE_POS, requestStatus);
+    engineData[5]  = sendECURequest(ENGINE_RUNTIME, requestStatus);
+    engineData[6]  = sendECURequest(FUEL_LEVEL_INPUT, requestStatus);
+    engineData[7]  = sendECURequest(AMBIENT_TEMP, requestStatus);
+    engineData[8]  = sendECURequest(ABS_THROTTLE_B, requestStatus);
+    engineData[9]  = sendECURequest(ABS_THROTTLE_C, requestStatus);
+    engineData[10] = sendECURequest(ACC_PEDAL_POS_D, requestStatus);
+    engineData[11] = sendECURequest(ACC_PEDAL_POS_E, requestStatus);
+    engineData[12] = sendECURequest(ACC_PEDAL_POS_F, requestStatus);
+    engineData[13] = sendECURequest(BATTERY_PACK_LIFE, requestStatus);
+    engineData[14] = sendECURequest(ENGINE_OIL_TEMP, requestStatus);
 }
 
 void sendEngineDataOverBluetooth(float engineData[NUM_PARAMETERS]) {
     String engineDataString;
-    char parameterCodes[NUM_PARAMETERS] = {
-        'E', 'C', 'S', 'M', 'O', 'T'    };
 
     for(int i = 0; i < NUM_PARAMETERS; i++) {
-        engineDataString = String(parameterCodes[i]) + "~" + floatToString(engineData[i], 2);
+        engineDataString = String(CAN.PIDs[i]) + "~" + floatToString(engineData[i], 2);
         bluetooth.sendStringWithFlags(engineDataString);
     }
 }
 
-float sendECURequest(unsigned char pid, int* requestStatus) {
+float sendECURequest(byte pid, int* requestStatus) {
     tCAN message;
     float engineData;
     unsigned long timestamp = 0;
@@ -143,54 +150,12 @@ float sendECURequest(unsigned char pid, int* requestStatus) {
     (*requestStatus) = 0;
 
     while(millis() <= timeout) {
-
         if (CAN.check_message()) {
             if (CAN.get_message(&message, &timestamp)) {
-
+                
                 // Check message is the reply and its the right PID
                 if((message.id >= PID_REPLY) && (message.data[2] == pid)) {
-                    switch(message.data[2]) {
-                    case ENGINE_RPM:            // ((A*256)+B)/4    [RPM]
-                        engineData = ((message.data[3]*256) + message.data[4])/4;
-//                        Serial.print("Engine RPM: ");
-//                        Serial.println(engineData, DEC);
-//                        bluetooth.sendStringWithFlags(String("Engine RPM: ") + String((int)engineData));
-                        return engineData;
-
-                    case ENGINE_COOLANT_TEMP:   // A-40	        [degree C]
-                        engineData = message.data[3] - 40;
-//                        Serial.print("Engine Temp (C): ");
-//                        Serial.println(engineData, DEC);
-//                        bluetooth.sendStringWithFlags(String("Engine Temp (C): ") + String((int)engineData));
-                        return engineData;
-
-                    case VEHICLE_SPEED:         // A                [km]
-                        engineData = message.data[3];
-//                        Serial.print("Vehicle KMH: ");
-//                        Serial.println(engineData, DEC);
-//                        bluetooth.sendStringWithFlags(String("Vehicle KMH: ") + String((int)engineData));
-                        return engineData;
-
-                    case MAF_SENSOR:            // ((256*A)+B)/100  [g/s]
-                        engineData = ((message.data[3]*256) + message.data[4])/100;
-//                        Serial.print("MAF Sensor (g/s): ");
-//                        Serial.println(engineData, DEC);
-//                        bluetooth.sendStringWithFlags(String("MAF Sensor (g/s): ") + String((int)engineData));
-                        return engineData;
-
-                    case O2_VOLTAGE:            // A * 0.005        [V]  
-                        engineData = message.data[3]*0.005;
-//                        Serial.print("O2 Voltage (v): ");
-//                        Serial.println(engineData, DEC);
-//                        bluetooth.sendStringWithFlags(String("O2 Voltage (v): ") + String((int)engineData));
-                        return engineData;
-
-                    case THROTTLE:		    // (A * 100)/255    [%]
-                        engineData = (message.data[3]*100)/255;
-//                        Serial.print("Throttle Position (%): ");
-//                        Serial.println(engineData, DEC);
-                        return engineData;
-                    }
+                    return CAN.calculatePIDvalue(pid, &message);
                 }
             }
         }
@@ -208,19 +173,17 @@ String floatToString(float value, int places) {
     int i;
     float tempfloat = value;
 
-    // calculate rounding term d:   0.5/pow(10,places)  
+    // calculate rounding term d: 0.5 / pow(10,places)  
     float d = 0.5;
     if (value < 0) {
         d = -0.5;
     }
     for (i = 0; i < places; i++)
         d /= 10.0;    
-    // this small addition, combined with truncation will round our values properly 
+    // this small addition, combined with truncation, will round our values properly 
     tempfloat +=  d;
 
-    // first get value tens to be the large power of ten less than value
-    // tenscount isn't necessary but it would be useful if you wanted to know after this how many chars the number will take
-
+    // first get value tens to be the largest power of ten that's less than the value
     if (value < 0) {
         tempfloat *= -1.0;
     }
@@ -255,7 +218,8 @@ String floatToString(float value, int places) {
     // otherwise, write the point and continue on
     floatString.concat('.');  
 
-    // now write out each decimal place by shifting digits one by one into the ones place and writing the truncated value
+    // now write out each decimal place by shifting digits
+    //one by one into the ones place and writing the truncated value
     for (i = 0; i < places; i++) {
         tempfloat *= 10.0; 
         digit = (int) tempfloat;
