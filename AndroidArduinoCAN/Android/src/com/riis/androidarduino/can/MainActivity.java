@@ -27,9 +27,6 @@ public class MainActivity extends Activity {
 	private Button stopTracking;
 	private Button pauseTracking;
 	
-	private ScrollView logScrollContainer;
-	private TextView msgLog;
-	
 	private volatile boolean keepRunning;
 	private boolean lastStatus;
 	private Thread msgThread;
@@ -92,8 +89,6 @@ public class MainActivity extends Activity {
     	setUpConnectButton();
     	setUpDisconnectButton();
     	setupHandler();
-    	setupMsgLog();
-    	setUpGraph();
 	}
     
     private void setUpConnectButton() {
@@ -126,8 +121,7 @@ public class MainActivity extends Activity {
 				
 				String message = tokens[1];
 				if(tokens[0].equals("LOG")) {
-					msgLog.append(message + "\n");
-			    	logScrollContainer.fullScroll(View.FOCUS_DOWN);
+					
 				} else if(tokens[0].equals("DATA")) {
 					//TODO parse data to determine if it's engine rpm, vehicle speed, engine temp, etc...
 //					float reading = Float.parseFloat(message);
@@ -143,26 +137,6 @@ public class MainActivity extends Activity {
 			}
 		};
 	}
-    
-    private void setupMsgLog() {
-    	logScrollContainer = (ScrollView)findViewById(R.id.scrollView);
-    	msgLog = (TextView) findViewById(R.id.messageLog);
-    	msgLog.append("Android Service Init...\n");
-    	msgLog.setMovementMethod(new ScrollingMovementMethod());
-    }
-    
-    private void setUpGraph() {
-    	//TODO Set up a graph to track acceleration, speed, and distance.
-    	
-//		String[] verlabels = new String[] { "Dead", "Wasted", "Drunk", "Tipsy", "Sober" };
-//		String[] horlabels = new String[] { "             Time ------------------->" };
-//		BreathalyzerView graphView = new BreathalyzerView(this, readings, "Breathalyzer Readings", horlabels, verlabels, BreathalyzerView.LINE);
-//		
-//		LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-//		graphView.setLayoutParams(params);
-//		
-//		((LinearLayout)findViewById(R.id.graphContainer)).addView(graphView);
-    }
     
     private void appendMsgToMsgLog(String str) {
 		Message msg = Message.obtain(handler);

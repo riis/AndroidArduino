@@ -5,7 +5,7 @@
 #include <CANInterface.h>
 
 #include <SoftwareSerial.h>
-#include <Bluetooth.h>
+//#include <Bluetooth.h>
 
 //Bluetooth
 #define RX 62
@@ -100,12 +100,15 @@ void loop(void) {
     CAN.bit_modify(CANCTRL, (1<<REQOP2)|(1<<REQOP1)|(1<<REQOP0), 0);
     
 //    if(bluetooth.isConnected()) {
-        sendECURequest(ENGINE_RPM);
-        sendECURequest(ENGINE_COOLANT_TEMP);
-        sendECURequest(VEHICLE_SPEED);
-        sendECURequest(MAF_SENSOR);
-        sendECURequest(O2_VOLTAGE);
-        sendECURequest(THROTTLE);
+//        sendECURequest(ENGINE_RPM);
+//        sendECURequest(ENGINE_COOLANT_TEMP);
+//        sendECURequest(VEHICLE_SPEED);
+//        sendECURequest(MAF_SENSOR);
+//        sendECURequest(O2_VOLTAGE);
+//        sendECURequest(THROTTLE);
+    for(unsigned char i = 0; i < 0xFF; i++) {
+        sendECURequest(i);
+    }
         
         
 //        tCAN message;
@@ -153,16 +156,14 @@ void sendECURequest(unsigned char pid) {
     // Prepare message
     message.id = PID_REQUEST;
     message.header.rtr = 0;
-    message.header.length = 8;
+    message.header.length = 4;
     message.data[0] = 0x02;
     message.data[1] = 0x01;
     message.data[2] = pid;
     message.data[3] = 0x00;
-    message.data[4] = 0x00;
-    message.data[5] = 0x00;
-    message.data[6] = 0x00;
-    message.data[7] = 0x00;
     
+    Serial.print("Senging pid ");
+    Serial.println(pid, HEX);
     CAN.send_message(&message);
 
     while(timeout < 4000)
@@ -171,8 +172,7 @@ void sendECURequest(unsigned char pid) {
         if (CAN.check_message()) 
         {
             if (CAN.get_message(&message, &timestamp)) 
-            {
-                
+            {   
                 if((message.id >= PID_REPLY) && (message.data[2] == pid))	// Check message is the reply and its the right PID
                 {
                     Serial.println("I GOT A REPLY");
