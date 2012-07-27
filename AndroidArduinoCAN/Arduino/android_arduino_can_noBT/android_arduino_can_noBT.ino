@@ -100,38 +100,39 @@ void loop(void) {
     CAN.bit_modify(CANCTRL, (1<<REQOP2)|(1<<REQOP1)|(1<<REQOP0), 0);
     
 //    if(bluetooth.isConnected()) {
-//        sendECURequest(ENGINE_RPM);
-//        sendECURequest(ENGINE_COOLANT_TEMP);
-//        sendECURequest(VEHICLE_SPEED);
-//        sendECURequest(MAF_SENSOR);
-//        sendECURequest(O2_VOLTAGE);
-//        sendECURequest(THROTTLE);
+        sendECURequest(ENGINE_RPM);
+        sendECURequest(ENGINE_COOLANT_TEMP);
+        sendECURequest(VEHICLE_SPEED);
+        sendECURequest(MAF_SENSOR);
+        sendECURequest(O2_VOLTAGE);
+        sendECURequest(THROTTLE);
         
         
-        tCAN message;
-        float engine_data;
-        int timeout = 0;
-        unsigned long timestamp = 0;
-        char message_ok = 0;
-        if (CAN.check_message())
-        {
-            if (CAN.get_message(&message, &timestamp))
-            {
-                if(dontIgnoreMessage(message.id)) {
-                    digitalWrite(CANCS, HIGH);
-                    Serial.print("Message ID: ");
-                    Serial.print(message.id, HEX);
-                  
-                    Serial.print(", \tMessage Payload: ");
-                    for(int i = 0; i < 8; i++)
-                    {
-                        Serial.print(message.data[i],HEX);
-                        Serial.print(' ');
-                    }
-                    Serial.println();
-                }
-            } 
-        }
+//        tCAN message;
+//        float engine_data;
+//        int timeout = 0;
+//        unsigned long timestamp = 0;
+//        char message_ok = 0;
+//        if (CAN.check_message())
+//        {
+//            if (CAN.get_message(&message, &timestamp))
+//            {
+//                if(dontIgnoreMessage(message.id)) {
+//                //if(message.id == 0x039) {
+//                    digitalWrite(CANCS, HIGH);
+//                    Serial.print("Message ID: ");
+//                    Serial.print(message.id, HEX);
+//                  
+//                    Serial.print(", \tMessage Payload: ");
+//                    for(int i = 0; i < 8; i++)
+//                    {
+//                        Serial.print(message.data[i],HEX);
+//                        Serial.print(' ');
+//                    }
+//                    Serial.println();
+//                }
+//            } 
+//        }
 
         digitalWrite(CANCS, LOW);
     
@@ -171,8 +172,10 @@ void sendECURequest(unsigned char pid) {
         {
             if (CAN.get_message(&message, &timestamp)) 
             {
+                
                 if((message.id >= PID_REPLY) && (message.data[2] == pid))	// Check message is the reply and its the right PID
                 {
+                    Serial.println("I GOT A REPLY");
                     switch(message.data[2])
                     {   /* Details from http://en.wikipedia.org/wiki/OBD-II_PIDs */
                     case ENGINE_RPM:  			//   ((A*256)+B)/4    [RPM]
@@ -363,6 +366,10 @@ boolean dontIgnoreMessage(uint16_t messageId) {
         case 0x0158:
         case 0x0159:
         case 0x0160:
+        case 0x0161:
+        case 0x0162:
+        case 0x0163:
+        case 0x0164:
         case 0x0166:
         case 0x0169:
         case 0x016A:
@@ -386,13 +393,14 @@ boolean dontIgnoreMessage(uint16_t messageId) {
         case 0x017C:
         case 0x017D:
         case 0x017E:
-        case 0x0180:
+        case 0x0183:
         case 0x0184:
         case 0x0185:
         case 0x0186:
         case 0x0187:
-        case 0x01A1:
-        case 0x01C0:
+        case 0x018E:  //wat do
+        case 0x0191:  //wat do
+        case 0x01A4:  //wat do
             return false;
             break;
         default:
