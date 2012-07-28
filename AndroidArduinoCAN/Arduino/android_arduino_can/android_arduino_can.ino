@@ -120,8 +120,10 @@ void sendEngineDataOverBluetooth(float engineData[NUM_PARAMETERS]) {
     String engineDataString;
 
     for(int i = 0; i < NUM_PARAMETERS; i++) {
+//        char pid = CAN.PIDs[i];
         engineDataString = String(CAN.PIDs[i]) + "~" + floatToString(engineData[i], 2);
         bluetooth.sendStringWithFlags(engineDataString);
+        Serial.println(engineDataString);
     }
 }
 
@@ -131,7 +133,7 @@ float sendECURequest(byte pid, int* requestStatus) {
     unsigned long timestamp = 0;
 
     //Timeout of 2 seconds
-    unsigned long timeout = (millis() + 2000);
+    unsigned long timeout = (millis() + 100);
 
     // Prepare message
     message.id = PID_REQUEST;
@@ -161,6 +163,7 @@ float sendECURequest(byte pid, int* requestStatus) {
         }
     }
 
+    delay(10);
     (*requestStatus) = -1;
 }
 

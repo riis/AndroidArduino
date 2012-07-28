@@ -248,45 +248,45 @@ public class MainActivity extends Activity {
 				if(tokens[0].equals("LOG")) {
 					
 				} else if(tokens[0].equals("DATA")) {
-			    	if(tokens[1].charAt(0) == 0x02)
-			    		setVIN(tokens[1].substring(1));
-			    	else if(tokens[1].charAt(0) == 0x04)
-			    		setEngineLoadVal(tokens[1].substring(1));
-			    	else if(tokens[1].charAt(0) == 0x05)
-			    		setEngineCoolantTemp(tokens[1].substring(1));
-			    	else if(tokens[1].charAt(0) == 0x0C)
-			    		setEngineRPM(tokens[1].substring(1));
-			    	else if(tokens[1].charAt(0) == 0x0D)
-			    		setVehicleSpeed(tokens[1].substring(1));
-			    	else if(tokens[1].charAt(0) == 0x11)
-			    		setThrottlePosition(tokens[1].substring(1));
-			    	else if(tokens[1].charAt(0) == 0x1F)
-			    		setEngineRunTime(tokens[1].substring(1));
-			    	else if(tokens[1].charAt(0) == 0x2F)
-			    		setFuelLevelInput(tokens[1].substring(1));
-			    	else if(tokens[1].charAt(0) == 0x46)
-			    		setAmbiantAirTemp(tokens[1].substring(1));
-			    	else if(tokens[1].charAt(0) == 0x47)
-			    		setAbsoluteThrottleB(tokens[1].substring(1));
-			    	else if(tokens[1].charAt(0) == 0x48)
-			    		setAbsoluteThrottleC(tokens[1].substring(1));
-			    	else if(tokens[1].charAt(0) == 0x49)
-			    		setAccPedalPosD(tokens[1].substring(1));
-			    	else if(tokens[1].charAt(0) == 0x4A)
-			    		setAccPedalPosE(tokens[1].substring(1));
-			    	else if(tokens[1].charAt(0) == 0x4B)
-			    		setAbsAccPedalPosF(tokens[1].substring(1));
-			    	else if(tokens[1].charAt(0) == 0x5B)
-			    		setHybridBatteryPackLife(tokens[1].substring(1));
-			    	else if(tokens[1].charAt(0) == 0x5C)
-			    		setEngineOilTemp(tokens[1].substring(1));
+			    	if(Integer.parseInt(tokens[1]) == 0x02)
+			    		setVIN(tokens[2]);
+			    	else if(Integer.parseInt(tokens[1]) == 0x04)
+			    		setEngineLoadVal(tokens[2]);
+			    	else if(Integer.parseInt(tokens[1]) == 0x05)
+			    		setEngineCoolantTemp(tokens[2]);
+			    	else if(Integer.parseInt(tokens[1]) == 0x0C)
+			    		setEngineRPM(tokens[2]);
+			    	else if(Integer.parseInt(tokens[1]) == 0x0D)
+			    		setVehicleSpeed(tokens[2]);
+			    	else if(Integer.parseInt(tokens[1]) == 0x11)
+			    		setThrottlePosition(tokens[2]);
+			    	else if(Integer.parseInt(tokens[1]) == 0x1F)
+			    		setEngineRunTime(tokens[2]);
+			    	else if(Integer.parseInt(tokens[1]) == 0x2F)
+			    		setFuelLevelInput(tokens[2]);
+			    	else if(Integer.parseInt(tokens[1]) == 0x46)
+			    		setAmbiantAirTemp(tokens[2]);
+			    	else if(Integer.parseInt(tokens[1]) == 0x47)
+			    		setAbsoluteThrottleB(tokens[2]);
+			    	else if(Integer.parseInt(tokens[1]) == 0x48)
+			    		setAbsoluteThrottleC(tokens[2]);
+			    	else if(Integer.parseInt(tokens[1]) == 0x49)
+			    		setAccPedalPosD(tokens[2]);
+			    	else if(Integer.parseInt(tokens[1]) == 0x4A)
+			    		setAccPedalPosE(tokens[2]);
+			    	else if(Integer.parseInt(tokens[1]) == 0x4B)
+			    		setAbsAccPedalPosF(tokens[2]);
+			    	else if(Integer.parseInt(tokens[1]) == 0x5B)
+			    		setHybridBatteryPackLife(tokens[2]);
+			    	else if(Integer.parseInt(tokens[1]) == 0x5C)
+			    		setEngineOilTemp(tokens[2]);
 				}
 			}
 		};
 	}
     
     private void setVIN(String vin) {
-    	VIN.setText(R.string.VINPreface + vin);
+    	VIN.setText(getString(R.string.VINPreface) + vin);
 	}
 
 	private void setEngineLoadVal(String substring) {
@@ -295,9 +295,9 @@ public class MainActivity extends Activity {
 	}
 
 	private void setEngineCoolantTemp(String coolantTempStr) {
-    	int coolantTemp = Integer.parseInt(coolantTempStr);
-		coolantTempTxt.setText(R.string.engineCoolantTempPreface + coolantTemp + " C");
-		coolantTempBar.setProgress(coolantTemp+40);
+    	float coolantTemp = Float.parseFloat(coolantTempStr);
+		coolantTempTxt.setText(getString(R.string.engineCoolantTempPreface) + coolantTemp + " C");
+		coolantTempBar.setProgress((int)coolantTemp+40);
 	}
 
 	private void setEngineRPM(String substring) {
@@ -316,7 +316,7 @@ public class MainActivity extends Activity {
 	}
 
 	private void setEngineRunTime(String timeStr) {
-		engineRunTime.setText(R.string.engineRunTimePreface + timeStr + "s");
+		engineRunTime.setText(getString(R.string.engineRunTimePreface) + timeStr + "s");
 	}
 
 	private void setFuelLevelInput(String substring) {
@@ -325,48 +325,48 @@ public class MainActivity extends Activity {
 	}
 
 	private void setAmbiantAirTemp(String tempStr) {
-		airTemp.setText(R.string.airTempPreface + tempStr + " C");
+		airTemp.setText(getString(R.string.airTempPreface) + Float.parseFloat(tempStr) + " C");
 	}
 
 	private void setAbsoluteThrottleB(String absThrottleBStr) {
-		int absThrottleB = Integer.parseInt(absThrottleBStr);
-		absThrottleBTxt.setText(R.string.absThrottleBPreface + absThrottleB + "%");
-		absThrottleBBar.setProgress(absThrottleB);
+		float absThrottleB = (int) Float.parseFloat(absThrottleBStr);
+		absThrottleBTxt.setText(getString(R.string.absThrottleBPreface) + absThrottleB + "%");
+		absThrottleBBar.setProgress((int)absThrottleB);
 	}
 
 	private void setAbsoluteThrottleC(String absThrottleCStr) {
-		int absThrottleC = Integer.parseInt(absThrottleCStr);
-		absThrottleCTxt.setText(R.string.absThrottleCPreface + absThrottleC + "%");
-		absThrottleCBar.setProgress(absThrottleC);
+		float absThrottleC = (int) Float.parseFloat(absThrottleCStr);
+		absThrottleCTxt.setText(getString(R.string.absThrottleCPreface) + absThrottleC + "%");
+		absThrottleCBar.setProgress((int)absThrottleC);
 	}
 
 	private void setAccPedalPosD(String absAccPosDStr) {
-		int absAccPosD = Integer.parseInt(absAccPosDStr);
-		absAccPosDTxt.setText(R.string.accPedalPosDPreface + absAccPosD + "%");
-		absAccPosDBar.setProgress(absAccPosD);
+		float absAccPosD = Float.parseFloat(absAccPosDStr);
+		absAccPosDTxt.setText(getString(R.string.accPedalPosDPreface) + absAccPosD + "%");
+		absAccPosDBar.setProgress((int)absAccPosD);
 	}
 
 	private void setAccPedalPosE(String absAccPosEStr) {
-		int absAccPosE = Integer.parseInt(absAccPosEStr);
-		absAccPosETxt.setText(R.string.accPedalPosEPreface + absAccPosE + "%");
-		absAccPosEBar.setProgress(absAccPosE);
+		float absAccPosE = Float.parseFloat(absAccPosEStr);
+		absAccPosETxt.setText(getString(R.string.accPedalPosEPreface) + absAccPosE + "%");
+		absAccPosEBar.setProgress((int)absAccPosE);
 	}
 
 	private void setAbsAccPedalPosF(String absAccPosFStr) {
-		int absAccPosF = Integer.parseInt(absAccPosFStr);
-		absAccPosFTxt.setText(R.string.accPedalPosFPreface + absAccPosF + "%");
-		absAccPosFBar.setProgress(absAccPosF);
+		float absAccPosF = Float.parseFloat(absAccPosFStr);
+		absAccPosFTxt.setText(getString(R.string.accPedalPosFPreface) + absAccPosF + "%");
+		absAccPosFBar.setProgress((int)absAccPosF);
 	}
 
 	private void setHybridBatteryPackLife(String batteryLifeStr) {
-		int batteryLife = Integer.parseInt(batteryLifeStr);
-		hybridBatteryPack.setText(R.string.hybridBatteryPackPreface + batteryLife + "%");
+		float batteryLife = Float.parseFloat(batteryLifeStr);
+		hybridBatteryPack.setText(getString(R.string.hybridBatteryPackPreface) + batteryLife + "%");
 	}
 
 	private void setEngineOilTemp(String oilTempStr) {
-    	int oilTemp = Integer.parseInt(oilTempStr);
-		oilTempTxt.setText(R.string.engineOilTempPreface + oilTemp + " C");
-		oilTempBar.setProgress(oilTemp+40);
+    	float oilTemp = Float.parseFloat(oilTempStr);
+		oilTempTxt.setText(getString(R.string.engineOilTempPreface) + oilTemp + " C");
+		oilTempBar.setProgress((int)oilTemp+40);
     }
     
     private void parseCANData(String data) {
