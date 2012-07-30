@@ -1,23 +1,20 @@
 package com.riis.androidarduino.can;
-import java.util.ArrayList;
-import java.util.Random;
 
-import com.riis.androidarduino.lib.BluetoothComm;
+import java.util.ArrayList;
 
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.LinearLayout.LayoutParams;
 import android.widget.ProgressBar;
-import android.widget.ScrollView;
 import android.widget.TextView;
+
+import com.riis.androidarduino.lib.BluetoothComm;
 
 public class MainActivity extends Activity {
 	private static String DEVICE_NAME = "AndroidArduinoCANBT";
@@ -32,6 +29,9 @@ public class MainActivity extends Activity {
 	private double timeSinceTrackStart;
 	private ArrayList<Double> avgRPM;
 	private ArrayList<Double> avgSpeed;
+	
+	private GuageView speedometer;
+	private GuageView tachometer;
 	
 	private TextView engineRunTime;
 	private TextView airTemp;
@@ -123,8 +123,9 @@ public class MainActivity extends Activity {
     	setUpBatteryMonitor();
     	setUpRuntimeMonitor();
     	setUpVIN();
+    	setUpSpeedometer();
     	setupHandler();
-	}
+    }
 
 	private void setUpConnectButton() {
     	btConnectButton = (Button)findViewById(R.id.connectButton);
@@ -245,6 +246,10 @@ public class MainActivity extends Activity {
 		engineRunTime = (TextView)findViewById(R.id.engineRunTime);
 		engineRunTime.append("0s");
 	}
+	
+	private void setUpSpeedometer() {
+		speedometer = (GuageView) findViewById(R.id.speedometer);
+	}
     
     private void setupHandler() {
 		handler = new Handler() {
@@ -319,6 +324,8 @@ public class MainActivity extends Activity {
 		
 		double newAvg = getAvg(avgRPM);
 		
+		tachometer.setValue(Float.parseFloat(rpmStr));
+		
 		// calculate angle from rpm
 		// -turn into a %- rpm/maxVal
 		// zeroAngle + (rpm*maxValAngle)
@@ -338,9 +345,10 @@ public class MainActivity extends Activity {
 		
 		double newAvg = getAvg(avgSpeed);
 		
+		speedometer.setValue(Float.parseFloat(speedStr));
+		
 		// calculate angle from speed
 		// calculate angle from newAvg
-		
 	}
 
 	private double getAvg(ArrayList<Double> dataList) {
@@ -428,7 +436,7 @@ public class MainActivity extends Activity {
 			btComm.resumeConnection();
 		}
 		
-		btComm.shouldPrintLogMsgs(true);
+		btComm.shouldPrintLogMsgs(false);
 		msgThread = new Thread(msgUpdateThread);
 		msgThread.start();
 	}

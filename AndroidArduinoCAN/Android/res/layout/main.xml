@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:guage="http://schemas.android.com/apk/res/com.riis.androidarduino.can"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:weightSum="1.0"
@@ -140,22 +141,23 @@
 		        
 		    </LinearLayout>
 
-		    <LinearLayout
-		        android:id="@+id/tachometerPlaceHolder"
+		    <com.riis.androidarduino.can.GuageView
+			    android:id="@+id/speedometer"
 		        android:layout_width="fill_parent"
 		        android:layout_height="fill_parent"
-		        android:layout_weight="0.3" >
-		    </LinearLayout>
+		        android:layout_weight="0.3"
+		        guage:maxValue="8000"
+		        guage:minValue="0" />
 	        
 	    </LinearLayout>
 		
-	    <LinearLayout
-		    android:id="@+id/speedometerPlaceHolder"
+	    <com.riis.androidarduino.can.GuageView
+		    android:id="@+id/speedometer"
 	        android:layout_width="fill_parent"
 	        android:layout_height="fill_parent"
-	        android:layout_weight="0.3" >
-		    
-	    </LinearLayout>
+	        android:layout_weight="0.3"
+	        guage:maxValue="240"
+	        guage:minValue="0" />
 	    
 	    <LinearLayout
 	        android:layout_width="fill_parent"
