@@ -72,22 +72,14 @@ void initJoyStick(void) {
 
 void loop(void) {
     float engineData[NUM_PARAMETERS];
-    int requestStatus;
     bluetooth.process();
 
     CAN.bit_modify(CANCTRL, (1<<REQOP2)|(1<<REQOP1)|(1<<REQOP0), 0);
 
     if(bluetooth.isConnected()) {
-        gatherEngineData(engineData, &requestStatus);
-
-        if(requestStatus == 0) {
-            sendEngineDataOverBluetooth(engineData);  
-        } 
-        else if(requestStatus == -1) {
-            Serial.print("Error receiving car data");
-        }
-    } 
-    else {
+        gatherEngineData(engineData);
+        sendEngineDataOverBluetooth(engineData);  
+    } else {
         Serial.println("Bluetooth disconnected...");
     }
 
@@ -98,29 +90,38 @@ void loop(void) {
     }
 }
 
-void gatherEngineData(float engineData[NUM_PARAMETERS], int* requestStatus) {
-    engineData[0]  = sendECURequest(ENGINE_LOAD_VAL, requestStatus);
-    engineData[1]  = sendECURequest(ENGINE_COOLANT_TEMP, requestStatus);
-    engineData[2]  = sendECURequest(ENGINE_RPM, requestStatus);
-    engineData[3]  = sendECURequest(VEHICLE_SPEED, requestStatus);
-    engineData[4]  = sendECURequest(THROTTLE_POS, requestStatus);
-    engineData[5]  = sendECURequest(ENGINE_RUNTIME, requestStatus);
-    engineData[6]  = sendECURequest(FUEL_LEVEL_INPUT, requestStatus);
-    engineData[7]  = sendECURequest(AMBIENT_TEMP, requestStatus);
-    engineData[8]  = sendECURequest(ABS_THROTTLE_B, requestStatus);
-    engineData[9]  = sendECURequest(ABS_THROTTLE_C, requestStatus);
-    engineData[10] = sendECURequest(ACC_PEDAL_POS_D, requestStatus);
-    engineData[11] = sendECURequest(ACC_PEDAL_POS_E, requestStatus);
-    engineData[12] = sendECURequest(ACC_PEDAL_POS_F, requestStatus);
-    engineData[13] = sendECURequest(BATTERY_PACK_LIFE, requestStatus);
-    engineData[14] = sendECURequest(ENGINE_OIL_TEMP, requestStatus);
+void gatherEngineData(float engineData[NUM_PARAMETERS]) {    
+    getPieceOfData(engineData, 0,  ENGINE_LOAD_VAL);   
+    getPieceOfData(engineData, 1,  ENGINE_COOLANT_TEMP);   
+    getPieceOfData(engineData, 2,  ENGINE_RPM);   
+    getPieceOfData(engineData, 3,  VEHICLE_SPEED);   
+    getPieceOfData(engineData, 4,  THROTTLE_POS);   
+    getPieceOfData(engineData, 5,  ENGINE_RUNTIME);   
+    getPieceOfData(engineData, 6,  FUEL_LEVEL_INPUT);   
+    getPieceOfData(engineData, 7,  AMBIENT_TEMP);   
+    getPieceOfData(engineData, 8,  ABS_THROTTLE_B);   
+    getPieceOfData(engineData, 9,  ABS_THROTTLE_C);   
+    getPieceOfData(engineData, 10,  ACC_PEDAL_POS_D);   
+    getPieceOfData(engineData, 11, ACC_PEDAL_POS_E);   
+    getPieceOfData(engineData, 12, ACC_PEDAL_POS_F);   
+    getPieceOfData(engineData, 13, BATTERY_PACK_LIFE);   
+    getPieceOfData(engineData, 14, ENGINE_OIL_TEMP);
+}
+
+void getPieceOfData(float engineData[NUM_PARAMETERS], int index, int pid) {
+    int requestStatus = -1;
+    float tempData = 0.0;
+    
+    tempData = sendECURequest(pid, &requestStatus);
+    if(requestStatus == 0) {
+        engineData[index] = tempData;
+    }
 }
 
 void sendEngineDataOverBluetooth(float engineData[NUM_PARAMETERS]) {
     String engineDataString;
 
     for(int i = 0; i < NUM_PARAMETERS; i++) {
-//        char pid = CAN.PIDs[i];
         engineDataString = String(CAN.PIDs[i]) + "~" + floatToString(engineData[i], 2);
         bluetooth.sendStringWithFlags(engineDataString);
         Serial.println(engineDataString);
@@ -132,8 +133,8 @@ float sendECURequest(byte pid, int* requestStatus) {
     float engineData;
     unsigned long timestamp = 0;
 
-    //Timeout of 2 seconds
-    unsigned long timeout = (millis() + 100);
+    //Timeout of 65 milliseconds, keeps refresh rate of 1Hz in worst case
+    unsigned long timeout = (millis() + 65);
 
     // Prepare message
     message.id = PID_REQUEST;
