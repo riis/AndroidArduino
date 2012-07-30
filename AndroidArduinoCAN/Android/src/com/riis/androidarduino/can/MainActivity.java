@@ -311,9 +311,11 @@ public class MainActivity extends Activity {
 	private void setEngineRPM(String rpmStr) {
 		double rpm = Double.parseDouble(rpmStr);
 		
-		if(avgRPM.size() == MAX_ARRAY_SIZE)
-			avgRPM.remove(0);
-		avgRPM.add(rpm);
+		if(enableTracking) {
+			if(avgRPM.size() == MAX_ARRAY_SIZE)
+				avgRPM.remove(0);
+			avgRPM.add(rpm);
+		}
 		
 		double newAvg = getAvg(avgRPM);
 		
@@ -328,9 +330,11 @@ public class MainActivity extends Activity {
 	private void setVehicleSpeed(String speedStr) {
 		double speed = Double.parseDouble(speedStr);
 		
-		if(avgSpeed.size() == MAX_ARRAY_SIZE)
-			avgSpeed.remove(0);
-		avgSpeed.add(speed);
+		if(enableTracking) {
+			if(avgSpeed.size() == MAX_ARRAY_SIZE)
+				avgSpeed.remove(0);
+			avgSpeed.add(speed);
+		}
 		
 		double newAvg = getAvg(avgSpeed);
 		
