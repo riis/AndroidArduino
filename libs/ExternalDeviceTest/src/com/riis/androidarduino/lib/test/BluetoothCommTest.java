@@ -71,7 +71,10 @@ public class BluetoothCommTest {
 	
 	@Test
 	public void testBluetoothComm() {
-		fail("Not yet implemented");
+		//Run the actual test action: invoking findDevice
+		BluetoothComm btComm = new BluetoothComm("AndroidArduinoBTRS23");
+
+		
 	}
 
 	@Test
@@ -80,8 +83,20 @@ public class BluetoothCommTest {
 	}
 
 	@Test
-	public void testDisconnect() {
-		fail("Not yet implemented");
+	public void testDisconnect() throws Exception {
+		//Run the actual test action: invoking findDevice
+		BluetoothComm btComm = new BluetoothComm("AndroidArduinoBTRS23");
+
+		Whitebox.invokeMethod(btComm, "connect");
+		
+		assertTrue(btComm.isConnected());
+		
+		Whitebox.invokeMethod(btComm, "disconnect");
+		
+		//Finish the test
+		verify(mockAdapter);
+		verify(BluetoothAdapter.class);		
+		assertTrue(!btComm.isConnected());
 	}
 
 	@Test
