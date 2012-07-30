@@ -5,8 +5,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import android.app.Activity;
-import android.content.Context;
 import android.util.Log;
 
 public abstract class SerialComm implements iCommunication, Runnable {
@@ -22,12 +20,9 @@ public abstract class SerialComm implements iCommunication, Runnable {
 	
 	protected boolean foundNullTerminatorFlag;
 	
-	protected Context context;
-	
 	protected boolean isConnected;
 	
-	public SerialComm(Activity parentActivity) {
-		this.context = parentActivity.getApplicationContext();
+	public SerialComm() {
 		
 		shouldLog = false;
 		isConnected = false;
@@ -148,7 +143,6 @@ public abstract class SerialComm implements iCommunication, Runnable {
 			msgBuffer.put(makeFlagMsgArrayFromByteArray());
 			foundNullTerminatorFlag = false;
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

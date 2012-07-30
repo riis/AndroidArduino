@@ -1,13 +1,12 @@
 package com.riis.androidarduino.lib;
 
+import java.io.IOException;
 import java.util.Set;
 import java.util.UUID;
 
-import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.widget.Toast;
 
 public class BluetoothComm extends SerialComm implements Runnable {
 	private BluetoothAdapter adapter;
@@ -15,27 +14,30 @@ public class BluetoothComm extends SerialComm implements Runnable {
 	private BluetoothSocket socket;
 	private String deviceName;
 	
-	public BluetoothComm(Activity parentActivity, String deviceName) {
-		super(parentActivity);
+	public BluetoothComm(String deviceName) {
+		super();
+		
 		this.deviceName = deviceName;
-		connect();
 		
 		Thread inputThread = new Thread(this, "BlueToothComm");
 		inputThread.start();
 	}
 	
-//	@Override
-	public void connect() {
-		device = findDevice(deviceName);
-		connectSocket();
+	public void connect() throws IOException {
+		try {
+			device = findDevice(deviceName);
+			connectSocket();
+		} catch(Exception e) {
+			throw new IOException("Could not connect to device.");
+		}
 		
 		if(socket != null) {
 			isConnected = true;
-			Toast.makeText(context, "Connected!", Toast.LENGTH_SHORT).show();
+			log("Connected!");
 		}
 	}
 	
-	private BluetoothDevice findDevice(String deviceName) {
+	private BluetoothDevice findDevice(String deviceName) throws NullPointerException {
     	adapter = BluetoothAdapter.getDefaultAdapter();
     	Set<BluetoothDevice> pairedDevices = adapter.getBondedDevices();
 
@@ -46,29 +48,28 @@ public class BluetoothComm extends SerialComm implements Runnable {
     	if(pairedDevices.size() > 0) {
 		    for (BluetoothDevice searchDevice : pairedDevices) {
 		    	if(searchDevice.getName().equals(deviceName)) {
-		    		Toast.makeText(context, "Found device " + deviceName, Toast.LENGTH_SHORT).show();
+		    		log("Found device " + deviceName);
 			    	return searchDevice;
 		    	}
 		    }
 		}
-		Toast.makeText(context, "Couldn't find any Bluetooth devices.", Toast.LENGTH_SHORT).show();
-		return null;
+		log("Couldn't find any Bluetooth devices.");
+		throw new NullPointerException();
 	}
 	
-	private void connectSocket() {
+	private void connectSocket() throws IOException {
 		try {
 			socket = device.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"));			
 			socket.connect();
 		
 			setInputStream(socket.getInputStream());								
 			setOutputStream(socket.getOutputStream());		
-		} catch (Exception e) {
-			Toast.makeText(context, "Couldn't connect to device", Toast.LENGTH_SHORT).show();
-			return ;
+		} catch (IOException e) {
+			throw e;
 		}
 	}
 	
-	public void disconnect() {
+	public void disconnect() throws IOException {
 		try {
 			if(socket != null)
 				socket.close();
@@ -76,19 +77,19 @@ public class BluetoothComm extends SerialComm implements Runnable {
 				getInputStream().close();
 			if(getOutputStream() != null)
 				getOutputStream().close();
-		} catch (Exception e) { }
+		} catch (IOException e) {
+			throw e;
+		}
 		
 		isConnected = false;
-		Toast.makeText(context, "Disconnected!", Toast.LENGTH_SHORT).show();
+		log("Disconnected!");
 	}
 
-//	@Override
-	public void pauseConnection() {
+	public void pauseConnection() throws IOException {
 		disconnect();
 	}
 
-//	@Override
-	public void resumeConnection() {
+	public void resumeConnection() throws IOException {
 		connect();
 	}
 }

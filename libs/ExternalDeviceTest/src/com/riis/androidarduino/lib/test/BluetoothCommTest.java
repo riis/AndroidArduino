@@ -35,11 +35,6 @@ public class BluetoothCommTest {
 		Activity mockActivity = PowerMockito.mock(Activity.class);
 		PowerMockito.when(mockActivity.getApplicationContext()).thenReturn(null);
 		
-		//Mock Toast so that it doesn't do anything
-		mockStatic(Toast.class);
-		Toast toastMock = createMock(Toast.class);
-		expect(Toast.makeText(null, "Couldn't find any Bluetooth devices.", 0)).andReturn(toastMock);
-		
 		//Create the mock BluetoothAdapter and add devices for it to return
 		BluetoothAdapter mockAdapter = createMock(BluetoothAdapter.class);
 		Set<BluetoothDevice> btDeviceSet = new LinkedHashSet<BluetoothDevice>();
@@ -55,7 +50,7 @@ public class BluetoothCommTest {
 		replay(Toast.class);
 		
 		//Run the actual test action: invoking findDevice
-		BluetoothComm btComm = new BluetoothComm(mockActivity, "AndroidArduinoBTRS232");
+		BluetoothComm btComm = new BluetoothComm("AndroidArduinoBTRS232");
 		Whitebox.invokeMethod(btComm, "findDevice", "AndroidArduinoBTRS232");
 		
 		//Finish the test

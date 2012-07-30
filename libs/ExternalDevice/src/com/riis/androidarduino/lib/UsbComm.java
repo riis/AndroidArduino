@@ -27,8 +27,13 @@ public class UsbComm extends SerialComm {
 	private boolean permissionRequestPending;
 	private Thread inputThread;
 	
+	private Context context;
+	
 	public UsbComm(Activity parentActivity) {
-		super(parentActivity);
+		super();
+		
+		this.context = parentActivity.getApplicationContext();
+		
 		setupBroadcastReceiver();
 		accessory = (UsbAccessory) parentActivity.getLastNonConfigurationInstance();
 		connect();
