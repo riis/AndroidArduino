@@ -37,7 +37,7 @@ public class BluetoothComm extends SerialComm implements Runnable {
 		}
 	}
 	
-	private BluetoothDevice findDevice(String deviceName) throws NullPointerException {
+	private BluetoothDevice findDevice(String deviceName) {
     	adapter = BluetoothAdapter.getDefaultAdapter();
     	Set<BluetoothDevice> pairedDevices = adapter.getBondedDevices();
 

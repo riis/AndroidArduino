@@ -11,6 +11,7 @@ import static org.powermock.api.easymock.PowerMock.verify;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.api.mockito.PowerMockito;
@@ -21,25 +22,32 @@ import org.powermock.reflect.Whitebox;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.widget.Toast;
 
 import com.riis.androidarduino.lib.BluetoothComm;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ BluetoothComm.class, BluetoothAdapter.class, Activity.class, Toast.class })
+@PrepareForTest({ BluetoothDevice.class, BluetoothComm.class, BluetoothAdapter.class, Activity.class })
 public class BluetoothCommTest {
+	
+	private static BluetoothAdapter mockAdapter = null;
 
-	@Test
-	public void testFindDevice() throws Exception {
+	@Before
+	public void setup() {
 		//Create the mock activity, override the appropriate functions
 		Activity mockActivity = PowerMockito.mock(Activity.class);
 		PowerMockito.when(mockActivity.getApplicationContext()).thenReturn(null);
 		
 		//Create the mock BluetoothAdapter and add devices for it to return
-		BluetoothAdapter mockAdapter = createMock(BluetoothAdapter.class);
+		mockAdapter = createMock(BluetoothAdapter.class);
 		Set<BluetoothDevice> btDeviceSet = new LinkedHashSet<BluetoothDevice>();
+		
+		BluetoothDevice btDevice = PowerMockito.mock(BluetoothDevice.class);
+		PowerMockito.when(btDevice.getName()).thenReturn("AndroidArduinoBTRS23");
+		
+		btDeviceSet.add(btDevice);
+		
 		expect(mockAdapter.getBondedDevices()).andReturn(btDeviceSet);
-
+		
 		//Mock the BluetoothAdapter's static method to return our mock adapter
 		mockStatic(BluetoothAdapter.class);
 		expect(BluetoothAdapter.getDefaultAdapter()).andReturn(mockAdapter);
@@ -47,17 +55,18 @@ public class BluetoothCommTest {
 		//Set up for the testing action
 		replay(mockAdapter);
 		replay(BluetoothAdapter.class);
-		replay(Toast.class);
-		
+	}
+
+	@Test
+	public void testFindDevice() throws Exception {
 		//Run the actual test action: invoking findDevice
 		BluetoothComm btComm = new BluetoothComm("AndroidArduinoBTRS232");
-		Whitebox.invokeMethod(btComm, "findDevice", "AndroidArduinoBTRS232");
+		BluetoothDevice retDev = Whitebox.invokeMethod(btComm, "findDevice", "AndroidArduinoBTRS232");
 		
 		//Finish the test
-		verify(Toast.class);
 		verify(mockAdapter);
 		verify(BluetoothAdapter.class);		
-		assertTrue(true);
+		assertTrue(retDev.getName().equals("AndroidArduinoBTRS23"));
 	}
 	
 	@Test
