@@ -27,6 +27,11 @@ public class MainActivity extends Activity {
 	private Button startTrackingButton;
 	private Button stopTrackingButton;
 	private Button pauseTrackingButton;
+	private boolean enableTracking;
+	
+	private double timeSinceTrackStart;
+	private ArrayList<Double> avgRPM;
+	private ArrayList<Double> avgSpeed;
 	
 	private TextView engineRunTime;
 	private TextView airTemp;
@@ -58,7 +63,7 @@ public class MainActivity extends Activity {
 	private Context context;
 
 	private BluetoothComm btComm;
-	//private ArrayList<Float> readings;
+	//private ArrayList<double> readings;
 	
 	private Runnable msgUpdateThread = new Runnable() { 
 		public void run() {
@@ -100,8 +105,9 @@ public class MainActivity extends Activity {
         lastStatus = false;
         
         context = this;
-        //TODO Setup a set of arrays to track incoming data such as engine rpm, temp, vehicle speed, etc.
-        //readings = new ArrayList<Float>(MAX_ARRAY_SIZE);
+        avgRPM = new ArrayList<Double>(MAX_ARRAY_SIZE);
+        avgSpeed = new ArrayList<Double>(MAX_ARRAY_SIZE);
+        enableTracking = false;
         
         setUpGUI();
     }
@@ -146,7 +152,7 @@ public class MainActivity extends Activity {
     	startTrackingButton.setOnClickListener(
     		new OnClickListener() {
     			public void onClick(View v) {
-    				//TODO Start tracking data values
+    				enableTracking = true;
     			}
     		}
     	);
@@ -157,7 +163,7 @@ public class MainActivity extends Activity {
     	pauseTrackingButton.setOnClickListener(
     		new OnClickListener() {
     			public void onClick(View v) {
-    				//TODO Pause tracking data values
+    				enableTracking = false;
     			}
     		}
     	);
@@ -168,7 +174,9 @@ public class MainActivity extends Activity {
     	stopTrackingButton.setOnClickListener(
     		new OnClickListener() {
     			public void onClick(View v) {
-    				//TODO Stop tracking data values
+    				enableTracking = false;
+    				avgRPM.clear();
+    				avgSpeed.clear();
     			}
     		}
     	);
@@ -295,24 +303,55 @@ public class MainActivity extends Activity {
 	}
 
 	private void setEngineCoolantTemp(String coolantTempStr) {
-    	float coolantTemp = Float.parseFloat(coolantTempStr);
+    	double coolantTemp = Double.parseDouble(coolantTempStr);
 		coolantTempTxt.setText(getString(R.string.engineCoolantTempPreface) + coolantTemp + " C");
 		coolantTempBar.setProgress((int)coolantTemp+40);
 	}
 
-	private void setEngineRPM(String substring) {
-		// TODO Auto-generated method stub
+	private void setEngineRPM(String rpmStr) {
+		double rpm = Double.parseDouble(rpmStr);
+		
+		if(avgRPM.size() == MAX_ARRAY_SIZE)
+			avgRPM.remove(0);
+		avgRPM.add(rpm);
+		
+		double newAvg = getAvg(avgRPM);
+		
+		// calculate angle from rpm
+		// -turn into a %- rpm/maxVal
+		// zeroAngle + (rpm*maxValAngle)
+		// if(result < 0)
+		//    result = 360+result;
+		// calculate angle from newAvg
+	}
+
+	private void setVehicleSpeed(String speedStr) {
+		double speed = Double.parseDouble(speedStr);
+		
+		if(avgSpeed.size() == MAX_ARRAY_SIZE)
+			avgSpeed.remove(0);
+		avgSpeed.add(speed);
+		
+		double newAvg = getAvg(avgSpeed);
+		
+		// calculate angle from speed
+		// calculate angle from newAvg
 		
 	}
 
-	private void setVehicleSpeed(String substring) {
-		// TODO Auto-generated method stub
-		
+	private double getAvg(ArrayList<Double> dataList) {
+		double avg = 0;
+		for(double datum : dataList) {
+			avg += datum;
+		}
+		avg /= dataList.size();
+		return avg;
 	}
 
-	private void setThrottlePosition(String substring) {
-		// TODO Auto-generated method stub
-		
+	private void setThrottlePosition(String throttlePosStr) {
+		double throttlePos = Double.parseDouble(throttlePosStr);
+		throttlePosTxt.setText(getString(R.string.throttlePosPreface) + throttlePos + "%");
+		throttlePosBar.setProgress((int)throttlePos);
 	}
 
 	private void setEngineRunTime(String timeStr) {
@@ -325,46 +364,46 @@ public class MainActivity extends Activity {
 	}
 
 	private void setAmbiantAirTemp(String tempStr) {
-		airTemp.setText(getString(R.string.airTempPreface) + Float.parseFloat(tempStr) + " C");
+		airTemp.setText(getString(R.string.airTempPreface) + Double.parseDouble(tempStr) + " C");
 	}
 
 	private void setAbsoluteThrottleB(String absThrottleBStr) {
-		float absThrottleB = (int) Float.parseFloat(absThrottleBStr);
+		double absThrottleB = Double.parseDouble(absThrottleBStr);
 		absThrottleBTxt.setText(getString(R.string.absThrottleBPreface) + absThrottleB + "%");
 		absThrottleBBar.setProgress((int)absThrottleB);
 	}
 
 	private void setAbsoluteThrottleC(String absThrottleCStr) {
-		float absThrottleC = (int) Float.parseFloat(absThrottleCStr);
+		double absThrottleC = Double.parseDouble(absThrottleCStr);
 		absThrottleCTxt.setText(getString(R.string.absThrottleCPreface) + absThrottleC + "%");
 		absThrottleCBar.setProgress((int)absThrottleC);
 	}
 
 	private void setAccPedalPosD(String absAccPosDStr) {
-		float absAccPosD = Float.parseFloat(absAccPosDStr);
+		double absAccPosD = Double.parseDouble(absAccPosDStr);
 		absAccPosDTxt.setText(getString(R.string.accPedalPosDPreface) + absAccPosD + "%");
 		absAccPosDBar.setProgress((int)absAccPosD);
 	}
 
 	private void setAccPedalPosE(String absAccPosEStr) {
-		float absAccPosE = Float.parseFloat(absAccPosEStr);
+		double absAccPosE = Double.parseDouble(absAccPosEStr);
 		absAccPosETxt.setText(getString(R.string.accPedalPosEPreface) + absAccPosE + "%");
 		absAccPosEBar.setProgress((int)absAccPosE);
 	}
 
 	private void setAbsAccPedalPosF(String absAccPosFStr) {
-		float absAccPosF = Float.parseFloat(absAccPosFStr);
+		double absAccPosF = Double.parseDouble(absAccPosFStr);
 		absAccPosFTxt.setText(getString(R.string.accPedalPosFPreface) + absAccPosF + "%");
 		absAccPosFBar.setProgress((int)absAccPosF);
 	}
 
 	private void setHybridBatteryPackLife(String batteryLifeStr) {
-		float batteryLife = Float.parseFloat(batteryLifeStr);
+		double batteryLife = Double.parseDouble(batteryLifeStr);
 		hybridBatteryPack.setText(getString(R.string.hybridBatteryPackPreface) + batteryLife + "%");
 	}
 
 	private void setEngineOilTemp(String oilTempStr) {
-    	float oilTemp = Float.parseFloat(oilTempStr);
+    	double oilTemp = Double.parseDouble(oilTempStr);
 		oilTempTxt.setText(getString(R.string.engineOilTempPreface) + oilTemp + " C");
 		oilTempBar.setProgress((int)oilTemp+40);
     }
