@@ -9,17 +9,21 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 
 public class BluetoothComm extends SerialComm implements Runnable {
+	public static UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+	
 	private BluetoothAdapter adapter;
 	private BluetoothDevice device;
 	private BluetoothSocket socket;
 	private String deviceName;
+	
+	private Thread inputThread;
 	
 	public BluetoothComm(String deviceName) {
 		super();
 		
 		this.deviceName = deviceName;
 		
-		Thread inputThread = new Thread(this, "BlueToothComm");
+		inputThread = new Thread(this, "BluetoothComm");
 		inputThread.start();
 	}
 	
@@ -59,7 +63,7 @@ public class BluetoothComm extends SerialComm implements Runnable {
 	
 	private void connectSocket() throws IOException {
 		try {
-			socket = device.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"));			
+			socket = device.createRfcommSocketToServiceRecord(uuid);			
 			socket.connect();
 		
 			setInputStream(socket.getInputStream());								

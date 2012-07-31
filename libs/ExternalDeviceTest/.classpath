@@ -19,5 +19,7 @@
 	<classpathentry kind="lib" path="libs/powermock-module-junit4-common-1.2.5.jar"/>
 	<classpathentry kind="lib" path="libs/powermock-module-junit4-legacy-1.2.5.jar"/>
 	<classpathentry kind="lib" path="libs/powermock-reflect-1.2.5.jar"/>
+	<classpathentry kind="lib" path="libs/maps.jar"/>
+	<classpathentry kind="lib" path="libs/usb.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

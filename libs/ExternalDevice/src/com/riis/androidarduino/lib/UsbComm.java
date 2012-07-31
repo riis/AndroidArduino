@@ -36,7 +36,6 @@ public class UsbComm extends SerialComm {
 		
 		setupBroadcastReceiver();
 		accessory = (UsbAccessory) parentActivity.getLastNonConfigurationInstance();
-		connect();
 	}
 	
 	private void setupBroadcastReceiver() {
@@ -44,7 +43,6 @@ public class UsbComm extends SerialComm {
 			@Override
 			public void onReceive(Context context, Intent intent) {
 				String action = intent.getAction();
-				log("ALL UP IN HURRRRR: " + action);
 				if (ACTION_USB_PERMISSION.equals(action)) {
 					synchronized (this) {
 						UsbAccessory accessory = UsbManager.getAccessory(intent);
@@ -106,19 +104,18 @@ public class UsbComm extends SerialComm {
 	public void disconnect() {
 		try {
 			if (fileDescriptor != null) {
-				fileDescriptor.close();				
+				fileDescriptor.close();
 				log("Accessory detached");
 			}
 			
 			getInputStream().close();
 			getOutputStream().close();
-		} catch (IOException e) {
-		} finally {
-			isConnected = false;
-			fileDescriptor = null;
-			accessory = null;
-		}
-		
+		} catch (IOException e) {}
+
+		isConnected = false;
+		fileDescriptor = null;
+		accessory = null;
+			
 		permissionIntent = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION), 0);
 		registerReceiver();
 	}
@@ -132,6 +129,7 @@ public class UsbComm extends SerialComm {
 		registerReceiver();
 		if (getInputStream() != null && getOutputStream() != null) {
 			log("Resuming: streams were not null");
+			isConnected = true;
 			return;
 		}
 		log("Resuming: streams were null");

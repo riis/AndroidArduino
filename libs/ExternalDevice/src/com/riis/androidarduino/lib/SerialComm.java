@@ -8,7 +8,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import android.util.Log;
 
 public abstract class SerialComm implements iCommunication, Runnable {
-	private static final byte STRING_END_CODE= (byte) 255;
+	private static final byte STRING_END_CODE = (byte) 255;
 	
 	protected boolean shouldLog;
 	
@@ -63,7 +63,7 @@ public abstract class SerialComm implements iCommunication, Runnable {
 	}
 	
 	public void clearMessages() {
-		inputBuffer.clear();
+		msgBuffer.clear();
 	}
 	
 	public boolean isMessageReady() {
