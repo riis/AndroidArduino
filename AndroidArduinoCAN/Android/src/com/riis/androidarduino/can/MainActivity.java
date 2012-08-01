@@ -30,8 +30,7 @@ public class MainActivity extends Activity {
 	private ArrayList<Double> avgRPM;
 	private ArrayList<Double> avgSpeed;
 	
-	private GuageView speedometer;
-	private GuageView tachometer;
+	private GuageView guages;
 	
 	private TextView engineRunTime;
 	private TextView airTemp;
@@ -42,6 +41,8 @@ public class MainActivity extends Activity {
 	private TextView oilTempTxt;
 	private ProgressBar coolantTempBar;
 	private TextView coolantTempTxt;
+	private ProgressBar engineLoadBar;
+	private TextView engineLoadTxt;
 	private ProgressBar throttlePosBar;
 	private TextView throttlePosTxt;
 	private ProgressBar absThrottleBBar;
@@ -118,12 +119,13 @@ public class MainActivity extends Activity {
     	setUpPauseTrackButton();
     	setUpStopTrackButton();
     	setUpTempMonitors();
+    	setUpEngineLoadMonitor();
     	setUpThrottleMonitors();
     	setUpAcceleratorMonitors();
     	setUpBatteryMonitor();
     	setUpRuntimeMonitor();
     	setUpVIN();
-    	setUpSpeedometer();
+    	setUpGuages();
     	setupHandler();
     }
 
@@ -199,6 +201,14 @@ public class MainActivity extends Activity {
 		airTemp = (TextView)findViewById(R.id.airTemp);
 		airTemp.append("0 C");
 	}
+	
+	private void setUpEngineLoadMonitor() {
+		engineLoadBar = (ProgressBar)findViewById(R.id.engineLoadBar);
+		engineLoadBar.setMax(100);
+		engineLoadBar.setProgress(0);
+		engineLoadTxt = (TextView)findViewById(R.id.engineLoadTxt);
+		engineLoadTxt.append("0%");
+	}
 
 	private void setUpThrottleMonitors() {
 		throttlePosBar = (ProgressBar)findViewById(R.id.throttlePosBar);
@@ -247,8 +257,8 @@ public class MainActivity extends Activity {
 		engineRunTime.append("0s");
 	}
 	
-	private void setUpSpeedometer() {
-		speedometer = (GuageView) findViewById(R.id.speedometer);
+	private void setUpGuages() {
+		guages = (GuageView) findViewById(R.id.guages);
 	}
     
     private void setupHandler() {
@@ -261,37 +271,39 @@ public class MainActivity extends Activity {
 				if(tokens[0].equals("LOG")) {
 					
 				} else if(tokens[0].equals("DATA")) {
-			    	if(Integer.parseInt(tokens[1]) == 0x02)
+					int pid = Integer.parseInt(tokens[1], 16);
+					
+			    	if(pid == 0x02)
 			    		setVIN(tokens[2]);
-			    	else if(Integer.parseInt(tokens[1]) == 0x04)
+			    	else if(pid == 0x04)
 			    		setEngineLoadVal(tokens[2]);
-			    	else if(Integer.parseInt(tokens[1]) == 0x05)
+			    	else if(pid == 0x05)
 			    		setEngineCoolantTemp(tokens[2]);
-			    	else if(Integer.parseInt(tokens[1]) == 0x0C)
+			    	else if(pid == 0x0C)
 			    		setEngineRPM(tokens[2]);
-			    	else if(Integer.parseInt(tokens[1]) == 0x0D)
+			    	else if(pid == 0x0D)
 			    		setVehicleSpeed(tokens[2]);
-			    	else if(Integer.parseInt(tokens[1]) == 0x11)
+			    	else if(pid == 0x11)
 			    		setThrottlePosition(tokens[2]);
-			    	else if(Integer.parseInt(tokens[1]) == 0x1F)
+			    	else if(pid == 0x1F)
 			    		setEngineRunTime(tokens[2]);
-			    	else if(Integer.parseInt(tokens[1]) == 0x2F)
+			    	else if(pid == 0x2F)
 			    		setFuelLevelInput(tokens[2]);
-			    	else if(Integer.parseInt(tokens[1]) == 0x46)
+			    	else if(pid == 0x46)
 			    		setAmbiantAirTemp(tokens[2]);
-			    	else if(Integer.parseInt(tokens[1]) == 0x47)
+			    	else if(pid == 0x47)
 			    		setAbsoluteThrottleB(tokens[2]);
-			    	else if(Integer.parseInt(tokens[1]) == 0x48)
+			    	else if(pid == 0x48)
 			    		setAbsoluteThrottleC(tokens[2]);
-			    	else if(Integer.parseInt(tokens[1]) == 0x49)
+			    	else if(pid == 0x49)
 			    		setAccPedalPosD(tokens[2]);
-			    	else if(Integer.parseInt(tokens[1]) == 0x4A)
+			    	else if(pid == 0x4A)
 			    		setAccPedalPosE(tokens[2]);
-			    	else if(Integer.parseInt(tokens[1]) == 0x4B)
+			    	else if(pid == 0x4B)
 			    		setAbsAccPedalPosF(tokens[2]);
-			    	else if(Integer.parseInt(tokens[1]) == 0x5B)
+			    	else if(pid == 0x5B)
 			    		setHybridBatteryPackLife(tokens[2]);
-			    	else if(Integer.parseInt(tokens[1]) == 0x5C)
+			    	else if(pid == 0x5C)
 			    		setEngineOilTemp(tokens[2]);
 				}
 			}
@@ -324,7 +336,7 @@ public class MainActivity extends Activity {
 		
 		double newAvg = getAvg(avgRPM);
 		
-		tachometer.setValue(Float.parseFloat(rpmStr));
+		guages.setTach(Float.parseFloat(rpmStr));
 		
 		// calculate angle from rpm
 		// -turn into a %- rpm/maxVal
@@ -345,7 +357,7 @@ public class MainActivity extends Activity {
 		
 		double newAvg = getAvg(avgSpeed);
 		
-		speedometer.setValue(Float.parseFloat(speedStr));
+		guages.setSpeed(Float.parseFloat(speedStr));
 		
 		// calculate angle from speed
 		// calculate angle from newAvg

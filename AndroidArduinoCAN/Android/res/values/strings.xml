@@ -5,6 +5,7 @@
     <string name="app_name">Android Arduino CAN dashboard</string>
     <string name="engineLoadValPreface"></string>
     <string name="engineCoolantTempPreface">Coolant Temp:\n</string>
+    <string name="engineLoadPreface">Engine Load:\n</string>
     <string name="engineRPMPreface"></string>
     <string name="engineKPHPreface"></string>
     <string name="throttlePosPreface">Throttle Position:\n</string>

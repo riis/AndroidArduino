@@ -3,8 +3,8 @@
     xmlns:guage="http://schemas.android.com/apk/res/com.riis.androidarduino.can"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:weightSum="1.0"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:weightSum="1.0" >
     
     <LinearLayout
         android:layout_width="fill_parent"
@@ -73,96 +73,30 @@
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="match_parent"
-        android:layout_weight="0.1"
+        android:layout_weight="0.07"
         android:orientation="horizontal" >
 	    
          <LinearLayout
              android:layout_width="fill_parent"
              android:layout_height="match_parent"
-             android:layout_weight="0.35"
+             android:layout_weight="0.3"
              android:orientation="vertical"
              android:weightSum="1" >
-			
-		    <LinearLayout
-		        android:layout_width="fill_parent"
-		        android:layout_height="fill_parent"
-		        android:layout_weight="0.7"
-		        android:orientation="horizontal" >
-	
-		        <LinearLayout
-			        android:layout_width="fill_parent"
-			        android:layout_height="fill_parent"
-			        android:layout_weight="0.5"
-			        android:orientation="vertical" >
-			        
-		            <TextView
-		                android:id="@+id/oilTempTxt"
-		                android:layout_width="match_parent"
-		                android:layout_height="match_parent"
-		                android:layout_weight="0.5"
-		                android:gravity="center"
-		                android:text="@string/engineOilTempPreface"
-		                android:textColor="@android:color/white" />
-			        
-			        <ProgressBar
-			            android:id="@+id/oilTempBar"
-			            style="?android:attr/progressBarStyleHorizontal"
-			            android:layout_width="fill_parent"
-			            android:layout_height="fill_parent"
-			            android:layout_margin="5dp"
-			            android:layout_weight="0.5" />
-			        
-		        </LinearLayout>
-
-		        <LinearLayout
-			        android:layout_width="fill_parent"
-			        android:layout_height="fill_parent"
-			        android:layout_weight="0.5"
-			        android:orientation="vertical" >
-			        
-			        <TextView
-			            android:id="@+id/coolantTempTxt"
-			            android:layout_width="match_parent"
-			            android:layout_height="match_parent"
-			            android:layout_weight="0.5"
-			            android:gravity="center"
-			            android:text="@string/engineCoolantTempPreface"
-			            android:textColor="@android:color/white" />
-			        
-			        <ProgressBar
-			            android:id="@+id/coolantTempBar"
-			            style="?android:attr/progressBarStyleHorizontal"
-			            android:layout_width="fill_parent"
-			            android:layout_height="fill_parent"
-			            android:layout_margin="5dp"
-			            android:layout_weight="0.5" />
-			        
-		        </LinearLayout>
-		        
-		    </LinearLayout>
 
 		    <com.riis.androidarduino.can.GuageView
-			    android:id="@+id/speedometer"
+			    android:id="@+id/guages"
 		        android:layout_width="fill_parent"
 		        android:layout_height="fill_parent"
-		        android:layout_weight="0.3"
+		        android:layout_weight="1"
 		        guage:maxValue="8000"
 		        guage:minValue="0" />
 	        
 	    </LinearLayout>
-		
-	    <com.riis.androidarduino.can.GuageView
-		    android:id="@+id/speedometer"
-	        android:layout_width="fill_parent"
-	        android:layout_height="fill_parent"
-	        android:layout_weight="0.3"
-	        guage:maxValue="240"
-	        guage:minValue="0" />
 	    
 	    <LinearLayout
 	        android:layout_width="fill_parent"
 	        android:layout_height="match_parent"
-	        android:layout_weight="0.35"
+	        android:layout_weight="0.7"
 	        android:orientation="vertical" >
 		    
 	        <LinearLayout
@@ -174,7 +108,7 @@
 	            <LinearLayout
 			        android:layout_width="fill_parent"
 			        android:layout_height="match_parent"
-			        android:layout_weight="0.5" >
+			        android:layout_weight="0.33" >
 			        
 	                <LinearLayout
 				        android:layout_width="fill_parent"
@@ -264,7 +198,7 @@
 	            <LinearLayout
 			        android:layout_width="fill_parent"
 			        android:layout_height="match_parent"
-			        android:layout_weight="0.5" >
+			        android:layout_weight="0.33" >
 	                
 	                <LinearLayout
 					        android:layout_width="fill_parent"
@@ -342,8 +276,92 @@
 				        </LinearLayout>
 		        
 			    </LinearLayout>
+			    
+				<LinearLayout
+			        android:layout_width="fill_parent"
+			        android:layout_height="fill_parent"
+			        android:layout_weight="0.33"
+			        android:orientation="horizontal" >
+	
+			        <LinearLayout
+				        android:layout_width="fill_parent"
+				        android:layout_height="fill_parent"
+				        android:layout_weight="0.33"
+				        android:orientation="vertical" >
+				        
+			            <TextView
+			                android:id="@+id/oilTempTxt"
+			                android:layout_width="match_parent"
+			                android:layout_height="match_parent"
+			                android:layout_weight="0.5"
+			                android:gravity="center"
+			                android:text="@string/engineOilTempPreface"
+			                android:textColor="@android:color/white" />
+				        
+				        <ProgressBar
+				            android:id="@+id/oilTempBar"
+				            style="?android:attr/progressBarStyleHorizontal"
+				            android:layout_width="fill_parent"
+				            android:layout_height="fill_parent"
+				            android:layout_margin="5dp"
+				            android:layout_weight="0.5" />
+				        
+			        </LinearLayout>
+
+			        <LinearLayout
+				        android:layout_width="fill_parent"
+				        android:layout_height="fill_parent"
+				        android:layout_weight="0.33"
+				        android:orientation="vertical" >
+				        
+				        <TextView
+				            android:id="@+id/coolantTempTxt"
+				            android:layout_width="match_parent"
+				            android:layout_height="match_parent"
+				            android:layout_weight="0.5"
+				            android:gravity="center"
+				            android:text="@string/engineCoolantTempPreface"
+				            android:textColor="@android:color/white" />
+				        
+				        <ProgressBar
+				            android:id="@+id/coolantTempBar"
+				            style="?android:attr/progressBarStyleHorizontal"
+				            android:layout_width="fill_parent"
+				            android:layout_height="fill_parent"
+				            android:layout_margin="5dp"
+				            android:layout_weight="0.5" />
+				        
+			        </LinearLayout>
+			        
+			        <LinearLayout
+				        android:layout_width="fill_parent"
+				        android:layout_height="fill_parent"
+				        android:layout_weight="0.33"
+				        android:orientation="vertical" >
+				        
+				        <TextView
+				            android:id="@+id/engineLoadTxt"
+				            android:layout_width="match_parent"
+				            android:layout_height="match_parent"
+				            android:layout_weight="0.5"
+				            android:gravity="center"
+				            android:text="@string/engineLoadPreface"
+				            android:textColor="@android:color/white" />
+				        
+				        <ProgressBar
+				            android:id="@+id/engineLoadBar"
+				            style="?android:attr/progressBarStyleHorizontal"
+				            android:layout_width="fill_parent"
+				            android:layout_height="fill_parent"
+				            android:layout_margin="5dp"
+				            android:layout_weight="0.5" />
+				        
+			        </LinearLayout>
+		        
+		    	</LinearLayout>
 	        
 		    </LinearLayout>
+		    
 			
 		    <LinearLayout
 		        android:layout_width="fill_parent"
@@ -385,14 +403,14 @@
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="match_parent"
-        android:layout_weight="0.45"
+        android:layout_weight="0.48"
         android:orientation="vertical" >
 	    
         <TextView
             android:id="@+id/VIN"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:gravity="center"
+            android:gravity="top|center"
             android:text="@string/VINPreface"
             android:textColor="@android:color/white" />
         

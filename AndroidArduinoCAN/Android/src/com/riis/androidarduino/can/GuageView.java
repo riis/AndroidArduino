@@ -1,5 +1,7 @@
 package com.riis.androidarduino.can;
 
+import com.riis.androidarduino.can.GuageViewNeedle.NeedleSize;
+
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -15,81 +17,102 @@ import android.view.View;
 import android.widget.TextView;
 
 public class GuageView extends View {
-	private static final int DEFAULT_MAX = 240;
-	private static final int DEFAULT_MIN = 0;
-	private static final int DEFAULT_BG = R.drawable.speedometerbg;
-	private static final int DEFAULT_NEEDLE = R.drawable.speedometerneedle;
-	private static final int MIN_ANGLE = 62;
-	private static final int MAX_ANGLE = 300;
+	private static final int BACKGROUND = R.drawable.guages;
+	
+	private static final int SPEED_CENTER_X = 657;
+	private static final int SPEED_CENTER_Y = 316;
+	private static final int TACH_CENTER_X = 228;
+	private static final int TACH_CENTER_Y = 350;
+	
+	private static final int MAX_SPEED = 240;
+	private static final int MAX_TACH = 8000;
+	private static final int MIN_SPEED_ANGLE = 46;
+	private static final int MAX_SPEED_ANGLE = 313;
+	private static final int MIN_TACH_ANGLE = 29;
+	private static final int MAX_TACH_ANGLE = 210;
 
 	private Context context;
 	
-	private int maxValue;
-	private int minValue;
+	private Point speedNeedlePos;
+	private Point tachNeedlePos;
+	private float currentScaleFactor;
 	
-	private int dialBackground = DEFAULT_BG;
-	private int dialNeedle = DEFAULT_NEEDLE;
-	
-	private Point dialNeedlePos;
-	
-	private float currentValue;
+	private GuageViewNeedle speedNeedle;
+	private GuageViewNeedle tachNeedle;
+	private float currentSpeed;
+	private float currentTach;
 	
 	public GuageView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		
-		parseAttributes(context, attrs);
 		this.context = context;
 		
-		dialNeedlePos = new Point();
+		currentScaleFactor = 1.0f;
+		speedNeedle = new GuageViewNeedle(context, NeedleSize.LARGE, currentScaleFactor, MIN_SPEED_ANGLE, MAX_SPEED_ANGLE);
+		tachNeedle = new GuageViewNeedle(context, NeedleSize.SMALL, currentScaleFactor, MIN_TACH_ANGLE, MAX_TACH_ANGLE);
 		
-		currentValue = 0;
-	}
-	
-	private void parseAttributes(Context context, AttributeSet attrs) {
-		TypedArray attrArray = context.obtainStyledAttributes(attrs, R.styleable.GuageView);
-		    
-		maxValue = attrArray.getInt(R.styleable.GuageView_maxValue, DEFAULT_MAX);
-		minValue = attrArray.getInt(R.styleable.GuageView_minValue, DEFAULT_MIN);
-		        	
-		attrArray.recycle();
+		speedNeedlePos = new Point(SPEED_CENTER_X, SPEED_CENTER_Y);
+		tachNeedlePos = new Point(TACH_CENTER_X, TACH_CENTER_Y);
 	}
 	
 	@Override
-	protected void onDraw(Canvas canvas) {		
-		Bitmap dialBg = BitmapFactory.decodeResource(context.getResources(), dialBackground);
-		Bitmap dialNdl = BitmapFactory.decodeResource(context.getResources(), dialNeedle);
-		
+	protected void onDraw(Canvas canvas) {	
+		//Draw the dials
+		Bitmap dialBg = BitmapFactory.decodeResource(context.getResources(), BACKGROUND);		
 		Rect srcRect = new Rect(0, 0, dialBg.getWidth(), dialBg.getHeight());
-		Rect dstRect = new Rect(0, 0, getWidth(), getWidth());
+		Rect dstRect = new Rect(0, 0, getWidth(), (getWidth() * dialBg.getHeight()) /  dialBg.getWidth());
 		canvas.drawBitmap(dialBg, srcRect, dstRect, new Paint());
+		
+		float newScaleFactor = ((float)getWidth() / (float)dialBg.getWidth());
+		checkNewScaleFactor(newScaleFactor);	
+		
+		speedNeedle.setAngleForValueBetweenZeroAnd(currentSpeed, MAX_SPEED);
+		tachNeedle.setAngleForValueBetweenZeroAnd(currentTach, MAX_TACH);
 
-		dialNeedlePos.x = dstRect.centerX() - (dialNdl.getWidth() / 2);
-		dialNeedlePos.y = dstRect.centerY();
-		
-		float rotateAngle = ((currentValue / maxValue) * MAX_ANGLE)	+ MIN_ANGLE;
-		float scaleFactor = ((float)dstRect.centerX() / (float)dialBg.getWidth()) * 1.5f;
-		
-		Matrix rotator = new Matrix();
-		rotator.postScale(1, scaleFactor);
-		rotator.postRotate(rotateAngle);
-		rotator.postTranslate(dialNeedlePos.x, dialNeedlePos.y);
-		
-		canvas.drawBitmap(dialNdl, rotator, new Paint());
+		speedNeedle.draw(canvas, speedNeedlePos);
+		tachNeedle.draw(canvas, tachNeedlePos);
 	}
 	
-	public void setValue(float value) {
-		if(value > maxValue) {
-			currentValue = maxValue;
-		} else if(value < minValue) {
-			currentValue = minValue;
+	private void checkNewScaleFactor(float newScaleFactor) {
+		if(newScaleFactor != currentScaleFactor) {
+			currentScaleFactor = newScaleFactor;
+			
+			speedNeedle.setScaleFactor(currentScaleFactor);
+			tachNeedle.setScaleFactor(currentScaleFactor);
+			
+			speedNeedlePos.x = (int) (SPEED_CENTER_X * currentScaleFactor);
+			speedNeedlePos.y = (int) (SPEED_CENTER_Y * currentScaleFactor);
+			
+			tachNeedlePos.x = (int) (TACH_CENTER_X * currentScaleFactor);
+			tachNeedlePos.y = (int) (TACH_CENTER_Y * currentScaleFactor);
+		}
+	}
+	
+	public void setSpeed(float speed) {
+		if(speed > MAX_SPEED) {
+			currentSpeed = MAX_SPEED;
+		} else if(speed < 0) {
+			currentSpeed = 0;
 		} else {
-			this.currentValue = value;
+			currentSpeed = speed;
+		}
+		
+		invalidate();
+	}
+	
+	public void setTach(float rpm) {
+		if(rpm > MAX_TACH) {
+			currentTach = MAX_TACH;
+		} else if(rpm < 0) {
+			currentTach = 0;
+		} else {
+			currentTach = rpm;
 		}
 		
 		invalidate();
 	}
 	
 	public float getValue() {
-		return this.currentValue;
+		return this.currentSpeed;
 	}
 }
