@@ -10,8 +10,8 @@
     <string name="engineKPHPreface"></string>
     <string name="throttlePosPreface">Throttle Position:\n</string>
     <string name="engineRunTimePreface">Engine Run Time: </string>
-    <string name="fuelLevelInputPreface"></string>
-    <string name="airTempPreface">Ambiant Air Temp:\n</string>
+    <string name="fuelLevelPreface">Fuel Level:\n</string>
+    <string name="airTempPreface">Ambient Air Temp:\n</string>
     <string name="absThrottleBPreface">Abs. Throttle B:\n</string>
     <string name="absThrottleCPreface">Abs. Throttle C:\n</string>
     <string name="accPedalPosDPreface">Abs. Acc. Pos. D:\n</string>

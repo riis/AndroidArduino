@@ -55,6 +55,8 @@ public class MainActivity extends Activity {
 	private TextView absAccPosETxt;
 	private ProgressBar absAccPosFBar;
 	private TextView absAccPosFTxt;
+	private ProgressBar fuelLevelBar;
+	private TextView fuelLevelTxt;
 	
 	private volatile boolean keepRunning;
 	private boolean lastStatus;
@@ -126,6 +128,7 @@ public class MainActivity extends Activity {
     	setUpRuntimeMonitor();
     	setUpVIN();
     	setUpGuages();
+    	setUpFuelLevelMonitor();
     	setupHandler();
     }
 
@@ -260,6 +263,13 @@ public class MainActivity extends Activity {
 	private void setUpGuages() {
 		guages = (GuageView) findViewById(R.id.guages);
 	}
+	
+	private void setUpFuelLevelMonitor() {
+		fuelLevelBar = (ProgressBar)findViewById(R.id.fuelLevelBar);
+		fuelLevelBar.setMax(100);
+		fuelLevelTxt = (TextView)findViewById(R.id.fuelLevelTxt);
+		fuelLevelTxt.append("0%");
+	}
     
     private void setupHandler() {
 		handler = new Handler() {
@@ -288,7 +298,7 @@ public class MainActivity extends Activity {
 			    	else if(pid == 0x1F)
 			    		setEngineRunTime(tokens[2]);
 			    	else if(pid == 0x2F)
-			    		setFuelLevelInput(tokens[2]);
+			    		setFuelLevel(tokens[2]);
 			    	else if(pid == 0x46)
 			    		setAmbiantAirTemp(tokens[2]);
 			    	else if(pid == 0x47)
@@ -314,8 +324,10 @@ public class MainActivity extends Activity {
     	VIN.setText(getString(R.string.VINPreface) + vin);
 	}
 
-	private void setEngineLoadVal(String substring) {
-		// TODO Auto-generated method stub
+	private void setEngineLoadVal(String engineLoadStr) {
+		double engineLoad = Double.parseDouble(engineLoadStr);
+		engineLoadBar.setProgress((int) engineLoad);
+		engineLoadTxt.append(getString(R.string.engineLoadPreface) + engineLoad + "%");
 		
 	}
 
@@ -382,9 +394,10 @@ public class MainActivity extends Activity {
 		engineRunTime.setText(getString(R.string.engineRunTimePreface) + timeStr + "s");
 	}
 
-	private void setFuelLevelInput(String substring) {
-		// TODO Auto-generated method stub
-		
+	private void setFuelLevel(String fuelLevelStr) {
+		double fuelLevel = Double.parseDouble(fuelLevelStr);
+		fuelLevelBar.setProgress((int) fuelLevel);
+		fuelLevelTxt.append(getString(R.string.engineLoadPreface) + fuelLevel + "%");		
 	}
 
 	private void setAmbiantAirTemp(String tempStr) {
