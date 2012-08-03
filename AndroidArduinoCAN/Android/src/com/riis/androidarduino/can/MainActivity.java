@@ -1,5 +1,6 @@
 package com.riis.androidarduino.can;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import android.app.Activity;
@@ -13,6 +14,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.riis.androidarduino.lib.BluetoothComm;
 
@@ -59,7 +61,7 @@ public class MainActivity extends Activity {
 	private TextView fuelLevelTxt;
 	
 	private volatile boolean keepRunning;
-	private boolean lastStatus;
+	private String lastStatus;
 	private Thread msgThread;
 	
 	private static Handler handler;
@@ -72,22 +74,18 @@ public class MainActivity extends Activity {
 		public void run() {
 			while(keepRunning) {
 				if(btComm.isConnected()) {
-					if(!lastStatus) {
-						lastStatus = true;
-						changeConnectButtonText();
-					}
-					
 					if(btComm.isMessageReady()) {
 						String data = btComm.readMessage();
 						parseCANData(data);
 					}
-		        	
-		        } else {
-		        	if(lastStatus) {
-						lastStatus = false;
-						changeConnectButtonText();
-					}
 		        }
+				else {
+					if(btConnectButton.getText().equals("Disconnect")) {
+						Message msg = Message.obtain(handler);
+						msg.obj = getString(R.id.connectButton) + "~Connect";
+						handler.sendMessage(msg);
+					}
+				}
 				
 				try {
 					Thread.sleep(10);
@@ -105,7 +103,6 @@ public class MainActivity extends Activity {
         setContentView(R.layout.main);
         
         keepRunning = true;
-        lastStatus = false;
         
         context = this;
         avgRPM = new ArrayList<Double>(MAX_ARRAY_SIZE);
@@ -138,20 +135,23 @@ public class MainActivity extends Activity {
     		new OnClickListener() {
     			public void onClick(View v) {
     				if(btComm.isConnected())
-    					btComm.disconnect();
-    				else
-    					btComm.connect();
+						try {
+							btComm.disconnect();
+							btConnectButton.setText("Connect");
+						} catch (IOException e) {
+							Toast.makeText(context, "Could not disconnect from device!", Toast.LENGTH_LONG).show();
+						}
+					else
+						try {
+							btComm.connect();
+							btConnectButton.setText("Disconnect");
+						} catch (IOException e) {
+							Toast.makeText(context, "Could not connect to device!", Toast.LENGTH_LONG).show();
+						}
     			}
     		}
     	);
     }
-	
-	private void changeConnectButtonText() {
-		if(btComm.isConnected())
-			btConnectButton.setText("Disconnect");
-		else
-			btConnectButton.setText("Connect");
-	}
     
     private void setUpStartTrackButton() {
     	startTrackingButton = (Button)findViewById(R.id.startTrackButton);
@@ -278,9 +278,10 @@ public class MainActivity extends Activity {
 				String[] tokens = taggedMessage.split("~");
 				
 				String message = tokens[1];
-				if(tokens[0].equals("LOG")) {
-					
-				} else if(tokens[0].equals("DATA")) {
+				if(tokens[0].equals(getString(R.id.connectButton))) {
+					btConnectButton.setText(message);
+				}
+				if(tokens[0].equals("DATA")) {
 					int pid = Integer.parseInt(tokens[1], 16);
 					
 			    	if(pid == 0x02)
@@ -456,9 +457,20 @@ public class MainActivity extends Activity {
 		super.onResume();
 		
 		if(btComm == null) {
-			btComm = new BluetoothComm(this, DEVICE_NAME);
+			btComm = new BluetoothComm(DEVICE_NAME);
+			try {
+				btComm.connect();
+				btConnectButton.setText("Disconnect");
+			} catch (IOException e) {
+				Toast.makeText(context, "Could not connect to device!", Toast.LENGTH_LONG).show();
+			}
 		} else {
-			btComm.resumeConnection();
+			try {
+				btComm.resumeConnection();
+				btConnectButton.setText("Disconnect");
+			} catch (IOException e) {
+				Toast.makeText(context, "Could not reconnect to device!", Toast.LENGTH_LONG).show();
+			}
 		}
 		
 		btComm.shouldPrintLogMsgs(false);
@@ -470,7 +482,12 @@ public class MainActivity extends Activity {
 	public void onPause() {
 		super.onPause();
 		keepRunning = false;
-		btComm.pauseConnection();
+		try {
+			btComm.pauseConnection();
+			btConnectButton.setText("Connect");
+		} catch (IOException e) {
+			Toast.makeText(context, "Could not pause device connection!", Toast.LENGTH_LONG).show();
+		}
 	}
     
     public BluetoothComm getBlueToothComm() {
