@@ -81,12 +81,17 @@ public abstract class SerialComm implements iCommunication, Runnable {
 	public String readMessage() {
 		String message = "";
 		if(isMessageReady()) {
+			try {
 			FlagMsg[] msgArray = msgBuffer.poll();
 			for(int i = 0; i < msgArray.length; i++) {
 				if(msgArray[i].getFlag() == Flags.STRING)
 					message += (char)msgArray[i].getValue();
 			}
 			return message;
+			} catch(NullPointerException e) {
+				System.err.println(e);
+				return null;
+			}
 		}
 		else
 			return null;

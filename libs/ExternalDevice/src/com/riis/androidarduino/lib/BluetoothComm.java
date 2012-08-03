@@ -74,6 +74,10 @@ public class BluetoothComm extends SerialComm implements Runnable {
 	}
 	
 	public void disconnect() throws IOException {
+		byte[] terminateConnectonSignal = {'\r', '\n', '+', 'B', 'T', 'S', 'T', 'A', 'T', 'E', ':', '1', '\n', '\r'};
+		
+		write(terminateConnectonSignal);
+		
 		try {
 			if(socket != null)
 				socket.close();

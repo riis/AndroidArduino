@@ -277,11 +277,14 @@ public class MainActivity extends Activity {
 				String taggedMessage = (String) msg.obj;
 				String[] tokens = taggedMessage.split("~");
 				
+				if(tokens.length < 2)
+					return;
+				
 				String message = tokens[1];
 				if(tokens[0].equals(getString(R.id.connectButton))) {
 					btConnectButton.setText(message);
 				}
-				if(tokens[0].equals("DATA")) {
+				if(tokens.length == 3 && tokens[0].equals("DATA")) {
 					int pid = Integer.parseInt(tokens[1], 16);
 					
 			    	if(pid == 0x02)
@@ -328,7 +331,7 @@ public class MainActivity extends Activity {
 	private void setEngineLoadVal(String engineLoadStr) {
 		double engineLoad = Double.parseDouble(engineLoadStr);
 		engineLoadBar.setProgress((int) engineLoad);
-		engineLoadTxt.append(getString(R.string.engineLoadPreface) + engineLoad + "%");
+		engineLoadTxt.setText(getString(R.string.engineLoadPreface) + engineLoad + "%");
 		
 	}
 
@@ -398,7 +401,7 @@ public class MainActivity extends Activity {
 	private void setFuelLevel(String fuelLevelStr) {
 		double fuelLevel = Double.parseDouble(fuelLevelStr);
 		fuelLevelBar.setProgress((int) fuelLevel);
-		fuelLevelTxt.append(getString(R.string.engineLoadPreface) + fuelLevel + "%");		
+		fuelLevelTxt.setText(getString(R.string.engineLoadPreface) + fuelLevel + "%");		
 	}
 
 	private void setAmbiantAirTemp(String tempStr) {
@@ -473,7 +476,7 @@ public class MainActivity extends Activity {
 			}
 		}
 		
-		btComm.shouldPrintLogMsgs(false);
+		btComm.shouldPrintLogMsgs(true);
 		msgThread = new Thread(msgUpdateThread);
 		msgThread.start();
 	}
