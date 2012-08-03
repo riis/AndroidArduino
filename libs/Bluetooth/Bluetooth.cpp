@@ -1,10 +1,11 @@
 #include "Bluetooth.h"
 
-Bluetooth::Bluetooth(String deviceName, SoftwareSerial &bluetoothSerial, boolean shouldPrintLog)
+Bluetooth::Bluetooth(String deviceName, SoftwareSerial &bluetoothSerial, boolean shouldPrintLog, int autoRetryCount)
 {
     this->shouldPrintLog = shouldPrintLog;
     this->deviceName = deviceName;
     this->bluetoothSerial = &bluetoothSerial;
+	this->autoRetryCount = autoRetryCount;
     
     connectionState = '0';
     allowReading = false;
@@ -15,15 +16,22 @@ Bluetooth::~Bluetooth() { }
 boolean Bluetooth::beginBluetooth()
 {
     logMsg("Powering up the Bluetooth device...");
-    if(sendSetupCommands())
-    {
-        logMsg("Bluetooth ready! Connect to " + deviceName + ".");
-	return true;
-    } else {
-	logMsg("Bluetooth setup failed!");
-        logMsg("Make sure it's connected properly and reset the Arduino board.");
+	for(int i = 0; i < autoRetryCount; i++)
+	{
+		if(sendSetupCommands())
+		{
+			logMsg("Bluetooth ready! Connect to " + deviceName + ".");
+			return true;
+		} else {
+			if(i < autoRetryCount - 1) {
+				logMsg("Bluetooth setup failed! Trying again...");
+			} else {
+				logMsg("Bluetooth setup failed! Out of retry attempts.");
+			}
+		}	
+	}
+	
 	return false;
-    }	
 }
 
 boolean Bluetooth::sendSetupCommands()
@@ -160,9 +168,11 @@ void Bluetooth::process()
         while(charsAvailable > 1)
         {
 			char charRead = (char)bluetoothSerial->read();
+			Serial.println(charRead);
             inputBuffer.concat(String(charRead));
 			
 			charRead = (char)bluetoothSerial->read();
+			Serial.println(charRead);
             inputBuffer.concat(String(charRead));
 			
             charsAvailable -= 2;

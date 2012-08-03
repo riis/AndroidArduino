@@ -6,7 +6,7 @@
 
 class Bluetooth {
 public:
-    Bluetooth(String deviceName, SoftwareSerial &bluetoothSerial, boolean shouldPrintLog);
+    Bluetooth(String deviceName, SoftwareSerial &bluetoothSerial, boolean shouldPrintLog, int autoRetryCount);
     ~Bluetooth();
 	
     boolean beginBluetooth();
@@ -47,6 +47,7 @@ private:
     String inputBuffer;    
     String statusMessage;
     boolean allowReading;
+	int autoRetryCount;
 };
 
 #endif

@@ -20,30 +20,34 @@
 #define CANCS 53 //SPI Enable for CAN
 
 SoftwareSerial bluetoothSerial(RX, TX);
-Bluetooth bluetooth("AndroidArduinoCANBT", bluetoothSerial, true);
+Bluetooth bluetooth("AndroidArduinoCANBT", bluetoothSerial, true, 3);
+
+boolean lastConnectionState; //True for connected and false for disconnected
 
 void setup(void) {
     initSPICS();
     initJoyStick();
+    
+    pinMode(2, OUTPUT);
 
     Serial.begin(9600);
 
-    if(!bluetooth.beginBluetooth()) {
-        Serial.println("\n\rHalting program...");
+    Serial.println("Setting up CAN...");
+    SPI.begin();
+    if(CAN.Init(CANSPEED_500)) {
+        Serial.println("CAN setup successful!\n\r");
+    } 
+    else {
+        Serial.println("CAN setup failed, halting program...\n\r");
         while(true);
     }
 
-    Serial.println("Press Up to Begin");
-
-    while (digitalRead(UP));
-
-    SPI.begin();
-    if(CAN.Init(CANSPEED_500)) {
-        Serial.println("CAN Running");
-    } 
-    else {
-        Serial.println("CAN Failure");
+    if(!bluetooth.beginBluetooth()) {
+        Serial.println("\n\rHalting program...\n\r");
+        while(true);
     }
+    
+    Serial.print("\n\rWaiting for a Bluetooth connection...\n\r");
 
     digitalWrite(CANCS, LOW);
 }
@@ -70,24 +74,54 @@ void initJoyStick(void) {
     digitalWrite(DOWN, HIGH);
 }
 
+boolean thingy = false;
+unsigned long lastTime = 0;
+
 void loop(void) {
     float engineData[NUM_PARAMETERS];
     bluetooth.process();
 
+    if(millis() > lastTime + 250) {
+        if(thingy) {
+            digitalWrite(2, LOW);
+        } else {
+            digitalWrite(2, HIGH);
+        }
+        
+        thingy = !thingy;
+        lastTime = millis();
+    }
+
     CAN.bit_modify(CANCTRL, (1<<REQOP2)|(1<<REQOP1)|(1<<REQOP0), 0);
 
     if(bluetooth.isConnected()) {
+        if(!lastConnectionState) {
+            printConnectedMessage();
+            lastConnectionState = true;
+        }
+        
         gatherEngineData(engineData);
         sendEngineDataOverBluetooth(engineData);  
     } else {
-        Serial.println("Bluetooth disconnected...");
+        if(lastConnectionState) {
+            printDisconnectedMessage();
+            lastConnectionState = false;
+        }   
     }
 
-    delay(10);
     if(!digitalRead(DOWN)) {
         Serial.println("Program Done");
         while(true);
     }
+}
+
+void printConnectedMessage() {
+    Serial.print("Bluetooth connected!\n\r");
+}
+
+void printDisconnectedMessage() {
+    Serial.print("Disconnected! Halting communications...");    
+    Serial.print("\n\rWaiting for Bluetooth connection...\n\r");
 }
 
 void gatherEngineData(float engineData[NUM_PARAMETERS]) {    
@@ -130,7 +164,6 @@ void sendEngineDataOverBluetooth(float engineData[NUM_PARAMETERS]) {
 
 float sendECURequest(byte pid, int* requestStatus) {
     tCAN message;
-    float engineData;
     unsigned long timestamp = 0;
 
     //Timeout of 65 milliseconds, keeps refresh rate of 1Hz in worst case
@@ -164,8 +197,8 @@ float sendECURequest(byte pid, int* requestStatus) {
         }
     }
 
-    delay(10);
     (*requestStatus) = -1;
+    return 0.0;
 }
 
 String floatToString(float value, int places) {

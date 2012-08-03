@@ -359,6 +359,9 @@ float CANInterface::calculatePIDvalue(byte PID, tCAN* message) {
 			
 		case ENGINE_OIL_TEMP:       // (A - 40)
 			return (message->data[3] - 40);
+			
+		default:
+			return 0.0;
 	}
 }
 
