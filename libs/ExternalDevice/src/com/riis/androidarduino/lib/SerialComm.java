@@ -20,7 +20,7 @@ public abstract class SerialComm implements iCommunication, Runnable {
 	
 	protected boolean foundNullTerminatorFlag;
 	
-	protected boolean isConnected;
+	protected volatile boolean isConnected;
 	
 	public SerialComm() {
 		
@@ -54,10 +54,10 @@ public abstract class SerialComm implements iCommunication, Runnable {
 				outputStream.write(byteBuffer[i]);
 			}
 		} catch (IOException e) {
-			log(e.toString());
+			System.err.print(e);
 			isConnected = false;
 		} catch (NullPointerException e) {
-			log(e.toString());
+			System.err.print(e);
 			isConnected = false;
 		}
 	}
@@ -96,7 +96,8 @@ public abstract class SerialComm implements iCommunication, Runnable {
 		byte[] buffer = new byte[1024];
 
 		while (true) { // keep reading messages forever.
-			checkAndHandleMessages(buffer);
+			if(isConnected)
+				checkAndHandleMessages(buffer);
 		}
 	}
 	
@@ -128,11 +129,11 @@ public abstract class SerialComm implements iCommunication, Runnable {
 		try {
 			return inputStream.read(byteBuffer);
 		} catch (IOException e) {
-			log(e.toString());
+			System.err.print(e);
 			isConnected = false;
 			return -1;
 		} catch (NullPointerException e) {
-			log(e.toString());
+			System.err.print(e);
 			isConnected = false;
 			return -1;
 		}

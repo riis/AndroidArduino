@@ -82,6 +82,7 @@ public class BluetoothComm extends SerialComm implements Runnable {
 			if(getOutputStream() != null)
 				getOutputStream().close();
 		} catch (IOException e) {
+			isConnected = false;
 			throw e;
 		}
 		
