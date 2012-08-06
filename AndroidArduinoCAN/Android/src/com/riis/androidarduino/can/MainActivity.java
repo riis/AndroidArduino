@@ -1,3 +1,15 @@
+/*
+ * Things to go
+ * 		abs throttle C
+ * 		all accellerator positions
+ * 		engine load
+ * 	
+ * Things to fix
+ * 		temperatures
+ * 		make it not do anything until the bluetooth
+ * 
+ */
+
 package com.riis.androidarduino.can;
 
 import java.io.IOException;
@@ -401,7 +413,7 @@ public class MainActivity extends Activity {
 	private void setFuelLevel(String fuelLevelStr) {
 		double fuelLevel = Double.parseDouble(fuelLevelStr);
 		fuelLevelBar.setProgress((int) fuelLevel);
-		fuelLevelTxt.setText(getString(R.string.engineLoadPreface) + fuelLevel + "%");		
+		fuelLevelTxt.setText(getString(R.string.fuelLevelPreface) + fuelLevel + "%");		
 	}
 
 	private void setAmbiantAirTemp(String tempStr) {

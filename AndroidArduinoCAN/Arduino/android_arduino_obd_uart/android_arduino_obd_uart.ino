@@ -210,7 +210,7 @@ float calculatePIDvalue(String PID, byte bytes[8]) {
     return ((bytes[2] * 256) + bytes[3]) / 4;
 
   else if(PID == VEHICLE_SPEED)         // A 
-    return (bytes[2]);
+    return (bytes[2] * 0.621371);
 
   else if(PID == THROTTLE_POS)		    // (A * 100) / 255
     return (bytes[2] * 100) / 255;
