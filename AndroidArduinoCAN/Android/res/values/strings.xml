@@ -18,6 +18,8 @@
     <string name="accPedalPosEPreface">Abs. Acc. Pos. E:\n</string>
     <string name="accPedalPosFPreface">Abs. Acc. Pos. F:\n</string>
     <string name="hybridBatteryPackPreface">Hybrid Battery Pack - Remaining Life (if supported):\n</string>
+    <string name="avgSpeedPreface">Average Speed:\n</string>
+    <string name="distanceTraveledPreface">Distance Traveled:\n</string>
     <string name="engineOilTempPreface">Oil Temp:\n</string>
     <string name="VINPreface">VIN: </string>
     

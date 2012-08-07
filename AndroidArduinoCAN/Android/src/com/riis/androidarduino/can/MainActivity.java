@@ -32,13 +32,12 @@ public class MainActivity extends Activity {
 	
 	private Button btConnectButton;
 	private Button startTrackingButton;
-	private Button viewTripDataButton;
 	private Button pauseTrackingButton;
 	private boolean enableTracking;
 	
-	private double timeSinceTrackStart;
-	private ArrayList<Double> avgRPM;
-	private ArrayList<Double> avgSpeed;
+	private double lastDistanceUpdateTime;
+	private double distanceTraveledVal;
+	private ArrayList<Double> speedArray;
 	
 	private GuageView guages;
 	NeedleValueController managedRPMVal;
@@ -47,6 +46,8 @@ public class MainActivity extends Activity {
 	private TextView engineRunTime;
 	private TextView airTemp;
 	private TextView hybridBatteryPack;
+	private TextView averageSpeed;
+	private TextView distanceTraveled;
 	private TextView VIN;
 	
 	private ProgressBar oilTempBar;
@@ -105,10 +106,10 @@ public class MainActivity extends Activity {
         keepRunning = true;
         
         context = this;
-        avgRPM = new ArrayList<Double>(MAX_ARRAY_SIZE);
-        avgSpeed = new ArrayList<Double>(MAX_ARRAY_SIZE);
+        speedArray = new ArrayList<Double>(MAX_ARRAY_SIZE);
         managedRPMVal = new NeedleValueController();
         managedSpeedVal = new NeedleValueController();
+        lastDistanceUpdateTime = System.currentTimeMillis();
         enableTracking = false;
         
         setUpGUI();
@@ -118,10 +119,11 @@ public class MainActivity extends Activity {
     	setUpConnectButton();
     	setUpStartTrackButton();
     	setUpPauseTrackButton();
-    	setUpViewTripDataButton();
     	setUpTempMonitors();
     	setUpThrottleMonitors();
     	setUpBatteryMonitor();
+    	setUpAverageSpeedMonitor();
+    	setUpDistanceTraveledMonitor();
     	setUpRuntimeMonitor();
     	setUpVIN();
     	setUpGuages();
@@ -165,8 +167,7 @@ public class MainActivity extends Activity {
     				else {
     					startTrackingButton.setText("Start Tracking");
 	    				enableTracking = false;
-	    				avgRPM.clear();
-	    				avgSpeed.clear();
+	    				speedArray.clear();
     				}
     			}
     		}
@@ -179,16 +180,6 @@ public class MainActivity extends Activity {
     		new OnClickListener() {
     			public void onClick(View v) {
     				enableTracking = false;
-    			}
-    		}
-    	);
-	}
-
-	private void setUpViewTripDataButton() {
-		viewTripDataButton = (Button)findViewById(R.id.viewTripDataButton);
-    	viewTripDataButton.setOnClickListener(
-    		new OnClickListener() {
-    			public void onClick(View v) {
     			}
     		}
     	);
@@ -225,6 +216,16 @@ public class MainActivity extends Activity {
 
 	private void setUpBatteryMonitor() {
 		hybridBatteryPack = (TextView)findViewById(R.id.hybridBatteryPack);
+	}
+	
+	private void setUpAverageSpeedMonitor() {
+		averageSpeed = (TextView)findViewById(R.id.averageSpeed);
+		averageSpeed.append("0 MPH");
+	}
+	
+	private void setUpDistanceTraveledMonitor() {
+		distanceTraveled = (TextView)findViewById(R.id.distanceTraveled);
+		distanceTraveled.append("0 mi");
 	}
 	
 	private void setUpVIN() {
@@ -315,54 +316,26 @@ public class MainActivity extends Activity {
 	private void setEngineRPM(int dataA, int dataB) {
 		double rpm = ((dataA * 256) + dataB) / 4;
 		
-		if(enableTracking) {
-			if(avgRPM.size() == MAX_ARRAY_SIZE)
-				avgRPM.remove(0);
-			avgRPM.add(rpm);
-		}
-		
-		double newAvg = getAvg(avgRPM);
-		
-//		managedRPMVal.addValue(rpm);
 		guages.setTach(rpm);
 		
 		long deltaTime = System.currentTimeMillis() - lastTime;
 		Log.v("TAAAAAG", "Since last update: " + deltaTime);
 		lastTime = System.currentTimeMillis();
-		
-		// calculate angle from rpm
-		// -turn into a %- rpm/maxVal
-		// zeroAngle + (rpm*maxValAngle)
-		// if(result < 0)
-		//    result = 360+result;
-		// calculate angle from newAvg
 	}
 
 	private void setVehicleSpeed(int dataA, int dataB) {
 		double speed = dataA * 0.621371;
 		
 		if(enableTracking) {
-			if(avgSpeed.size() == MAX_ARRAY_SIZE)
-				avgSpeed.remove(0);
-			avgSpeed.add(speed);
+			if(speedArray.size() == MAX_ARRAY_SIZE)
+				speedArray.remove(0);
+			speedArray.add(speed);
 		}
 		
-		double newAvg = getAvg(avgSpeed);
+		setAverageSpeed();
 		
 		managedSpeedVal.addValue(speed);
 		guages.setSpeed(managedSpeedVal.getLatestSlope());
-		
-		// calculate angle from speed
-		// calculate angle from newAvg
-	}
-
-	private double getAvg(ArrayList<Double> dataList) {
-		double avg = 0;
-		for(double datum : dataList) {
-			avg += datum;
-		}
-		avg /= dataList.size();
-		return avg;
 	}
 
 	private void setThrottlePosition(int dataA, int dataB) {
@@ -374,6 +347,7 @@ public class MainActivity extends Activity {
 	private void setEngineRunTime(int dataA, int dataB) {
 		double time = (dataA * 256.0) + dataB;
 		engineRunTime.setText(getString(R.string.engineRunTimePreface) + time + "s");
+		setDistanceTraveled();
 	}
 
 	private void setFuelLevel(int dataA, int dataB) {
@@ -396,6 +370,26 @@ public class MainActivity extends Activity {
 	private void setHybridBatteryPackLife(int dataA, int dataB) {
 		double batteryLife = (dataA / 256.0) * 100.0;
 		hybridBatteryPack.setText(getString(R.string.hybridBatteryPackPreface) + batteryLife + "%");
+	}
+	
+	private void setAverageSpeed() {
+		double avgSpd = 0;
+		for(double spd : speedArray) {
+			avgSpd += spd;
+		}
+		avgSpd /= speedArray.size();
+		averageSpeed.setText(getString(R.string.avgSpeedPreface) + avgSpd + " ");
+	}
+	
+	private void setDistanceTraveled() {
+		double avgspd = 0;
+		if(speedArray.size() > 2)
+			avgspd = speedArray.get(speedArray.size()-1) - speedArray.get(speedArray.size()-2);
+		double dt = (System.currentTimeMillis() - lastDistanceUpdateTime)/(1000.0*60.0*60.0);
+        lastDistanceUpdateTime = System.currentTimeMillis();
+		distanceTraveledVal += avgspd*dt;
+		
+		distanceTraveled.setText(getString(R.string.distanceTraveledPreface) + distanceTraveledVal + " mi");
 	}
 
 	private void setEngineOilTemp(int dataA, int dataB) {

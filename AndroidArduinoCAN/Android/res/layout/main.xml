@@ -51,20 +51,14 @@
 		        android:id="@+id/startTrackButton"
 		        android:layout_width="fill_parent"
 		        android:layout_height="fill_parent"
-		        android:layout_weight="0.33"
+		        android:layout_weight="0.5"
 		        android:text="Start Tracking" />
 	        <Button
 		        android:id="@+id/pauseTrackButton"
 		        android:layout_width="fill_parent"
 		        android:layout_height="fill_parent"
-		        android:layout_weight="0.33"
+		        android:layout_weight="0.5"
 		        android:text="Pause Tracking" />
-	        <Button
-		        android:id="@+id/viewTripDataButton"
-		        android:layout_width="fill_parent"
-		        android:layout_height="fill_parent"
-		        android:layout_weight="0.33"
-		        android:text="View Trip Data" />
 	        
 	    </LinearLayout>
 	    
@@ -119,7 +113,7 @@
 				        <LinearLayout
 					        android:layout_width="fill_parent"
 					        android:layout_height="fill_parent"
-					        android:layout_weight="0.5"
+					        android:layout_weight="0.33"
 					        android:orientation="vertical" >
 					        
 				            <TextView
@@ -144,7 +138,7 @@
 				        <LinearLayout
 					        android:layout_width="fill_parent"
 					        android:layout_height="fill_parent"
-					        android:layout_weight="0.5"
+					        android:layout_weight="0.33"
 					        android:orientation="vertical" >
 					        
 					        <TextView
@@ -166,8 +160,33 @@
 					        
 				        </LinearLayout>
 				        
+				        <LinearLayout
+					        android:layout_width="fill_parent"
+					        android:layout_height="fill_parent"
+					        android:layout_weight="0.33"
+					        android:orientation="vertical" >
+					        
+					        <TextView
+					            android:id="@+id/fuelLevelTxt"
+					            android:layout_width="match_parent"
+					            android:layout_height="match_parent"
+					            android:layout_weight="0.5"
+					            android:gravity="center"
+					            android:text="@string/fuelLevelPreface"
+					            android:textColor="@android:color/white" />
+					        
+					        <ProgressBar
+					            android:id="@+id/fuelLevelBar"
+					            style="?android:attr/progressBarStyleHorizontal"
+					            android:layout_width="fill_parent"
+					            android:layout_height="fill_parent"
+					            android:layout_margin="5dp"
+					            android:layout_weight="0.5" />
+					        
+				        </LinearLayout>
+					        
 				    </LinearLayout>
-		        
+				    
 			    </LinearLayout>
 			    
 				<LinearLayout
@@ -179,7 +198,7 @@
 			        <LinearLayout
 				        android:layout_width="fill_parent"
 				        android:layout_height="fill_parent"
-				        android:layout_weight="0.5"
+				        android:layout_weight="0.33"
 				        android:orientation="vertical" >
 				        
 			            <TextView
@@ -204,7 +223,7 @@
 			        <LinearLayout
 				        android:layout_width="fill_parent"
 				        android:layout_height="fill_parent"
-				        android:layout_weight="0.5"
+				        android:layout_weight="0.33"
 				        android:orientation="vertical" >
 				        
 				        <TextView
@@ -225,54 +244,28 @@
 				            android:layout_weight="0.5" />
 				        
 			        </LinearLayout>
+			        
+			        <LinearLayout
+				        android:layout_width="fill_parent"
+				        android:layout_height="fill_parent"
+				        android:layout_weight="0.33"
+				        android:orientation="horizontal" >
+			
+				        <TextView
+				            android:id="@+id/airTemp"
+				            android:layout_width="match_parent"
+				            android:layout_height="match_parent"
+				            android:layout_weight="0.5"
+				            android:gravity="center"
+				            android:text="@string/airTempPreface"
+				            android:textColor="@android:color/white" />
+				        
+				    </LinearLayout>
 		        
 		    	</LinearLayout>
 	        
 		    </LinearLayout>
-		    
 			
-		    <LinearLayout
-		        android:layout_width="fill_parent"
-		        android:layout_height="fill_parent"
-		        android:layout_weight="0.4"
-		        android:orientation="horizontal" >
-				
-		        <LinearLayout
-			        android:layout_width="fill_parent"
-			        android:layout_height="fill_parent"
-			        android:layout_weight="0.5"
-			        android:orientation="vertical" >
-			        
-			        <TextView
-			            android:id="@+id/fuelLevelTxt"
-			            android:layout_width="match_parent"
-			            android:layout_height="match_parent"
-			            android:layout_weight="0.5"
-			            android:gravity="center"
-			            android:text="@string/fuelLevelPreface"
-			            android:textColor="@android:color/white" />
-			        
-			        <ProgressBar
-			            android:id="@+id/fuelLevelBar"
-			            style="?android:attr/progressBarStyleHorizontal"
-			            android:layout_width="fill_parent"
-			            android:layout_height="fill_parent"
-			            android:layout_margin="5dp"
-			            android:layout_weight="0.5" />
-			        
-		        </LinearLayout>
-	
-		        <TextView
-		            android:id="@+id/airTemp"
-		            android:layout_width="match_parent"
-		            android:layout_height="match_parent"
-		            android:layout_weight="0.5"
-		            android:gravity="center"
-		            android:text="@string/airTempPreface"
-		            android:textColor="@android:color/white" />
-		        
-		    </LinearLayout>
-		    
 		    <LinearLayout
 		        android:layout_width="fill_parent"
 		        android:layout_height="match_parent"
@@ -288,9 +281,36 @@
 		            android:textColor="@android:color/white" />
 		        
 		    </LinearLayout>
+		    
+		    <LinearLayout
+		        android:layout_width="fill_parent"
+		        android:layout_height="match_parent"
+		        android:layout_weight="0.4" 
+        		android:orientation="horizontal" >
+		        
+		        <TextView
+		            android:id="@+id/averageSpeed"
+		            android:layout_width="match_parent"
+		            android:layout_height="match_parent"
+		            android:layout_weight="0.5"
+		            android:gravity="center"
+		            android:text="@string/avgSpeedPreface"
+		            android:textColor="@android:color/white" />
+		        
+		        <TextView
+		            android:id="@+id/distanceTraveled"
+		            android:layout_width="match_parent"
+		            android:layout_height="match_parent"
+		            android:layout_weight="0.5"
+		            android:gravity="center"
+		            android:text="@string/distanceTraveledPreface"
+		            android:textColor="@android:color/white" />
+		        
+		    </LinearLayout>
+		        
 		        
 		</LinearLayout>
-	    
+		
     </LinearLayout>
     
     <LinearLayout
