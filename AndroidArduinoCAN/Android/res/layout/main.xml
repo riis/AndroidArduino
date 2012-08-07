@@ -108,7 +108,7 @@
 	            <LinearLayout
 			        android:layout_width="fill_parent"
 			        android:layout_height="match_parent"
-			        android:layout_weight="0.33" >
+			        android:layout_weight="0.5" >
 			        
 	                <LinearLayout
 				        android:layout_width="fill_parent"
@@ -119,7 +119,7 @@
 				        <LinearLayout
 					        android:layout_width="fill_parent"
 					        android:layout_height="fill_parent"
-					        android:layout_weight="0.33"
+					        android:layout_weight="0.5"
 					        android:orientation="vertical" >
 					        
 				            <TextView
@@ -144,7 +144,7 @@
 				        <LinearLayout
 					        android:layout_width="fill_parent"
 					        android:layout_height="fill_parent"
-					        android:layout_weight="0.33"
+					        android:layout_weight="0.5"
 					        android:orientation="vertical" >
 					        
 					        <TextView
@@ -166,127 +166,20 @@
 					        
 				        </LinearLayout>
 				        
-				        <LinearLayout
-					        android:layout_width="fill_parent"
-					        android:layout_height="fill_parent"
-					        android:layout_weight="0.33"
-					        android:orientation="vertical" >
-					        
-				            <TextView
-				                android:id="@+id/absoluteThrottleCTxt"
-				                android:layout_width="match_parent"
-				                android:layout_height="match_parent"
-				                android:layout_weight="0.5"
-				                android:gravity="center"
-				                android:text="@string/absThrottleCPreface"
-				                android:textColor="@android:color/white" />
-					        
-					        <ProgressBar
-					            android:id="@+id/absoluteThrottleCBar"
-					            style="?android:attr/progressBarStyleHorizontal"
-					            android:layout_width="fill_parent"
-					            android:layout_height="fill_parent"
-					            android:layout_margin="5dp"
-					            android:layout_weight="0.5" />
-					        
-				        </LinearLayout>
-				        
 				    </LinearLayout>
-		        
-			    </LinearLayout>
-			    
-	            <LinearLayout
-			        android:layout_width="fill_parent"
-			        android:layout_height="match_parent"
-			        android:layout_weight="0.33" >
-	                
-	                <LinearLayout
-					        android:layout_width="fill_parent"
-					        android:layout_height="fill_parent"
-					        android:layout_weight="0.33"
-					        android:orientation="vertical" >
-					        
-				            <TextView
-				                android:id="@+id/absAccPosDTxt"
-				                android:layout_width="match_parent"
-				                android:layout_height="match_parent"
-				                android:layout_weight="0.5"
-				                android:gravity="center"
-				                android:text="@string/accPedalPosDPreface"
-				                android:textColor="@android:color/white" />
-					        
-					        <ProgressBar
-					            android:id="@+id/absAccPosDBar"
-					            style="?android:attr/progressBarStyleHorizontal"
-					            android:layout_width="fill_parent"
-					            android:layout_height="fill_parent"
-					            android:layout_margin="5dp"
-					            android:layout_weight="0.5" />
-					        
-				        </LinearLayout>
-		
-				        <LinearLayout
-					        android:layout_width="fill_parent"
-					        android:layout_height="fill_parent"
-					        android:layout_weight="0.33"
-					        android:orientation="vertical" >
-					        
-					        <TextView
-					            android:id="@+id/absAccPosETxt"
-					            android:layout_width="match_parent"
-					            android:layout_height="match_parent"
-					            android:layout_weight="0.5"
-					            android:gravity="center"
-					            android:text="@string/accPedalPosEPreface"
-					            android:textColor="@android:color/white" />
-					        
-					        <ProgressBar
-					            android:id="@+id/absAccPosEBar"
-					            style="?android:attr/progressBarStyleHorizontal"
-					            android:layout_width="fill_parent"
-					            android:layout_height="fill_parent"
-					            android:layout_margin="5dp"
-					            android:layout_weight="0.5" />
-					        
-				        </LinearLayout>
-				        
-				        <LinearLayout
-					        android:layout_width="fill_parent"
-					        android:layout_height="fill_parent"
-					        android:layout_weight="0.33"
-					        android:orientation="vertical" >
-					        
-				            <TextView
-				                android:id="@+id/absAccPosFTxt"
-				                android:layout_width="match_parent"
-				                android:layout_height="match_parent"
-				                android:layout_weight="0.5"
-				                android:gravity="center"
-				                android:text="@string/accPedalPosFPreface"
-				                android:textColor="@android:color/white" />
-					        
-					        <ProgressBar
-					            android:id="@+id/absAccPosFBar"
-					            style="?android:attr/progressBarStyleHorizontal"
-					            android:layout_width="fill_parent"
-					            android:layout_height="fill_parent"
-					            android:layout_margin="5dp"
-					            android:layout_weight="0.5" />
-					        
-				        </LinearLayout>
 		        
 			    </LinearLayout>
 			    
 				<LinearLayout
 			        android:layout_width="fill_parent"
 			        android:layout_height="fill_parent"
-			        android:layout_weight="0.33"
+			        android:layout_weight="0.5"
 			        android:orientation="horizontal" >
 	
 			        <LinearLayout
 				        android:layout_width="fill_parent"
 				        android:layout_height="fill_parent"
-				        android:layout_weight="0.33"
+				        android:layout_weight="0.5"
 				        android:orientation="vertical" >
 				        
 			            <TextView
@@ -311,7 +204,7 @@
 			        <LinearLayout
 				        android:layout_width="fill_parent"
 				        android:layout_height="fill_parent"
-				        android:layout_weight="0.33"
+				        android:layout_weight="0.5"
 				        android:orientation="vertical" >
 				        
 				        <TextView
@@ -325,31 +218,6 @@
 				        
 				        <ProgressBar
 				            android:id="@+id/coolantTempBar"
-				            style="?android:attr/progressBarStyleHorizontal"
-				            android:layout_width="fill_parent"
-				            android:layout_height="fill_parent"
-				            android:layout_margin="5dp"
-				            android:layout_weight="0.5" />
-				        
-			        </LinearLayout>
-			        
-			        <LinearLayout
-				        android:layout_width="fill_parent"
-				        android:layout_height="fill_parent"
-				        android:layout_weight="0.33"
-				        android:orientation="vertical" >
-				        
-				        <TextView
-				            android:id="@+id/engineLoadTxt"
-				            android:layout_width="match_parent"
-				            android:layout_height="match_parent"
-				            android:layout_weight="0.5"
-				            android:gravity="center"
-				            android:text="@string/engineLoadPreface"
-				            android:textColor="@android:color/white" />
-				        
-				        <ProgressBar
-				            android:id="@+id/engineLoadBar"
 				            style="?android:attr/progressBarStyleHorizontal"
 				            android:layout_width="fill_parent"
 				            android:layout_height="fill_parent"

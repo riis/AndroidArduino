@@ -1,8 +1,4 @@
 /*
- * Things to go
- * 		abs throttle C
- * 		all accellerator positions
- * 		engine load
  * 	
  * Things to fix
  * 		temperatures
@@ -55,20 +51,10 @@ public class MainActivity extends Activity {
 	private TextView oilTempTxt;
 	private ProgressBar coolantTempBar;
 	private TextView coolantTempTxt;
-	private ProgressBar engineLoadBar;
-	private TextView engineLoadTxt;
 	private ProgressBar throttlePosBar;
 	private TextView throttlePosTxt;
 	private ProgressBar absThrottleBBar;
 	private TextView absThrottleBTxt;
-	private ProgressBar absThrottleCBar;
-	private TextView absThrottleCTxt;
-	private ProgressBar absAccPosDBar;
-	private TextView absAccPosDTxt;
-	private ProgressBar absAccPosEBar;
-	private TextView absAccPosETxt;
-	private ProgressBar absAccPosFBar;
-	private TextView absAccPosFTxt;
 	private ProgressBar fuelLevelBar;
 	private TextView fuelLevelTxt;
 	
@@ -130,9 +116,7 @@ public class MainActivity extends Activity {
     	setUpPauseTrackButton();
     	setUpStopTrackButton();
     	setUpTempMonitors();
-    	setUpEngineLoadMonitor();
     	setUpThrottleMonitors();
-    	setUpAcceleratorMonitors();
     	setUpBatteryMonitor();
     	setUpRuntimeMonitor();
     	setUpVIN();
@@ -216,14 +200,6 @@ public class MainActivity extends Activity {
 		airTemp = (TextView)findViewById(R.id.airTemp);
 		airTemp.append("0 C");
 	}
-	
-	private void setUpEngineLoadMonitor() {
-		engineLoadBar = (ProgressBar)findViewById(R.id.engineLoadBar);
-		engineLoadBar.setMax(100);
-		engineLoadBar.setProgress(0);
-		engineLoadTxt = (TextView)findViewById(R.id.engineLoadTxt);
-		engineLoadTxt.append("0%");
-	}
 
 	private void setUpThrottleMonitors() {
 		throttlePosBar = (ProgressBar)findViewById(R.id.throttlePosBar);
@@ -235,28 +211,6 @@ public class MainActivity extends Activity {
 		absThrottleBBar.setMax(100);
 		absThrottleBTxt = (TextView)findViewById(R.id.absoluteThrottleBTxt);
 		absThrottleBTxt.append("0%");
-		
-		absThrottleCBar = (ProgressBar)findViewById(R.id.absoluteThrottleCBar);
-		absThrottleCBar.setMax(100);
-		absThrottleCTxt = (TextView)findViewById(R.id.absoluteThrottleCTxt);
-		absThrottleCTxt.append("0%");
-	}
-
-	private void setUpAcceleratorMonitors() {
-		absAccPosDBar = (ProgressBar)findViewById(R.id.absAccPosDBar);
-		absAccPosDBar.setMax(100);
-		absAccPosDTxt = (TextView)findViewById(R.id.absAccPosDTxt);
-		absAccPosDTxt.append("0%");
-		
-		absAccPosEBar = (ProgressBar)findViewById(R.id.absAccPosEBar);
-		absAccPosEBar.setMax(100);
-		absAccPosETxt = (TextView)findViewById(R.id.absAccPosETxt);
-		absAccPosETxt.append("0%");
-		
-		absAccPosFBar = (ProgressBar)findViewById(R.id.absAccPosFBar);
-		absAccPosFBar.setMax(100);
-		absAccPosFTxt = (TextView)findViewById(R.id.absAccPosFTxt);
-		absAccPosFTxt.append("0%");
 	}
 
 	private void setUpBatteryMonitor() {
@@ -301,8 +255,6 @@ public class MainActivity extends Activity {
 					
 			    	if(pid == 0x02)
 			    		setVIN(tokens[2]);
-			    	else if(pid == 0x04)
-			    		setEngineLoadVal(tokens[2]);
 			    	else if(pid == 0x05)
 			    		setEngineCoolantTemp(tokens[2]);
 			    	else if(pid == 0x0C)
@@ -319,14 +271,6 @@ public class MainActivity extends Activity {
 			    		setAmbiantAirTemp(tokens[2]);
 			    	else if(pid == 0x47)
 			    		setAbsoluteThrottleB(tokens[2]);
-			    	else if(pid == 0x48)
-			    		setAbsoluteThrottleC(tokens[2]);
-			    	else if(pid == 0x49)
-			    		setAccPedalPosD(tokens[2]);
-			    	else if(pid == 0x4A)
-			    		setAccPedalPosE(tokens[2]);
-			    	else if(pid == 0x4B)
-			    		setAbsAccPedalPosF(tokens[2]);
 			    	else if(pid == 0x5B)
 			    		setHybridBatteryPackLife(tokens[2]);
 			    	else if(pid == 0x5C)
@@ -338,13 +282,6 @@ public class MainActivity extends Activity {
     
     private void setVIN(String vin) {
     	VIN.setText(getString(R.string.VINPreface) + vin);
-	}
-
-	private void setEngineLoadVal(String engineLoadStr) {
-		double engineLoad = Double.parseDouble(engineLoadStr);
-		engineLoadBar.setProgress((int) engineLoad);
-		engineLoadTxt.setText(getString(R.string.engineLoadPreface) + engineLoad + "%");
-		
 	}
 
 	private void setEngineCoolantTemp(String coolantTempStr) {
@@ -424,30 +361,6 @@ public class MainActivity extends Activity {
 		double absThrottleB = Double.parseDouble(absThrottleBStr);
 		absThrottleBTxt.setText(getString(R.string.absThrottleBPreface) + absThrottleB + "%");
 		absThrottleBBar.setProgress((int)absThrottleB);
-	}
-
-	private void setAbsoluteThrottleC(String absThrottleCStr) {
-		double absThrottleC = Double.parseDouble(absThrottleCStr);
-		absThrottleCTxt.setText(getString(R.string.absThrottleCPreface) + absThrottleC + "%");
-		absThrottleCBar.setProgress((int)absThrottleC);
-	}
-
-	private void setAccPedalPosD(String absAccPosDStr) {
-		double absAccPosD = Double.parseDouble(absAccPosDStr);
-		absAccPosDTxt.setText(getString(R.string.accPedalPosDPreface) + absAccPosD + "%");
-		absAccPosDBar.setProgress((int)absAccPosD);
-	}
-
-	private void setAccPedalPosE(String absAccPosEStr) {
-		double absAccPosE = Double.parseDouble(absAccPosEStr);
-		absAccPosETxt.setText(getString(R.string.accPedalPosEPreface) + absAccPosE + "%");
-		absAccPosEBar.setProgress((int)absAccPosE);
-	}
-
-	private void setAbsAccPedalPosF(String absAccPosFStr) {
-		double absAccPosF = Double.parseDouble(absAccPosFStr);
-		absAccPosFTxt.setText(getString(R.string.accPedalPosFPreface) + absAccPosF + "%");
-		absAccPosFBar.setProgress((int)absAccPosF);
 	}
 
 	private void setHybridBatteryPackLife(String batteryLifeStr) {
