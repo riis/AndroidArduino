@@ -42,6 +42,8 @@ public class GuageView extends View {
 	private float currentSpeed;
 	private float currentTach;
 	
+	private boolean smoothValues;
+	
 	public GuageView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		
@@ -53,6 +55,10 @@ public class GuageView extends View {
 		
 		speedNeedlePos = new Point(SPEED_CENTER_X, SPEED_CENTER_Y);
 		tachNeedlePos = new Point(TACH_CENTER_X, TACH_CENTER_Y);
+		
+		smoothValues = true;
+		
+		this.setWillNotDraw(false);
 	}
 	
 	@Override
@@ -71,6 +77,8 @@ public class GuageView extends View {
 
 		speedNeedle.draw(canvas, speedNeedlePos);
 		tachNeedle.draw(canvas, tachNeedlePos);
+		
+		invalidate();
 	}
 	
 	private void checkNewScaleFactor(float newScaleFactor) {

@@ -256,48 +256,59 @@ public class MainActivity extends Activity {
 				if(tokens[0].equals(getString(R.id.connectButton))) {
 					btConnectButton.setText(message);
 				}
-				if(tokens.length == 3 && tokens[0].equals("DATA")) {
-					int pid = Integer.parseInt(tokens[1], 16);
+				if(tokens.length == 4 && tokens[0].equals("DATA")) {
+					int pid;
+					int dataA;
+					int dataB;
 					
+					try {
+						pid = Integer.parseInt(tokens[1], 16);
+						dataA = Integer.parseInt(tokens[2], 16);
+						dataB = Integer.parseInt(tokens[3], 16);
+					} catch(NumberFormatException e) {
+						return;
+					}
+						
 			    	if(pid == 0x02)
-			    		setVIN(tokens[2]);
+			    		setVIN(dataA, dataB);
 			    	else if(pid == 0x05)
-			    		setEngineCoolantTemp(tokens[2]);
+			    		setEngineCoolantTemp(dataA, dataB);
 			    	else if(pid == 0x0C)
-			    		setEngineRPM(tokens[2]);
+			    		setEngineRPM(dataA, dataB);
 			    	else if(pid == 0x0D)
-			    		setVehicleSpeed(tokens[2]);
+			    		setVehicleSpeed(dataA, dataB);
 			    	else if(pid == 0x11)
-			    		setThrottlePosition(tokens[2]);
+			    		setThrottlePosition(dataA, dataB);
 			    	else if(pid == 0x1F)
-			    		setEngineRunTime(tokens[2]);
+			    		setEngineRunTime(dataA, dataB);
 			    	else if(pid == 0x2F)
-			    		setFuelLevel(tokens[2]);
+			    		setFuelLevel(dataA, dataB);
 			    	else if(pid == 0x46)
-			    		setAmbiantAirTemp(tokens[2]);
+			    		setAmbiantAirTemp(dataA, dataB);
 			    	else if(pid == 0x47)
-			    		setAbsoluteThrottleB(tokens[2]);
+			    		setAbsoluteThrottleB(dataA, dataB);
 			    	else if(pid == 0x5B)
-			    		setHybridBatteryPackLife(tokens[2]);
+			    		setHybridBatteryPackLife(dataA, dataB);
 			    	else if(pid == 0x5C)
-			    		setEngineOilTemp(tokens[2]);
+			    		setEngineOilTemp(dataA, dataB);
 				}
 			}
 		};
 	}
     
-    private void setVIN(String vin) {
+    private void setVIN(int dataA, int dataB) {
+    	String vin = "";
     	VIN.setText(getString(R.string.VINPreface) + vin);
 	}
 
-	private void setEngineCoolantTemp(String coolantTempStr) {
-    	double coolantTemp = Double.parseDouble(coolantTempStr);
+	private void setEngineCoolantTemp(int dataA, int dataB) {
+    	double coolantTemp = dataA - 40.0;
 		coolantTempTxt.setText(getString(R.string.engineCoolantTempPreface) + coolantTemp + " C");
 		coolantTempBar.setProgress((int)coolantTemp+40);
 	}
 
-	private void setEngineRPM(String rpmStr) {
-		double rpm = Double.parseDouble(rpmStr);
+	private void setEngineRPM(int dataA, int dataB) {
+		double rpm = ((dataA * 256) + dataB) / 4;
 		
 		if(enableTracking) {
 			if(avgRPM.size() == MAX_ARRAY_SIZE)
@@ -307,7 +318,7 @@ public class MainActivity extends Activity {
 		
 		double newAvg = getAvg(avgRPM);
 		
-		guages.setTach(Float.parseFloat(rpmStr));
+		guages.setTach((float) rpm);
 		
 		// calculate angle from rpm
 		// -turn into a %- rpm/maxVal
@@ -317,8 +328,8 @@ public class MainActivity extends Activity {
 		// calculate angle from newAvg
 	}
 
-	private void setVehicleSpeed(String speedStr) {
-		double speed = Double.parseDouble(speedStr);
+	private void setVehicleSpeed(int dataA, int dataB) {
+		double speed = dataA * 0.621371;
 		
 		if(enableTracking) {
 			if(avgSpeed.size() == MAX_ARRAY_SIZE)
@@ -328,7 +339,7 @@ public class MainActivity extends Activity {
 		
 		double newAvg = getAvg(avgSpeed);
 		
-		guages.setSpeed(Float.parseFloat(speedStr));
+		guages.setSpeed((float) speed);
 		
 		// calculate angle from speed
 		// calculate angle from newAvg
@@ -343,39 +354,41 @@ public class MainActivity extends Activity {
 		return avg;
 	}
 
-	private void setThrottlePosition(String throttlePosStr) {
-		double throttlePos = Double.parseDouble(throttlePosStr);
+	private void setThrottlePosition(int dataA, int dataB) {
+		double throttlePos = (dataA / 256.0) * 100.0;
 		throttlePosTxt.setText(getString(R.string.throttlePosPreface) + throttlePos + "%");
 		throttlePosBar.setProgress((int)throttlePos);
 	}
 
-	private void setEngineRunTime(String timeStr) {
-		engineRunTime.setText(getString(R.string.engineRunTimePreface) + timeStr + "s");
+	private void setEngineRunTime(int dataA, int dataB) {
+		double time = (dataA * 256.0) + dataB;
+		engineRunTime.setText(getString(R.string.engineRunTimePreface) + time + "s");
 	}
 
-	private void setFuelLevel(String fuelLevelStr) {
-		double fuelLevel = Double.parseDouble(fuelLevelStr);
+	private void setFuelLevel(int dataA, int dataB) {
+		double fuelLevel = (dataA / 256.0) * 100.0;
 		fuelLevelBar.setProgress((int) fuelLevel);
 		fuelLevelTxt.setText(getString(R.string.fuelLevelPreface) + fuelLevel + "%");		
 	}
 
-	private void setAmbiantAirTemp(String tempStr) {
-		airTemp.setText(getString(R.string.airTempPreface) + Double.parseDouble(tempStr) + " C");
+	private void setAmbiantAirTemp(int dataA, int dataB) {
+		double temp = dataA - 40.0;
+		airTemp.setText(getString(R.string.airTempPreface) + temp + " C");
 	}
 
-	private void setAbsoluteThrottleB(String absThrottleBStr) {
-		double absThrottleB = Double.parseDouble(absThrottleBStr);
+	private void setAbsoluteThrottleB(int dataA, int dataB) {
+		double absThrottleB = (dataA / 256.0) * 100.0;
 		absThrottleBTxt.setText(getString(R.string.absThrottleBPreface) + absThrottleB + "%");
 		absThrottleBBar.setProgress((int)absThrottleB);
 	}
 
-	private void setHybridBatteryPackLife(String batteryLifeStr) {
-		double batteryLife = Double.parseDouble(batteryLifeStr);
+	private void setHybridBatteryPackLife(int dataA, int dataB) {
+		double batteryLife = (dataA / 256.0) * 100.0;
 		hybridBatteryPack.setText(getString(R.string.hybridBatteryPackPreface) + batteryLife + "%");
 	}
 
-	private void setEngineOilTemp(String oilTempStr) {
-    	double oilTemp = Double.parseDouble(oilTempStr);
+	private void setEngineOilTemp(int dataA, int dataB) {
+    	double oilTemp = dataA - 40.0;
 		oilTempTxt.setText(getString(R.string.engineOilTempPreface) + oilTemp + " C");
 		oilTempBar.setProgress((int)oilTemp+40);
     }
