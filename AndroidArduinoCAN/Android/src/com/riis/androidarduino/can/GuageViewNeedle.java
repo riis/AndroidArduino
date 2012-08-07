@@ -23,20 +23,20 @@ public class GuageViewNeedle {
 	public enum NeedleSize {LARGE, SMALL};
 	private NeedleSize needleSize;
 	
-	private float scaleFactor;
-	private float minAngle;
-	private float maxAngle;
+	private double scaleFactor;
+	private double minAngle;
+	private double maxAngle;
 	
-	private float angle;
+	private double angle;
 	private Point needleCenter;
 	private Matrix needleMatrix;
 	
 	private Bitmap needleBitmap;	
 	private boolean isGhost;
 	
-	public GuageViewNeedle(Context context, NeedleSize needleSize, float scaleFactor, float minAngle, float maxAngle) {
+	public GuageViewNeedle(Context context, NeedleSize needleSize, double currentScaleFactor, double minAngle, double maxAngle) {
 		this.needleSize = needleSize;
-		this.scaleFactor = scaleFactor;
+		this.scaleFactor = currentScaleFactor;
 		
 		this.minAngle = minAngle;
 		this.maxAngle = maxAngle;
@@ -89,12 +89,12 @@ public class GuageViewNeedle {
 		needleBitmap = BitmapFactory.decodeResource(context.getResources(), SMALL_NEEDLE_IMG);
 	}
 	
-	public void setAngleForValueBetweenZeroAnd(float value, float maxValue) {
-		float newAngle = ((value / maxValue) * (maxAngle - minAngle)) + minAngle;
+	public void setAngleForValueBetweenZeroAnd(double value, double maxValue) {
+		double newAngle = ((value / maxValue) * (maxAngle - minAngle)) + minAngle;
 		setAngle(newAngle);
 	}
 	
-	public void setAngle(float angle) {
+	public void setAngle(double angle) {
 		if(angle > maxAngle) {
 			this.angle = maxAngle;
 		} else if(angle < minAngle) {
@@ -104,15 +104,15 @@ public class GuageViewNeedle {
 		}
 	}
 	
-	public float getMinAngle() {
+	public double getMinAngle() {
 		return minAngle;
 	}
 	
-	public float getMaxAngle() {
+	public double getMaxAngle() {
 		return maxAngle;
 	}
 	
-	public void setScaleFactor(float scaleFactor) {
+	public void setScaleFactor(double scaleFactor) {
 		this.scaleFactor = scaleFactor;
 		setUpNeedleCenter();
 	}
@@ -124,8 +124,8 @@ public class GuageViewNeedle {
 	public void draw(Canvas canvas, Point destination) {
 		needleMatrix.reset();
 		
-		needleMatrix.postScale(scaleFactor, scaleFactor);
-		needleMatrix.postRotate(angle + 180.0f, needleCenter.x, needleCenter.y);
+		needleMatrix.postScale((float)scaleFactor, (float)scaleFactor);
+		needleMatrix.postRotate((float)angle + 180.0f, needleCenter.x, needleCenter.y);
 		needleMatrix.postTranslate(destination.x - needleCenter.x, destination.y - needleCenter.y);
 		
 		Paint paint = new Paint();

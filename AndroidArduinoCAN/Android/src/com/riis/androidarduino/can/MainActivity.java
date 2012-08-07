@@ -41,6 +41,8 @@ public class MainActivity extends Activity {
 	private ArrayList<Double> avgSpeed;
 	
 	private GuageView guages;
+	NeedleValueController managedRPMVal;
+	NeedleValueController managedSpeedVal;
 	
 	private TextView engineRunTime;
 	private TextView airTemp;
@@ -105,6 +107,8 @@ public class MainActivity extends Activity {
         context = this;
         avgRPM = new ArrayList<Double>(MAX_ARRAY_SIZE);
         avgSpeed = new ArrayList<Double>(MAX_ARRAY_SIZE);
+        managedRPMVal = new NeedleValueController();
+        managedSpeedVal = new NeedleValueController();
         enableTracking = false;
         
         setUpGUI();
@@ -307,6 +311,7 @@ public class MainActivity extends Activity {
 		coolantTempBar.setProgress((int)coolantTemp+40);
 	}
 
+	private long lastTime = 0;
 	private void setEngineRPM(int dataA, int dataB) {
 		double rpm = ((dataA * 256) + dataB) / 4;
 		
@@ -318,7 +323,12 @@ public class MainActivity extends Activity {
 		
 		double newAvg = getAvg(avgRPM);
 		
-		guages.setTach((float) rpm);
+//		managedRPMVal.addValue(rpm);
+		guages.setTach(rpm);
+		
+		long deltaTime = System.currentTimeMillis() - lastTime;
+		Log.v("TAAAAAG", "Since last update: " + deltaTime);
+		lastTime = System.currentTimeMillis();
 		
 		// calculate angle from rpm
 		// -turn into a %- rpm/maxVal
@@ -339,7 +349,8 @@ public class MainActivity extends Activity {
 		
 		double newAvg = getAvg(avgSpeed);
 		
-		guages.setSpeed((float) speed);
+		managedSpeedVal.addValue(speed);
+		guages.setSpeed(managedSpeedVal.getLatestSlope());
 		
 		// calculate angle from speed
 		// calculate angle from newAvg
@@ -420,7 +431,7 @@ public class MainActivity extends Activity {
 			}
 		}
 		
-		btComm.shouldPrintLogMsgs(true);
+		btComm.shouldPrintLogMsgs(false);
 		msgThread = new Thread(msgUpdateThread);
 		msgThread.start();
 	}

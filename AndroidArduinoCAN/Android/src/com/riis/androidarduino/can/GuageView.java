@@ -35,14 +35,14 @@ public class GuageView extends View {
 	
 	private Point speedNeedlePos;
 	private Point tachNeedlePos;
-	private float currentScaleFactor;
+	private double currentScaleFactor;
 	
 	private GuageViewNeedle speedNeedle;
 	private GuageViewNeedle tachNeedle;
-	private float currentSpeed;
-	private float currentTach;
+	private double currentSpeed;
+	private double currentTach;
 	
-	private boolean smoothValues;
+	private NeedleValueController needleValControl;
 	
 	public GuageView(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -56,7 +56,7 @@ public class GuageView extends View {
 		speedNeedlePos = new Point(SPEED_CENTER_X, SPEED_CENTER_Y);
 		tachNeedlePos = new Point(TACH_CENTER_X, TACH_CENTER_Y);
 		
-		smoothValues = true;
+		needleValControl = new NeedleValueController();
 		
 		this.setWillNotDraw(false);
 	}
@@ -69,8 +69,10 @@ public class GuageView extends View {
 		Rect dstRect = new Rect(0, 0, getWidth(), (getWidth() * dialBg.getHeight()) /  dialBg.getWidth());
 		canvas.drawBitmap(dialBg, srcRect, dstRect, new Paint());
 		
-		float newScaleFactor = ((float)getWidth() / (float)dialBg.getWidth());
+		double newScaleFactor = ((double)getWidth() / (double)dialBg.getWidth());
 		checkNewScaleFactor(newScaleFactor);	
+		
+		currentTach = needleValControl.getIncrementSinceLastCall() + currentTach;
 		
 		speedNeedle.setAngleForValueBetweenZeroAnd(currentSpeed, MAX_SPEED);
 		tachNeedle.setAngleForValueBetweenZeroAnd(currentTach, MAX_TACH);
@@ -81,7 +83,7 @@ public class GuageView extends View {
 		invalidate();
 	}
 	
-	private void checkNewScaleFactor(float newScaleFactor) {
+	private void checkNewScaleFactor(double newScaleFactor) {
 		if(newScaleFactor != currentScaleFactor) {
 			currentScaleFactor = newScaleFactor;
 			
@@ -96,7 +98,7 @@ public class GuageView extends View {
 		}
 	}
 	
-	public void setSpeed(float speed) {
+	public void setSpeed(double speed) {
 		if(speed > MAX_SPEED) {
 			currentSpeed = MAX_SPEED;
 		} else if(speed < 0) {
@@ -108,19 +110,21 @@ public class GuageView extends View {
 		invalidate();
 	}
 	
-	public void setTach(float rpm) {
-		if(rpm > MAX_TACH) {
+	public void setTach(double d) {
+		if(d > MAX_TACH) {
 			currentTach = MAX_TACH;
-		} else if(rpm < 0) {
+		} else if(d < 0) {
 			currentTach = 0;
 		} else {
-			currentTach = rpm;
+			currentTach = d;
 		}
+		
+		needleValControl.addValue(currentTach);
 		
 		invalidate();
 	}
 	
-	public float getValue() {
+	public double getValue() {
 		return this.currentSpeed;
 	}
 }
