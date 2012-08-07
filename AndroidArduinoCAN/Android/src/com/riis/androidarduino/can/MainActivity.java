@@ -114,7 +114,7 @@ public class MainActivity extends Activity {
     	setUpConnectButton();
     	setUpStartTrackButton();
     	setUpPauseTrackButton();
-    	setUpStopTrackButton();
+    	setUpViewTripDataButton();
     	setUpTempMonitors();
     	setUpThrottleMonitors();
     	setUpBatteryMonitor();
@@ -171,7 +171,7 @@ public class MainActivity extends Activity {
     	);
 	}
 
-	private void setUpStopTrackButton() {
+	private void setUpViewTripDataButton() {
 		stopTrackingButton = (Button)findViewById(R.id.stopTrackButton);
     	stopTrackingButton.setOnClickListener(
     		new OnClickListener() {

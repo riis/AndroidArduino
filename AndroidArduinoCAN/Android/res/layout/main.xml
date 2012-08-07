@@ -60,11 +60,11 @@
 		        android:layout_weight="0.33"
 		        android:text="Pause Track" />
 	        <Button
-		        android:id="@+id/stopTrackButton"
+		        android:id="@+id/viewTripDataButton"
 		        android:layout_width="fill_parent"
 		        android:layout_height="fill_parent"
 		        android:layout_weight="0.33"
-		        android:text="Stop Track" />
+		        android:text="View Trip Data" />
 	        
 	    </LinearLayout>
 	    
