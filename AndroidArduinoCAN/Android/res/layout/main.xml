@@ -52,13 +52,13 @@
 		        android:layout_width="fill_parent"
 		        android:layout_height="fill_parent"
 		        android:layout_weight="0.33"
-		        android:text="Start Track" />
+		        android:text="Start Tracking" />
 	        <Button
 		        android:id="@+id/pauseTrackButton"
 		        android:layout_width="fill_parent"
 		        android:layout_height="fill_parent"
 		        android:layout_weight="0.33"
-		        android:text="Pause Track" />
+		        android:text="Pause Tracking" />
 	        <Button
 		        android:id="@+id/viewTripDataButton"
 		        android:layout_width="fill_parent"

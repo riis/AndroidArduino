@@ -32,7 +32,7 @@ public class MainActivity extends Activity {
 	
 	private Button btConnectButton;
 	private Button startTrackingButton;
-	private Button stopTrackingButton;
+	private Button viewTripDataButton;
 	private Button pauseTrackingButton;
 	private boolean enableTracking;
 	
@@ -154,7 +154,16 @@ public class MainActivity extends Activity {
     	startTrackingButton.setOnClickListener(
     		new OnClickListener() {
     			public void onClick(View v) {
-    				enableTracking = true;
+    				if(startTrackingButton.getText().toString().toLowerCase().contains("start")) {
+	    				startTrackingButton.setText("Stop Tracking");
+	    				enableTracking = true;
+    				}
+    				else {
+    					startTrackingButton.setText("Start Tracking");
+	    				enableTracking = false;
+	    				avgRPM.clear();
+	    				avgSpeed.clear();
+    				}
     			}
     		}
     	);
@@ -172,13 +181,10 @@ public class MainActivity extends Activity {
 	}
 
 	private void setUpViewTripDataButton() {
-		stopTrackingButton = (Button)findViewById(R.id.stopTrackButton);
-    	stopTrackingButton.setOnClickListener(
+		viewTripDataButton = (Button)findViewById(R.id.viewTripDataButton);
+    	viewTripDataButton.setOnClickListener(
     		new OnClickListener() {
     			public void onClick(View v) {
-    				enableTracking = false;
-    				avgRPM.clear();
-    				avgSpeed.clear();
     			}
     		}
     	);
