@@ -9,6 +9,8 @@
 package com.riis.androidarduino.can;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 
 import android.app.Activity;
@@ -324,7 +326,7 @@ public class MainActivity extends Activity {
 	}
 
 	private void setVehicleSpeed(int dataA, int dataB) {
-		double speed = dataA * 0.621371;
+		double speed = dataA * 0.621371; //kph -> mph
 		
 		if(enableTracking) {
 			if(speedArray.size() == MAX_ARRAY_SIZE)
@@ -334,8 +336,7 @@ public class MainActivity extends Activity {
 		
 		setAverageSpeed();
 		
-		managedSpeedVal.addValue(speed);
-		guages.setSpeed(managedSpeedVal.getLatestSlope());
+		guages.setSpeed(speed);
 	}
 
 	private void setThrottlePosition(int dataA, int dataB) {
@@ -378,18 +379,20 @@ public class MainActivity extends Activity {
 			avgSpd += spd;
 		}
 		avgSpd /= speedArray.size();
-		averageSpeed.setText(getString(R.string.avgSpeedPreface) + avgSpd + " ");
+		NumberFormat formatter = new DecimalFormat("#0.0");
+		averageSpeed.setText(getString(R.string.avgSpeedPreface) + formatter.format(avgSpd) + " MPH");
 	}
 	
 	private void setDistanceTraveled() {
 		double avgspd = 0;
 		if(speedArray.size() > 2)
-			avgspd = speedArray.get(speedArray.size()-1) - speedArray.get(speedArray.size()-2);
+			avgspd = (speedArray.get(speedArray.size()-1) + speedArray.get(speedArray.size()-2))/2.0;
 		double dt = (System.currentTimeMillis() - lastDistanceUpdateTime)/(1000.0*60.0*60.0);
         lastDistanceUpdateTime = System.currentTimeMillis();
 		distanceTraveledVal += avgspd*dt;
-		
-		distanceTraveled.setText(getString(R.string.distanceTraveledPreface) + distanceTraveledVal + " mi");
+
+		NumberFormat formatter = new DecimalFormat("#0.0");
+		distanceTraveled.setText(getString(R.string.distanceTraveledPreface) + formatter.format(distanceTraveledVal) + " mi");
 	}
 
 	private void setEngineOilTemp(int dataA, int dataB) {
