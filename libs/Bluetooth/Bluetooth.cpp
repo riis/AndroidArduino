@@ -168,11 +168,9 @@ void Bluetooth::process()
         while(charsAvailable > 1)
         {
 			char charRead = (char)bluetoothSerial->read();
-			Serial.println(charRead);
             inputBuffer.concat(String(charRead));
 			
 			charRead = (char)bluetoothSerial->read();
-			Serial.println(charRead);
             inputBuffer.concat(String(charRead));
 			
             charsAvailable -= 2;
