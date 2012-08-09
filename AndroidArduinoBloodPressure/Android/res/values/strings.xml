@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="hello">Hello World, MainActivity!</string>
+    <string name="app_name">Android Arduino CAN dashboard</string>
+    <string name="engineLoadValPreface"></string>
+    <string name="engineCoolantTempPreface">Coolant Temp:\n</string>
+    <string name="engineLoadPreface">Engine Load:\n</string>
+    <string name="engineRPMPreface"></string>
+    <string name="engineKPHPreface"></string>
+    <string name="throttlePosPreface">Throttle Position:\n</string>
+    <string name="engineRunTimePreface">Engine Run Time: </string>
+    <string name="fuelLevelPreface">Fuel Level:\n</string>
+    <string name="airTempPreface">Ambient Air Temp:\n</string>
+    <string name="absThrottleBPreface">Abs. Throttle B:\n</string>
+    <string name="absThrottleCPreface">Abs. Throttle C:\n</string>
+    <string name="accPedalPosDPreface">Abs. Acc. Pos. D:\n</string>
+    <string name="accPedalPosEPreface">Abs. Acc. Pos. E:\n</string>
+    <string name="accPedalPosFPreface">Abs. Acc. Pos. F:\n</string>
+    <string name="hybridBatteryPackPreface">Hybrid Battery Pack - Remaining Life (if supported):\n</string>
+    <string name="avgSpeedPreface">Average Speed:\n</string>
+    <string name="distanceTraveledPreface">Distance Traveled:\n</string>
+    <string name="engineOilTempPreface">Oil Temp:\n</string>
+    <string name="VINPreface">VIN: </string>
+    
+    
+
+</resources>

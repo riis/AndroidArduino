@@ -156,7 +156,7 @@ public class MainActivity extends Activity {
     		}
     	);
     }
-    
+    //google g2
     private void setUpStartTrackButton() {
     	startTrackingButton = (Button)findViewById(R.id.startTrackButton);
     	startTrackingButton.setOnClickListener(
@@ -170,6 +170,8 @@ public class MainActivity extends Activity {
     					startTrackingButton.setText("Start Tracking");
 	    				enableTracking = false;
 	    				speedArray.clear();
+	    				distanceTraveledVal = 0;
+	    				lastDistanceUpdateTime = 0;
     				}
     			}
     		}
