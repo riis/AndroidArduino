@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="0.1"
+        android:orientation="vertical" >
+	    <LinearLayout 
+	        android:layout_height="wrap_content"
+	        android:layout_width="fill_parent"
+	        android:orientation="horizontal" >
+	        <TextView 
+		        android:layout_height="fill_parent"
+		        android:layout_width="fill_parent"
+		        android:gravity="center|left"
+		        android:text="First Name: "
+		        android:textSize="30dp"/>
+	        <EditText 
+	            android:layout_height="fill_parent"
+		        android:layout_width="fill_parent"
+		        android:gravity="center|left"
+		        android:inputType="textPersonName"
+		        android:singleLine="true"
+		        android:textSize="30dp"/>
+	    </LinearLayout>
+	    
+	    <LinearLayout 
+	        android:layout_height="wrap_content"
+	        android:layout_width="fill_parent"
+	        android:orientation="horizontal" >
+	        <TextView 
+		        android:layout_height="fill_parent"
+		        android:layout_width="fill_parent"
+		        android:gravity="center|left"
+		        android:text="Last Name: "
+		        android:textSize="30dp"/>
+	        <EditText 
+	            android:layout_height="fill_parent"
+		        android:layout_width="fill_parent"
+		        android:gravity="center|left"
+		        android:inputType="textPersonName"
+		        android:singleLine="true"
+		        android:textSize="30dp"/>
+	    </LinearLayout>
+	    
+	    <LinearLayout 
+	        android:layout_height="wrap_content"
+	        android:layout_width="fill_parent"
+	        android:orientation="horizontal" >
+	        <TextView 
+		        android:layout_height="fill_parent"
+		        android:layout_width="fill_parent"
+		        android:gravity="center|left"
+		        android:text="Age: "
+		        android:textSize="30dp"/>
+	        <EditText 
+	            android:layout_height="fill_parent"
+		        android:layout_width="fill_parent"
+		        android:gravity="center|left"
+		        android:inputType="number"
+		        android:singleLine="true"
+		        android:textSize="30dp"/>
+	    </LinearLayout>
+	    
+	    <LinearLayout 
+	        android:layout_height="wrap_content"
+	        android:layout_width="fill_parent"
+	        android:orientation="horizontal" >
+	        <TextView 
+		        android:layout_height="fill_parent"
+		        android:layout_width="fill_parent"
+		        android:gravity="center|left"
+		        android:text="Weight "
+		        android:textSize="30dp"/>
+	        <EditText 
+	            android:layout_height="fill_parent"
+		        android:layout_width="fill_parent"
+		        android:gravity="center|left"
+		        android:hint="Weight in lbs"
+		        android:inputType="number"
+		        android:singleLine="true"
+		        android:textSize="30dp"/>
+	    </LinearLayout>
+	    
+	    <LinearLayout 
+	        android:layout_height="wrap_content"
+	        android:layout_width="fill_parent"
+	        android:orientation="horizontal" >
+	        <TextView 
+		        android:layout_height="fill_parent"
+		        android:layout_width="fill_parent"
+		        android:gravity="center|left"
+		        android:text="Height: "
+		        android:textSize="30dp"/>
+	        <EditText 
+	            android:layout_height="fill_parent"
+		        android:layout_width="fill_parent"
+		        android:gravity="center|left"
+		        android:hint="Height in inches"
+		        android:inputType="number"
+		        android:singleLine="true"
+		        android:textSize="30dp"/>
+	    </LinearLayout>
+    </LinearLayout>
+    
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="0.9"
+        android:orientation="horizontal" >
+	    <LinearLayout
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:orientation="horizontal" >
+	
+	        <Button
+	            android:layout_width="fill_parent"
+	            android:layout_height="fill_parent"
+	            android:layout_weight="0.5"
+	            android:gravity="center"
+	            android:padding="2dp"
+	            android:text="Save"
+	            android:textSize="30dp" />
+	
+	        <Button
+	            android:layout_width="fill_parent"
+	            android:layout_height="fill_parent"
+	            android:layout_weight="0.5"
+	            android:gravity="center"
+	            android:text="Cancel"
+		        android:padding="2dp"
+	            android:textSize="30dp" />
+	
+	    </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>
