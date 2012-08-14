@@ -1,18 +1,11 @@
-#include <SoftwareSerial.h>
 #include <Bluetooth.h>
+#include <SoftwareSerial.h>
 
 #define TESTING 0
 
 #if TESTING == 1
     #include <Mocks.h>
     #include <ArduinoUnit.h>
-#endif
-
-//Encryption defines
-#if TESTING == 0
-    #define XOR_VAL 55
-#else
-    #define XOR_VAL 0
 #endif
 
 //Parsing defines
@@ -30,12 +23,12 @@
 #define WAITING_FOR_START 1
 #define RECEIVING_CHARS 2
 
-//RX and TX pin numbers
-#define RX 11
-#define TX 3
+//Bluetooth
+#define RX 62
+#define TX 7
 
 SoftwareSerial bluetoothSerial(RX, TX);
-Bluetooth bluetooth("AndroidArduinoBTRS232", bluetoothSerial, true);
+Bluetooth bluetooth("AndroidArduinoBTRS232", bluetoothSerial, true, 3);
 
 int bluetoothState;
 int terminalState;
@@ -69,7 +62,7 @@ void setup()
     
     if(!bluetooth.beginBluetooth())
     {
-        logSerial->println("\n\n\rHalting program...");
+        logSerial->println("\n\rHalting program...");
         while(true) { }
     }
     
@@ -235,11 +228,10 @@ void stopAndSendTerminalMsg()
 void sendTerminalMsgToBluetooth()
 {
     for(int i = 0; i < terminalMsgLen; i++) {
-        byte encrypted = (byte)terminalMsg[i] ^ XOR_VAL;
-        bluetooth.sendByteWithFlag('S' ^ XOR_VAL, encrypted);
+        bluetooth.sendByteWithFlag('S', (byte)terminalMsg[i]);
     }
     
-    bluetooth.sendByteWithFlag('N' ^ XOR_VAL, (byte)0 ^ XOR_VAL);
+    bluetooth.sendByteWithFlag('N', (byte)255);
 }
 
 //////////////////
