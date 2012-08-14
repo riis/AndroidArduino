@@ -1,18 +1,18 @@
-#include <SoftwareSerial.h>
 #include <Bluetooth.h>
+#include <SoftwareSerial.h>
 
 #define SENSOR_PIN 0
 #define REFRESH_INTERVAL 100
 
-#define RX 11
-#define TX 3
-
-unsigned long lastRunTime = 0;
+//Bluetooth
+#define RX 62
+#define TX 7
 
 SoftwareSerial bluetoothSerial(RX, TX);
-Bluetooth bluetooth("AndroidArduinoBTRS232", bluetoothSerial, true);
+Bluetooth bluetooth("AndroidArduinoCANBT", bluetoothSerial, true, 3);
 
 boolean lastConnectionState; //True for connected and false for disconnected
+unsigned long lastRunTime = 0;
 
 HardwareSerial* logSerial;
 
