@@ -21,6 +21,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".AddUserActivity"
+            android:label="Add a new user"
+            android:configChanges="orientation|keyboardHidden"/>
     </application>
 
 </manifest>
