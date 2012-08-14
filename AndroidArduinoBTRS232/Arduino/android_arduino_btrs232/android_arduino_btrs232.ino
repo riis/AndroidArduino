@@ -1,5 +1,5 @@
-#include <SoftwareSerial.h>
 #include <Bluetooth.h>
+#include <SoftwareSerial.h>
 
 #define TESTING 0
 
@@ -15,12 +15,12 @@
 //BluetoothStates for the terminal state machine
 #define RECEIVING_CHARS 1
 
-//RX and TX pin numbers
-#define RX 11
-#define TX 3
+//Bluetooth
+#define RX 62
+#define TX 7
 
 SoftwareSerial bluetoothSerial(RX, TX);
-Bluetooth bluetooth("AndroidArduinoBTRS232", bluetoothSerial, true);
+Bluetooth bluetooth("AndroidArduinoBTRS232", bluetoothSerial, true, 3);
 
 int bluetoothState;
 int terminalState;
@@ -55,7 +55,7 @@ void setup()
 
     if(!bluetooth.beginBluetooth())
     {
-        logSerial->println("\n\n\rHalting program...");
+        logSerial->println("\n\rHalting program...");
         while(true) { }
     }
     
@@ -165,7 +165,7 @@ void printConnectedMessage()
     logSerial->print("\n\rConnected! Communications ready on the terminal\n\n\r");
     
     terminalSerial->print('\f');
-    terminalSerial->print("Bluetooth connected!, monitoring for messages\n\r");
+    terminalSerial->print("Bluetooth connected! Monitoring for messages\n\r");
     terminalSerial->print("To send messages, type a line, then press enter.\n\n\r");
 }
 

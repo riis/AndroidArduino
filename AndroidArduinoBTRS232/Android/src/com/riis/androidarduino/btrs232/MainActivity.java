@@ -1,8 +1,11 @@
 package com.riis.androidarduino.btrs232;
 
+import java.io.IOException;
+
 import com.riis.androidarduino.btrs232.R;
 import com.riis.androidarduino.lib.BluetoothComm;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
@@ -19,6 +22,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.TextView.OnEditorActionListener;
 
 public class MainActivity extends Activity {
@@ -79,6 +83,8 @@ public class MainActivity extends Activity {
         keepRunning = true;
         lastStatus = false;
         setUpGUI();
+
+		appendMsgToMsgLog("Waiting for Bluetooth connection...");
     }
     
     private void setUpGUI() {
@@ -95,7 +101,11 @@ public class MainActivity extends Activity {
     	connectButton.setOnClickListener(
     		new OnClickListener() {
     			public void onClick(View v) {
-    				btComm.connect();
+    				try {
+						btComm.connect();
+					} catch (IOException e) {
+						Toast.makeText(MainActivity.this, "Couldn't connect!", Toast.LENGTH_SHORT).show();
+					}
     			}
     		}
     	);
@@ -106,13 +116,18 @@ public class MainActivity extends Activity {
     	disconnectButton.setOnClickListener(
     		new OnClickListener() {
     			public void onClick(View v) {
-    				btComm.disconnect();
+    				try {
+						btComm.disconnect();
+					} catch (IOException e) {
+						Toast.makeText(MainActivity.this, "Couldn't disconnect!", Toast.LENGTH_SHORT).show();
+					}
     			}
     		}
     	);
     }
     
-    private void setupHandler() {
+    @SuppressLint("HandlerLeak")
+	private void setupHandler() {
 		handler = new Handler() {
 			public void handleMessage(Message msg) {
 		    	msgLog.append((String) msg.obj + "\n");
@@ -171,10 +186,14 @@ public class MainActivity extends Activity {
 	public void onResume() {
 		super.onResume();
 		
-		if(btComm == null) {
-			btComm = new BluetoothComm(this, DEVICE_NAME);
-		} else {
-			btComm.resumeConnection();
+		try {
+			if(btComm == null) {
+				btComm = new BluetoothComm(DEVICE_NAME);
+			} else {
+				btComm.resumeConnection();
+			}
+		} catch(IOException e) {
+			Toast.makeText(MainActivity.this, "Couldn't connect!", Toast.LENGTH_SHORT).show();
 		}
 		
 		btComm.shouldPrintLogMsgs(true);
@@ -186,12 +205,11 @@ public class MainActivity extends Activity {
 	public void onPause() {
 		super.onPause();
 		keepRunning = false;
-		btComm.pauseConnection();
+		
+		try {
+			btComm.pauseConnection();
+		} catch (IOException e) {
+			Toast.makeText(MainActivity.this, "Couldn't disconnect!", Toast.LENGTH_SHORT).show();
+		}
 	}
-    
-    
-    
-    public BluetoothComm getBlueToothComm() {
-    	return btComm;
-    }
 }
