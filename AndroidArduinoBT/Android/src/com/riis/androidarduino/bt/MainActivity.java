@@ -1,22 +1,25 @@
 package com.riis.androidarduino.bt;
 
+import java.io.IOException;
+
 import com.riis.androidarduino.bt.R;
-import com.riis.androidarduino.lib.BlueToothComm;
+import com.riis.androidarduino.lib.BluetoothComm;
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.Toast;
 
 public class MainActivity extends Activity {
 	private static String DEVICE_NAME = "AndroidArduinoBT";
 	
-	private final byte LED_OFF = 0;
+	private final byte LED_OFF = 2;
 	private final byte LED_ON = 1;
-	private final char LED1 = 'r';
-	private final char LED2 = 'y';
-	private final char LED3 = 'g';
+	private final byte LED1 = 'r';
+	private final byte LED2 = 'y';
+	private final byte LED3 = 'g';
 	
 	private Button connectButton;
 	private Button disconnectButton;
@@ -29,7 +32,7 @@ public class MainActivity extends Activity {
 	private boolean isYellowLEDOn = false;
 	private boolean isGreenLEDOn = false;
 	
-	private BlueToothComm btComm;
+	private BluetoothComm btComm;
 	
     /** Called when the activity is first created. */
     @Override
@@ -44,17 +47,26 @@ public class MainActivity extends Activity {
 	public void onResume() {
 		super.onResume();
 		
-		if(btComm == null) {
-			btComm = new BlueToothComm(this, DEVICE_NAME);
-		} else {
-			btComm.resumeConnection();
+		try {
+			if(btComm == null) {
+				btComm = new BluetoothComm(DEVICE_NAME);
+				btComm.connect();
+			} else {
+				btComm.resumeConnection();
+			}
+		} catch(IOException e) {
+			Toast.makeText(MainActivity.this, "Couldn't connect!", Toast.LENGTH_SHORT).show();
 		}
 	}
 	
 	@Override
 	public void onPause() {
 		super.onPause();
-		btComm.pauseConnection();
+		try {
+			btComm.pauseConnection();
+		} catch (IOException e) {
+			Toast.makeText(MainActivity.this, "Couldn't disconnect!", Toast.LENGTH_SHORT).show();
+		}
 	}
     
     private void setUpButtons() {
@@ -71,7 +83,11 @@ public class MainActivity extends Activity {
     	connectButton.setOnClickListener(
     		new OnClickListener() {
     			public void onClick(View v) {
-    				btComm.connect();
+    				try {
+						btComm.connect();
+					} catch (IOException e) {
+						Toast.makeText(MainActivity.this, "Couldn't connect!", Toast.LENGTH_SHORT).show();
+					}
     			}
     		}
     	);
@@ -82,7 +98,11 @@ public class MainActivity extends Activity {
     	disconnectButton.setOnClickListener(
     		new OnClickListener() {
     			public void onClick(View v) {
-    				btComm.disconnect();
+    				try {
+						btComm.disconnect();
+					} catch (IOException e) {
+						Toast.makeText(MainActivity.this, "Couldn't disconnect!", Toast.LENGTH_SHORT).show();
+					}
     			}
     		}
     	);
@@ -95,11 +115,13 @@ public class MainActivity extends Activity {
 				public void onClick(View v) {
 					if(isRedLEDOn) {
 			         	((Button)v).setText("Turn Red On");
-			         	btComm.sendByteWithFlag(LED1, LED_OFF);
+			         	btComm.sendByteWithFlag('L', LED1);
+			         	btComm.sendByteWithFlag('L', LED_OFF);
 			         	isRedLEDOn = false;
 					} else {
 			         	((Button)v).setText("Turn Red Off");
-			         	btComm.sendByteWithFlag(LED1, LED_ON);
+			         	btComm.sendByteWithFlag('L', LED1);
+			         	btComm.sendByteWithFlag('L', LED_ON);
 			         	isRedLEDOn = true;
 					}
 				}
@@ -114,11 +136,13 @@ public class MainActivity extends Activity {
 				public void onClick(View v) {
 					if(isYellowLEDOn) {
 			         	((Button)v).setText("Turn Yellow On");
-			         	btComm.sendByteWithFlag(LED2, LED_OFF);
+			         	btComm.sendByteWithFlag('L', LED2);
+			         	btComm.sendByteWithFlag('L', LED_OFF);
 			         	isYellowLEDOn = false;
 					} else {
 			         	((Button)v).setText("Turn Yellow Off");
-			         	btComm.sendByteWithFlag(LED2, LED_ON);
+			         	btComm.sendByteWithFlag('L', LED2);
+			         	btComm.sendByteWithFlag('L', LED_ON);
 			         	isYellowLEDOn = true;
 					}
 				}
@@ -133,11 +157,13 @@ public class MainActivity extends Activity {
 				public void onClick(View v) {
 					if(isGreenLEDOn) {
 						((Button)v).setText("Turn Green On");
-						btComm.sendByteWithFlag(LED3, LED_OFF);
+			         	btComm.sendByteWithFlag('L', LED3);
+			         	btComm.sendByteWithFlag('L', LED_OFF);
 		                isGreenLEDOn = false;
 					} else {
 			         	((Button)v).setText("Turn Green Off");
-			         	btComm.sendByteWithFlag(LED3, LED_ON);
+			         	btComm.sendByteWithFlag('L', LED3);
+			         	btComm.sendByteWithFlag('L', LED_ON);
 			         	isGreenLEDOn = true;
 					}
 				}

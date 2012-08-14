@@ -1,7 +1,8 @@
+#include <Bluetooth.h>
 #include <SoftwareSerial.h>
 
 //LED command codes
-#define LED_OFF 0
+#define LED_OFF 2
 #define LED_ON  1
 
 //LED pin numbers
@@ -13,157 +14,164 @@
 #define RECEIVING_COMMAND_FLAG 0
 #define RECEIVING_COMMAND_DATA 1
 
-//RX and TX pin numbers
-#define RX 11
-#define TX 3
+//Bluetooth
+#define RX 62
+#define TX 7
+
+SoftwareSerial bluetoothSerial(RX, TX);
+Bluetooth bluetooth("AndroidArduinoBT", bluetoothSerial, true, 3);
+
+boolean lastConnectionState = false;
 
 int state;
 int currentCommand;
 int currentLEDNum;
 
-SoftwareSerial blueToothSerial(RX, TX);
-
 void setup()
 {
-  setUpIO();  
-  resetState();
-  
-  Serial.begin(115200);
-  
-  Serial.println("Powering up the BlueTooth device...");
-  setUpBlueToothConnection();
- 
-  Serial.println("BlueTooth device ready, connect to \"AndroidArduinoBT\".");
-  Serial.println();
-  Serial.println("Waiting for messages...");
-  Serial.println();
+    setUpIO();  
+    resetState();
+
+    Serial.begin(115200);
+
+    if(!bluetooth.beginBluetooth()) {
+        Serial.println("\n\rHalting program...");
+        while(true) { 
+        }
+    }
 }
 
 void setUpIO()
 {
-  pinMode(RED_LED, OUTPUT);
-  pinMode(YLW_LED, OUTPUT); 
-  pinMode(GRN_LED, OUTPUT);
-  
-  pinMode(RX, INPUT);
-  pinMode(TX, OUTPUT);
+    pinMode(RED_LED, OUTPUT);
+    pinMode(YLW_LED, OUTPUT); 
+    pinMode(GRN_LED, OUTPUT);
+
+    pinMode(RX, INPUT);
+    pinMode(TX, OUTPUT);
 }
 
 void resetState()
 {
-  state = RECEIVING_COMMAND_FLAG;
-  currentCommand = LED_OFF;
-  currentLEDNum = RED_LED;
-}
-
-void setUpBlueToothConnection()
-{
-  blueToothSerial.begin(38400);
-
-  blueToothSerial.print("\r\n+STWMOD=0\r\n"); //Set the BlueTooth to slave mode
-  blueToothSerial.print("\r\n+STNA=AndroidArduinoBT\r\n"); //Set the BlueTooth name to "AndroidArduinoBT"
-  blueToothSerial.print("\r\n+STOAUT=1\r\n"); //Permit a paired device to connect
-  blueToothSerial.print("\r\n+STAUTO=0\r\n"); //No auto conneection
-  
-  delay(2000);  
-  blueToothSerial.print("\r\n+INQ=1\r\n"); //Make the BlueTooth device inquirable 
-
-  delay(2000);
-  blueToothSerial.flush();
+    state = RECEIVING_COMMAND_FLAG;
+    currentCommand = LED_OFF;
+    currentLEDNum = RED_LED;
 }
 
 void loop()
 {
-  byte msg;
-  
-  if(blueToothSerial.available()) {
-    msg = (byte) blueToothSerial.read();
+    bluetooth.process();
     
-    printReceivedMessage(msg);
-    runStateMachine(msg);
-  }
+    byte msg;
+
+    if(bluetooth.isConnected()) {
+        if(!lastConnectionState) {
+            printConnectedMessage();
+            lastConnectionState = true;
+        }
+        
+        if(bluetooth.bytesAvailable() > 1) {
+            msg = bluetooth.readByte();
+            Serial.println(msg);
+            if(msg == 'L') {
+                msg = bluetooth.readByte();   
+                Serial.println(msg);
+            }
+
+            runStateMachine(msg);
+        }
+    } else {
+        if(lastConnectionState) {
+            printDisconnectedMessage();
+            lastConnectionState = false;
+        } 
+    }
 }
 
-void printReceivedMessage(byte msg)
-{
-  Serial.print("Recieved ");
-  Serial.print(msg);
-  Serial.println(" from master");
+void printConnectedMessage() {
+    Serial.print("Bluetooth connected!\n\r");
+}
+
+void printDisconnectedMessage() {
+    Serial.print("Disconnected! Halting communications...");    
+    Serial.print("\n\rWaiting for Bluetooth connection...\n\r");
 }
 
 void runStateMachine(byte msg)
 {
-  switch(state)
-  {
+    switch(state)
+    {
     case RECEIVING_COMMAND_FLAG:
-      if(isMessageAnLEDFlag(msg))
-      {
-        setCurrentLEDNum(msg);
-        state = RECEIVING_COMMAND_DATA;
-      } else {
-        resetState(); 
-      }
-      break;
+        if(isMessageAnLEDFlag(msg))
+        {
+            setCurrentLEDNum(msg);
+            state = RECEIVING_COMMAND_DATA;
+        } 
+        else {
+            resetState(); 
+        }
+        break;
     case RECEIVING_COMMAND_DATA:
-      if(isMessageACommand(msg))
-      {
-        currentCommand = msg;
-        executeCommand();
-      }
-      
-      resetState(); 
-      break;
+        if(isMessageACommand(msg))
+        {
+            currentCommand = msg;
+            executeCommand();
+        }
+
+        resetState(); 
+        break;
     default:
-      resetState();
-      break;
-  }
+        resetState();
+        break;
+    }
 }
 
 boolean isMessageAnLEDFlag(byte msg)
 {
-  char msgChar = (char) msg;
-  return (msgChar == 'r' || msgChar == 'y' || msgChar == 'g');
+    char msgChar = (char) msg;
+    return (msgChar == 'r' || msgChar == 'y' || msgChar == 'g');
 }
 
 void setCurrentLEDNum(byte msg)
 {
-  char msgChar = (char) msg;
-  
-  if(msgChar == 'r')
-  {
-    currentLEDNum = RED_LED;
-  }
-  else if(msgChar == 'y')
-  {
-    currentLEDNum = YLW_LED;
-  }
-  else if(msgChar == 'g')
-  {
-    currentLEDNum = GRN_LED;
-  }
+    char msgChar = (char) msg;
+
+    if(msgChar == 'r')
+    {
+        currentLEDNum = RED_LED;
+    }
+    else if(msgChar == 'y')
+    {
+        currentLEDNum = YLW_LED;
+    }
+    else if(msgChar == 'g')
+    {
+        currentLEDNum = GRN_LED;
+    }
 }
 
 boolean isMessageACommand(byte msg)
 {
-  return (msg == LED_OFF || msg == LED_ON);
+    return (msg == LED_OFF || msg == LED_ON);
 }
 
 void executeCommand()
 {
-  Serial.print("Turning pin ");
-  Serial.print(currentLEDNum);
-  
-  if(currentCommand == LED_ON)
-  {
-    Serial.println(" on...");
-    digitalWrite(currentLEDNum, HIGH);
-  }
-  else if(currentCommand == LED_OFF)
-  {
-    Serial.println(" off...");
-    digitalWrite(currentLEDNum, LOW);
-  }
-  
-  Serial.println();
+    Serial.print("Turning pin ");
+    Serial.print(currentLEDNum);
+
+    if(currentCommand == LED_ON)
+    {
+        Serial.println(" on...");
+        digitalWrite(currentLEDNum, HIGH);
+    }
+    else if(currentCommand == LED_OFF)
+    {
+        Serial.println(" off...");
+        digitalWrite(currentLEDNum, LOW);
+    }
+
+    Serial.println();
 }
+
 

@@ -27,8 +27,7 @@ void setup() {
 
     if(!bluetooth.beginBluetooth()) {
         Serial.println("\n\rHalting program...");
-        while(true) { 
-        }
+        while(true) { }
     }
 
     Serial.println("Waiting for connection to OBD board...");
