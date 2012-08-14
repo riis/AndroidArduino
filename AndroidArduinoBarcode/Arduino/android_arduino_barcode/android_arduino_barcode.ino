@@ -1,5 +1,5 @@
+#include <Bluetooth.h>
 #include <SoftwareSerial.h>
-#include "Bluetooth.h"
 
 #define STRING_END 0
 #define BARCODE_START 63
@@ -15,11 +15,12 @@
 #define WAITING_FOR_START 1
 #define RECEIVING_CHARS 2
 
-//RX and TX pin numbers
-#define RX 11
-#define TX 3
+//Bluetooth
+#define RX 62
+#define TX 7
 
-Bluetooth bluetooth(RX, TX, "AndroidArduinoBTRS232", true);
+SoftwareSerial bluetoothSerial(RX, TX);
+Bluetooth bluetooth("AndroidArduinoBTRS232", bluetoothSerial, true, 3);
 
 int bluetoothState;
 int terminalState;
@@ -45,7 +46,7 @@ void setup()
     
     if(!bluetooth.beginBluetooth())
     {
-        Serial.println("\n\n\rHalting program...");
+        Serial.println("\n\rHalting program...");
         while(true) { }
     }
     
@@ -248,21 +249,7 @@ void stopAndSendBluetoothMsg()
     
     flushBluetoothMsgBuffer();
     resetBluetoothState();
-    
-//    sendBluetoothMsgToTerminal();
 }
-
-//void sendBluetoothMsgToTerminal()
-//{
-//    Serial1.print("Connected device: ");
-//    
-//    for(int i = 0; i < bluetoothMsgLen; i++)
-//    {
-//        Serial1.print(bluetoothMsg[i]);
-//    }
-//  
-//    Serial1.print("\n\r");
-//}
 
 void runTerminalStateMachine(char letter)
 {
@@ -316,5 +303,5 @@ void sendTerminalMsgToBluetooth()
         bluetooth.sendByteWithFlag('S', (byte)terminalMsg[i]);
     }
     
-    bluetooth.sendByteWithFlag('N', (byte)0);
+    bluetooth.sendByteWithFlag('N', (byte)255);
 }

@@ -13,7 +13,7 @@
         android:label="@string/app_name">        
         <activity 
             android:name="com.riis.androidarduino.barcode.MainActivity"
-            android:label="Android Arduino BlueTooth Barcode Scanner" 
+            android:label="Barcode Scanner" 
             android:configChanges="orientation|keyboardHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
