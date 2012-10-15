@@ -1,8 +1,5 @@
 package com.riis.androidarduino.rs232;
 
-import com.riis.androidarduino.lib.FlagMsg;
-import com.riis.androidarduino.lib.UsbComm;
-
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
@@ -21,6 +18,9 @@ import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
+
+import com.riis.androidarduino.lib.FlagMsg;
+import com.riis.androidarduino.lib.UsbComm;
 
 public class MainActivity extends Activity {
 	
@@ -59,15 +59,12 @@ public class MainActivity extends Activity {
 					}
 					
 					String newMsg = "UsbHost: ";
-		        	while(usbComm.hasNewMessages()) {
-		        		FlagMsg msg = usbComm.readMessage();
-		        		if(msg.getFlag() != 'N') {
-		        			newMsg += (char)msg.getValue();
+		        	if(usbComm.isMessageReady()) {
+		        		FlagMsg[] msg = usbComm.readMessageWithFlags();
+		        		for(int i = 0; i < msg.length; i++) {
+			        			newMsg += msg[i];
 		        		}
-		        		else {
-				        	appendMsgToMsgLog(newMsg);
-		        			break;
-		        		}
+		        		appendMsgToMsgLog(newMsg);
 		        	}
 		        } else {
 		        	if(lastStatus) {

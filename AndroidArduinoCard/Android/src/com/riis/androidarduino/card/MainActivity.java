@@ -2,10 +2,6 @@ package com.riis.androidarduino.card;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
-
-import com.riis.androidarduino.lib.BluetoothComm;
-
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -22,6 +18,8 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.riis.androidarduino.lib.BluetoothComm;
 
 public class MainActivity extends Activity {
 	private static String DEVICE_NAME = "AndroidArduinoBTRS232";

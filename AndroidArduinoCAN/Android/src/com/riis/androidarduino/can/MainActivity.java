@@ -64,7 +64,6 @@ public class MainActivity extends Activity {
 	private TextView fuelLevelTxt;
 	
 	private volatile boolean keepRunning;
-	private String lastStatus;
 	private Thread msgThread;
 	
 	private static Handler handler;

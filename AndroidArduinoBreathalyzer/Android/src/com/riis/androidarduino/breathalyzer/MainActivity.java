@@ -3,11 +3,8 @@ package com.riis.androidarduino.breathalyzer;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import com.riis.androidarduino.lib.BluetoothComm;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -20,6 +17,8 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.riis.androidarduino.lib.BluetoothComm;
 
 public class MainActivity extends Activity {
 	private static String DEVICE_NAME = "AndroidArduinoBTRS232";
