@@ -2,5 +2,34 @@
 <resources>
 
     <string name="app_name">Barcode Scanner</string>
+    <string name="ebay_request_template">^1services/search/FindingService/v1?OPERATION-NAME=findItemsByKeywords&amp;SERVICE-VERSION=1.0.0&amp;SECURITY-APPNAME=^2&amp;RESPONSE-DATA-FORMAT=JSON&amp;REST-PAYLOAD&amp;keywords=^3&amp;paginationInput.entriesPerPage=10&amp;affiliate.networkId=9&amp;affiliate.trackingId=5336695910&amp;affiliate.customId=ebaydemo&amp;sortOrder=StartTimeNewest</string>
+    <string name="ebay_source_name">eBay</string>
+    <string name="ebay_appid_sandbox">REPLACE_WITH_YOUR_SANDBOX_ID</string>
+    <string name="ebay_appid_production">REPLACE_WITH_YOUR_PRODUCTION_ID</string>
+    <string name="ebay_wsurl_sandbox">http://sandbox.ebay.com/</string>
+    <string name="ebay_wsurl_production">http://svcs.ebay.com/</string>
+    <string name="ebay_tag_findItemsByKeywordsResponse">findItemsByKeywordsResponse</string>
+    <string name="ebay_tag_searchResult">searchResult</string>
+    <string name="ebay_tag_item">item</string>
+    <string name="ebay_tag_itemId">itemId</string>
+    <string name="ebay_tag_title">title</string>
+    <string name="ebay_tag_galleryURL">galleryURL</string>
+    <string name="ebay_tag_viewItemURL">viewItemURL</string>
+    <string name="ebay_tag_location">location</string>
+    <string name="ebay_tag_sellingStatus">sellingStatus</string>
+    <string name="ebay_tag_currentPrice">currentPrice</string>
+    <string name="ebay_tag_value">__value__</string>
+    <string name="ebay_tag_currencyId">\@currencyId</string>
+    <string name="ebay_tag_shippingInfo">shippingInfo</string>
+    <string name="ebay_tag_shippingServiceCost">shippingServiceCost</string>
+    <string name="ebay_tag_listingInfo">listingInfo</string>
+    <string name="ebay_tag_listingType">listingType</string>
+    <string name="ebay_tag_buyItNowAvailable">buyItNowAvailable</string>
+    <string name="ebay_tag_startTime">startTime</string>
+    <string name="ebay_tag_endTime">endTime</string>
+    <string name="ebay_value_auction">auction</string>
+    <string name="ebay_value_storeinventory">StoreInventory</string>
+    <string name="ebay_value_fixedprice">StoreInventory</string>
+    <string name="ebay_value_true">true</string>
 
 </resources>
