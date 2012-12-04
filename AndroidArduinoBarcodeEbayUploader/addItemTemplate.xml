@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AddItemRequest xmlns="urn:ebay:apis:eBLBaseComponents">
+  <RequesterCredentials>
+    <eBayAuthToken>AgAAAA**AQAAAA**aAAAAA**2Oi9UA**nY+sHZ2PrBmdj6wVnY+sEZ2PrA2dj6AFlIGpC5WApw+dj6x9nY+seQ**tK4BAA**AAMAAA**pnpeztXJFAky2tnAVXm7d6vm4558e4ei+nz2RuMW4Uri3IPrQUuDUdlA5Yz+jnef7FMLFyi7n7VroXr1tvpgKpg4kUMoKdaeMC5ok8kplfJIndVMjbaWYX9zQCf0NaLRX2dXAE2yMtNU74dj5DgYZesqB+qXIkYB3XcsAXFf2+EtwH7YSJ/rfc7JD5RWAb4SnrAHE1OhWkVKa2Z901xq21N3/DHX6rhEYBV2UgH5HksO+Nlkfdq0o+RoPZjhmAedqB5SJ0JcYC6vbSQs8mpqzgl/Li6a9O0HwA1m4VjI1n+ga4ohDsJOUFt8o/+WecQERvOfnlUnMFo+Xj3Mus2s7Bis1cpPlO2OJVCyWII/f/PoCcKvoqvayjToeTtWEeYi9tZX6J+FkjlcXQtQnvZaU92shMsuOgwkdzayEWzzFqWA1ZLBK/+t6APVgJ2ApXKBwnGPsvG9Fz2rQm99vM92SzyLtuFvmourwy14F+1dTxVd7TdtFLKQ4j+GavX6+ap474hxhNYRS2VvNQ6GFKu8nDpnVDADuts4WEKBJf919mImV42p+BJ/nCgLW4ohEco8QBSCcPgsBovoHgAbw0nruxgLtrWyrL15E7i6mHKZ1RckK5YFJR8CDcAJybiQw0CU+q/Jh+yRO7bgG5TEN0Lp1w9HDQxfI4EoyUsFv5Vl1uk3Mxj04G6csBxJ9JjO44gf+p4ZJQDzUq+mZG1Kx1/FF6PWj8EHxjE6oMUxCLkgrbFHvhYjIT5XBidP0PhX6wTe</eBayAuthToken>
+  </RequesterCredentials>
+  <ErrorLanguage>en_US</ErrorLanguage>
+  <WarningLevel>High</WarningLevel>
+  <Item>
+    <Title></Title>
+    <Description></Description>
+    <PrimaryCategory>
+      <CategoryID>267</CategoryID>
+    </PrimaryCategory>
+    <StartPrice>5.0</StartPrice>
+    <CategoryMappingAllowed>true</CategoryMappingAllowed>
+    <ConditionID>1000</ConditionID>
+    <Country>US</Country>
+    <Currency>USD</Currency>
+    <DispatchTimeMax>3</DispatchTimeMax>
+    <ListingDuration>Days_14</ListingDuration>
+    <ListingType>Chinese</ListingType>
+    <PaymentMethods>PayPal</PaymentMethods>
+    <PayPalEmailAddress>godfrey@riis.com</PayPalEmailAddress>
+    <PictureDetails>
+      <GalleryType>Gallery</GalleryType>
+    </PictureDetails>
+    <PostalCode>48076</PostalCode>
+    <ProductListingDetails>
+      <UPC></UPC>
+      <IncludeStockPhotoURL>true</IncludeStockPhotoURL>
+      <IncludePrefilledItemInformation>true</IncludePrefilledItemInformation>
+      <UseFirstProduct>true</UseFirstProduct>
+      <UseStockPhotoURLAsGallery>true</UseStockPhotoURLAsGallery>
+      <ReturnSearchResultOnDuplicates>true</ReturnSearchResultOnDuplicates>
+    </ProductListingDetails>
+    <Quantity>1</Quantity>
+    <ReturnPolicy>
+      <ReturnsAcceptedOption>ReturnsAccepted</ReturnsAcceptedOption>
+      <RefundOption>MoneyBack</RefundOption>
+      <ReturnsWithinOption>Days_30</ReturnsWithinOption>
+      <Description>If you are not satisfied, return the item for refund.</Description>
+      <ShippingCostPaidByOption>Buyer</ShippingCostPaidByOption>
+    </ReturnPolicy>
+    <ShippingDetails>
+      <ShippingType>Flat</ShippingType>
+      <ShippingServiceOptions>
+        <ShippingServicePriority>1</ShippingServicePriority>
+        <ShippingService>UPSGround</ShippingService>
+        <FreeShipping>true</FreeShipping>
+        <ShippingServiceAdditionalCost currencyID="USD">2.00</ShippingServiceAdditionalCost>
+      </ShippingServiceOptions>
+    </ShippingDetails>
+    <Site>US</Site>
+  </Item>
+</AddItemRequest>
