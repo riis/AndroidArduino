@@ -9,6 +9,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -22,23 +23,6 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.ebay.sdk.ApiContext;
-import com.ebay.sdk.ApiCredential;
-import com.ebay.soap.eBLBaseComponents.AmountType;
-import com.ebay.soap.eBLBaseComponents.BuyerPaymentMethodCodeType;
-import com.ebay.soap.eBLBaseComponents.CategoryType;
-import com.ebay.soap.eBLBaseComponents.CountryCodeType;
-import com.ebay.soap.eBLBaseComponents.CurrencyCodeType;
-import com.ebay.soap.eBLBaseComponents.FeesType;
-import com.ebay.soap.eBLBaseComponents.ItemType;
-import com.ebay.soap.eBLBaseComponents.ListingDurationCodeType;
-import com.ebay.soap.eBLBaseComponents.ListingTypeCodeType;
-import com.ebay.soap.eBLBaseComponents.ProductListingDetailsType;
-import com.ebay.soap.eBLBaseComponents.ReturnPolicyType;
-import com.ebay.soap.eBLBaseComponents.ShippingDetailsType;
-import com.ebay.soap.eBLBaseComponents.ShippingServiceCodeType;
-import com.ebay.soap.eBLBaseComponents.ShippingServiceOptionsType;
-import com.ebay.soap.eBLBaseComponents.ShippingTypeCodeType;
 import com.riis.androidarduino.lib.BluetoothComm;
 
 public class MainActivity extends Activity {
@@ -62,7 +46,6 @@ public class MainActivity extends Activity {
 
 	private BluetoothComm btComm;
 
-	private ApiContext ebayContext;
 	private AlertDialog ebayDialog;
 
 	private Runnable msgUpdateThread = new Runnable() {
@@ -105,14 +88,27 @@ public class MainActivity extends Activity {
 		keepRunning = true;
 		lastStatus = false;
 		context = this;
-		try {
-			ebayContext = getApiContext();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 		setUpGUI();
 
+		new EbayTask().execute("a book", "it's a good book", "9780966101072");
+
 		appendMsgToMsgLog("Waiting for Bluetooth connection...");
+	}
+	
+	private class EbayTask extends AsyncTask<String, Void, String> {
+
+		@Override
+		protected String doInBackground(String... params) {
+			EbayInvoke ebayInvoker = new EbayInvoke(MainActivity.this);
+			try {
+				ebayInvoker.listBookWithEbay(params[0], params[1], params[2]);
+				SuccessOrFaliureDialog(true, 0.0);
+			} catch(IOException e) {
+				SuccessOrFaliureDialog(false, 0.0);
+			}
+			
+			return null;
+		}
 	}
 
 	private void setUpGUI() {
@@ -192,15 +188,12 @@ public class MainActivity extends Activity {
 							ebayDialogBuilder.setPositiveButton("List Item", new DialogInterface.OnClickListener() {
 								@Override
 								public void onClick(DialogInterface dialog, int which) {
-									AddItemCall api = new AddItemCall(ebayContext);
+									EbayInvoke ebayInvoker = new EbayInvoke(MainActivity.this);
 									try {
-										api.setItem(buildItem("a book", "with a description", message));
-										FeesType fees = api.addItem();
-										double listingFee = eBayUtil.findFeeByName(fees.getFee(), "ListingFee").getFee().getValue();
-										SuccessOrFaliureDialog(true, listingFee);
-									} catch (Exception e) {
-										SuccessOrFaliureDialog(false, 0);
-										e.printStackTrace();
+										ebayInvoker.listBookWithEbay("a book", "it's a really cool book", message);
+										SuccessOrFaliureDialog(true, 0.0);
+									} catch(IOException e) {
+										SuccessOrFaliureDialog(false, 0.0);
 									}
 								}
 							});
@@ -250,114 +243,6 @@ public class MainActivity extends Activity {
 		Message msg = Message.obtain(handler);
 		msg.obj = "SCAN~" + itemCode;
 		handler.sendMessage(msg);
-	}
-
-	private static ApiContext getApiContext() throws IOException {
-		ApiContext apiContext = new ApiContext();
-
-		// set Api Token to access eBay Api Server
-		ApiCredential cred = apiContext.getApiCredential();
-		cred.seteBayToken("26fe32fa-8721-479b-8051-f0a4d241a8b3");
-
-		// set Api Server Url
-		apiContext.setApiServerUrl("https://api.ebay.com/wsapi");
-
-		return apiContext;
-	}
-
-	private static ItemType buildItem(String title, String description, String UPC) throws IOException {
-		ItemType item = new ItemType();
-
-		// item title
-		item.setTitle(title);
-		// item description
-		item.setDescription(description);
-
-		// listing type
-		item.setListingType(ListingTypeCodeType.CHINESE);
-		// listing price
-		item.setCurrency(CurrencyCodeType.USD);
-		AmountType amount = new AmountType();
-		amount.setValue(5.0);
-		item.setStartPrice(amount);
-
-		// listing duration
-		item.setListingDuration(ListingDurationCodeType.DAYS_14.value());
-
-		// item location and country
-		item.setLocation("Southfield, MI");
-		item.setCountry(CountryCodeType.US);
-
-		// listing category
-
-		// TODO need catid;
-		CategoryType cat = new CategoryType();
-		cat.setCategoryID(ConsoleUtil.readString("Primary Category (e.g., 30022): "));
-		item.setPrimaryCategory(cat);
-
-		// item quality
-		item.setQuantity(1);
-
-		// payment methods
-		item.setPaymentMethods(new BuyerPaymentMethodCodeType[] { BuyerPaymentMethodCodeType.PAY_PAL });
-		// email is required if paypal is used as payment method
-		item.setPayPalEmailAddress("godfrey@riis.com");
-
-		ProductListingDetailsType listingDetails = new ProductListingDetailsType();
-//		listingDetails.setISBN(title); // TODO get this from scanner
-		listingDetails.setUPC(UPC); // TODO get this from scanner
-		listingDetails.setIncludeStockPhotoURL(true);
-		listingDetails.setIncludePrefilledItemInformation(true);
-		listingDetails.setUseFirstProduct(true);
-		listingDetails.setUseStockPhotoURLAsGallery(true);
-		listingDetails.setReturnSearchResultOnDuplicates(true);
-
-		item.setProductListingDetails(listingDetails);
-
-		// item condition, New
-		item.setConditionID(1000);
-
-		// handling time is required
-		item.setDispatchTimeMax(1);
-
-		// shipping details
-		item.setShippingDetails(buildShippingDetails());
-
-		// return policy
-		ReturnPolicyType returnPolicy = new ReturnPolicyType();
-		returnPolicy.setReturnsAcceptedOption("ReturnsAccepted");
-		item.setReturnPolicy(returnPolicy);
-
-		return item;
-	}
-
-	private static ShippingDetailsType buildShippingDetails() {
-		// Shipping details.
-		ShippingDetailsType sd = new ShippingDetailsType();
-
-		sd.setApplyShippingDiscount(true);
-		AmountType amount = new AmountType();
-		amount.setValue(2.8);
-		sd.setPaymentInstructions("paypal");
-
-		// Shipping type and shipping service options
-		sd.setShippingType(ShippingTypeCodeType.FLAT);
-		ShippingServiceOptionsType shippingOptions = new ShippingServiceOptionsType();
-		shippingOptions.setShippingService(ShippingServiceCodeType.SHIPPING_METHOD_STANDARD.value());
-		amount = new AmountType();
-		amount.setValue(2.0);
-		shippingOptions.setShippingServiceAdditionalCost(amount);
-		amount = new AmountType();
-		amount.setValue(10);
-		shippingOptions.setShippingServiceCost(amount);
-		shippingOptions.setShippingServicePriority(1);
-		amount = new AmountType();
-		amount.setValue(1.0);
-		shippingOptions.setShippingInsuranceCost(amount);
-
-		sd.setShippingServiceOptions(new ShippingServiceOptionsType[] { shippingOptions });
-
-		return sd;
 	}
 
 	@Override

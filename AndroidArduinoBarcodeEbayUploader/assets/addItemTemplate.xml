@@ -6,8 +6,8 @@
   <ErrorLanguage>en_US</ErrorLanguage>
   <WarningLevel>High</WarningLevel>
   <Item>
-    <Title></Title>
-    <Description></Description>
+    <Title>^1</Title>
+    <Description>^2</Description>
     <PrimaryCategory>
       <CategoryID>267</CategoryID>
     </PrimaryCategory>
@@ -26,7 +26,7 @@
     </PictureDetails>
     <PostalCode>48076</PostalCode>
     <ProductListingDetails>
-      <UPC></UPC>
+      <UPC>^3</UPC>
       <IncludeStockPhotoURL>true</IncludeStockPhotoURL>
       <IncludePrefilledItemInformation>true</IncludePrefilledItemInformation>
       <UseFirstProduct>true</UseFirstProduct>
