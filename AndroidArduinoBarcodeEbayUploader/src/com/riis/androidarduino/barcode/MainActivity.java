@@ -95,19 +95,22 @@ public class MainActivity extends Activity {
 		appendMsgToMsgLog("Waiting for Bluetooth connection...");
 	}
 	
-	private class EbayTask extends AsyncTask<String, Void, String> {
+	private class EbayTask extends AsyncTask<String, Void, Boolean> {
 
 		@Override
-		protected String doInBackground(String... params) {
+		protected Boolean doInBackground(String... params) {
 			EbayInvoke ebayInvoker = new EbayInvoke(MainActivity.this);
 			try {
 				ebayInvoker.listBookWithEbay(params[0], params[1], params[2]);
-				SuccessOrFaliureDialog(true, 0.0);
+				return true;
 			} catch(IOException e) {
-				SuccessOrFaliureDialog(false, 0.0);
+				return false;
 			}
-			
-			return null;
+		}
+		
+		@Override
+		protected void onPostExecute(Boolean result) {
+			SuccessOrFaliureDialog(result, 0.0);
 		}
 	}
 

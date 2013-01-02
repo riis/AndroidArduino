@@ -53,3 +53,51 @@
     <Site>US</Site>
   </Item>
 </AddItemRequest>
+
+<!-- <?xml version="1.0" encoding="UTF-8"?> -->
+<!-- <addProductsRequest xmlns="http://www.ebay.com/marketplace/marketplacecatalog/v1/services"> -->
+<!--    <addProductRequest> -->
+<!--       <invocationId>0123456789</invocationId> -->
+<!--       <categoryId>156955</categoryId> -->
+<!--       <productPropertyValue> -->
+<!--          <propertyName>Seller Product ID</propertyName> -->
+<!--          <value> -->
+<!--             <text> -->
+<!--                <value>1122334455-01</value> -->
+<!--             </text> -->
+<!--          </value> -->
+<!--       </productPropertyValue> -->
+<!--       <productPropertyValue> -->
+<!--          <propertyName>Title</propertyName> -->
+<!--          <value> -->
+<!--             <text> -->
+<!--                <value>^1</value> -->
+<!--             </text> -->
+<!--          </value> -->
+<!--       </productPropertyValue> -->
+<!--       <productPropertyValue> -->
+<!--          <propertyName>Product Description</propertyName> -->
+<!--          <value> -->
+<!--             <text> -->
+<!--                <value>^2</value> -->
+<!--             </text> -->
+<!--          </value> -->
+<!--       </productPropertyValue> -->
+<!--       <productPropertyValue> -->
+<!--          <propertyName>EAN</propertyName> -->
+<!--          <value> -->
+<!--             <text> -->
+<!--                <value>753759083588</value> -->
+<!--             </text> -->
+<!--          </value> -->
+<!--       </productPropertyValue> -->
+<!--       ... -->
+<!--       <media> -->
+<!--          <mediaIdentifier> -->
+<!--             <url>http://www.botany.com/img/plants/dictionary-plants-flowers.jpg</url> -->
+<!--          </mediaIdentifier> -->
+<!--          <mediaType>Image</mediaType> -->
+<!--       </media> -->
+<!--    </addProductRequest> -->
+<!--    <clientBatchId>54321</clientBatchId> -->
+<!-- </addProductsRequest> -->
