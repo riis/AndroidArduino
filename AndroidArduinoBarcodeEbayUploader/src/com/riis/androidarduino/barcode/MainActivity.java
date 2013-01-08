@@ -23,6 +23,10 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.ebay.sdk.ApiContext;
+import com.ebay.sdk.ApiCredential;
+import com.ebay.sdk.call.GeteBayOfficialTimeCall;
+import com.ebay.sdk.helper.ConsoleUtil;
 import com.riis.androidarduino.lib.BluetoothComm;
 
 public class MainActivity extends Activity {
@@ -94,23 +98,72 @@ public class MainActivity extends Activity {
 
 		appendMsgToMsgLog("Waiting for Bluetooth connection...");
 	}
-	
+
 	private class EbayTask extends AsyncTask<String, Void, Boolean> {
 
 		@Override
 		protected Boolean doInBackground(String... params) {
-			EbayInvoke ebayInvoker = new EbayInvoke(MainActivity.this);
+			// EbayInvoke ebayInvoker = new EbayInvoke(MainActivity.this);
+			// try {
+			// ebayInvoker.listBookWithEbay(params[0], params[1], params[2]);
+			// return true;
+			// } catch(IOException e) {
+			// return false;
+			// }
 			try {
-				ebayInvoker.listBookWithEbay(params[0], params[1], params[2]);
-				return true;
-			} catch(IOException e) {
+				System.out.print("\n");
+				System.out.print("+++++++++++++++++++++++++++++++++++++++\n");
+				System.out.print("+ Welcome to eBay SDK for Java Sample +\n");
+				System.out.print("+  - HelloWorld                       +\n");
+				System.out.print("+++++++++++++++++++++++++++++++++++++++\n");
+				System.out.print("\n");
+
+				// [Step 1] Initialize eBay ApiContext object
+				System.out.println("===== [1] Account Information ====");
+				ApiContext apiContext = getApiContext();
+
+				// [Step 2] Create call object and execute the call
+				GeteBayOfficialTimeCall apiCall = new GeteBayOfficialTimeCall(apiContext);
+				System.out.println("Begin to call eBay API, please wait ... ");
+				Calendar cal = apiCall.geteBayOfficialTime();
+				System.out.println("End to call eBay API, show call result ...");
+
+				// [Setp 3] Handle the result returned
+				System.out.println("Official eBay Time : " + cal.getTime().toString());
+			} catch (Exception e) {
+				System.out.println("Fail to get eBay official time.");
+				e.printStackTrace();
 				return false;
 			}
+			
+			return true;
+		}
+
+		/**
+		 * Populate eBay SDK ApiContext object with data input from user
+		 * 
+		 * @return ApiContext object
+		 */
+		private ApiContext getApiContext() throws IOException {
+
+			String input;
+			ApiContext apiContext = new ApiContext();
+
+			// set Api Token to access eBay Api Server
+			ApiCredential cred = apiContext.getApiCredential();
+			input = ConsoleUtil.readString("Enter your eBay Authentication Token: ");
+			cred.seteBayToken(input);
+
+			// set Api Server Url
+			input = ConsoleUtil.readString("Enter eBay SOAP server URL (e.g., https://api.ebay.com/wsapi): ");
+			apiContext.setApiServerUrl(input);
+
+			return apiContext;
 		}
 		
 		@Override
 		protected void onPostExecute(Boolean result) {
-			SuccessOrFaliureDialog(result, 0.0);
+			// SuccessOrFaliureDialog(result, 0.0);
 		}
 	}
 
@@ -195,7 +248,7 @@ public class MainActivity extends Activity {
 									try {
 										ebayInvoker.listBookWithEbay("a book", "it's a really cool book", message);
 										SuccessOrFaliureDialog(true, 0.0);
-									} catch(IOException e) {
+									} catch (IOException e) {
 										SuccessOrFaliureDialog(false, 0.0);
 									}
 								}
